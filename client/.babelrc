@@ -1,0 +1,11 @@
+{
+  "presets": [
+    "stage-3",
+    "react",
+    "airbnb"
+  ],
+  "plugins": [
+    "transform-class-properties",
+    ["lodash", { "id": ["lodash", "semantic-ui-react"] }]
+  ]
+}

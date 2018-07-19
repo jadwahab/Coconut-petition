@@ -1,0 +1,64 @@
+{
+  "name": "multi-authority-sdc",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">= 8.5.0"
+  },
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2017": "^6.24.1",
+    "body-parser": "^1.18.2",
+    "es6-promise": "^4.2.2",
+    "express": "^4.16.2",
+    "isomorphic-fetch": "^2.2.1",
+    "knex": "^0.15.0",
+    "pg": "^7.4.1",
+    "pg-native": "^2.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.1.2",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "chai": "^4.1.2",
+    "eslint": "^4.14.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-node": "^5.2.1",
+    "mocha": "^4.1.0",
+    "nyc": "^11.4.1"
+  },
+  "scripts": {
+    "test": "nyc mocha dist/test --require babel-polyfill --no-timeouts",
+    "build": "babel src --ignore lib --out-dir dist --source-maps inline --copy-files",
+    "start_sign": "NODE_ENV=development node dist/signingAuthority/server.js",
+    "start_merchant": "NODE_ENV=development node dist/merchant/server.js",
+    "start_issuer": "NODE_ENV=development node dist/issuer/server.js",
+    "start_sign_production": "NODE_ENV=production node dist/signingAuthority/server.js",
+    "start_merchant_production": "NODE_ENV=production node dist/merchant/server.js",
+    "start_issuer_production": "NODE_ENV=production node dist/issuer/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jstuczyn/Multi-Authority-SDC.git"
+  },
+  "author": "Jedrzej Stuczynski",
+  "bugs": {
+    "url": "https://github.com/jstuczyn/Multi-Authority-SDC/issues"
+  },
+  "homepage": "https://github.com/jstuczyn/Multi-Authority-SDC#readme",
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  },
+  "nyc": {
+    "include": [
+      "dist/*.js"
+    ]
+  }
+}

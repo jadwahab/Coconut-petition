@@ -1,0 +1,49 @@
+{
+  "name": "multi-authority-sdc",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">= 8.5.0"
+  },
+  "description": "",
+  "dependencies": {
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2017": "^6.24.1",
+    "benchmark": "^2.1.4",
+    "es6-promise": "^4.2.2",
+    "isomorphic-fetch": "^2.2.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.1.2",
+    "eslint": "^4.14.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-node": "^5.2.1",
+    "nyc": "^11.4.1"
+  },
+  "scripts": {
+    "test": "nyc mocha dist/test --timeout=10000",
+    "build": "babel src --out-dir dist",
+    "start": "NODE_ENV=production node dist/runBenchmarks.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jstuczyn/Multi-Authority-SDC.git"
+  },
+  "author": "Jedrzej Stuczynski",
+  "bugs": {
+    "url": "https://github.com/jstuczyn/Multi-Authority-SDC/issues"
+  },
+  "homepage": "https://github.com/jstuczyn/Multi-Authority-SDC#readme",
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  },
+  "nyc": {
+    "include": [
+      "dist/*.js"
+    ]
+  }
+}
