@@ -50,7 +50,7 @@ export async function getSigningAuthorityPublicKey(server) {
   return publicKey;
 }
 
-export async function getCoin(sk_coin, pk_coin, value, pk_client, sk_client, issuingServer) {
+export async function getCoin(sk_coin, pk_coin, pk_client, sk_client, issuingServer) {
   const [G, o, g1, g2, e] = params;
 
   const coin_id = getRandomNumber();
@@ -72,7 +72,7 @@ export async function getCoin(sk_coin, pk_coin, value, pk_client, sk_client, iss
   const issuingServerStr = publicKeys[issuingServer].join('');
 
   const coinRequestObject =
-    getCoinRequestObject(sk_coin, pk_coin, value, pk_client, sk_client, issuingServerStr);
+    getCoinRequestObject(sk_coin, pk_coin, pk_client, sk_client, issuingServerStr);
 
   let issuedCoin;
   let issuance_status;
@@ -188,7 +188,7 @@ export async function spendCoin(coin, proof, signature, pkX, id, server) {
   id.toBytes(idBytes);
 
   const coinAttributes = {
-    value: coin.value,
+    // value: coin.value,
     ttl: coin.ttl,
     idBytes: idBytes,
   };

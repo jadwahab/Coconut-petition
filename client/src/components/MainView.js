@@ -59,12 +59,12 @@ class MainView extends React.Component {
     return [sk, pk];
   };
 
-  handleCoinSubmit = async (value) => {
+  handleCoinSubmit = async () => {
     const [sk_coin, pk_coin] = this.generateCoinSecret();
     const [coin, id] = await getCoin(
       sk_coin,
       pk_coin,
-      value,
+      // value,
       this.state.pk_client,
       this.state.sk_client,
       issuer,
@@ -84,7 +84,7 @@ class MainView extends React.Component {
           as="h2"
           color="teal"
           textAlign="center"
-          content="Generate a coin (by separate issuer entity)"
+          content="Get issued your credential (by separate issuer entity)"
         />
         <Grid>
           <Grid.Row centered={true}>

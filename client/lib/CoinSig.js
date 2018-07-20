@@ -44,7 +44,7 @@ export default class CoinSig {
     const [G, o, g1, g2, e] = params;
     const [x0, x1, x2, x3, x4] = sk;
 
-    const h = hashToPointOnCurve(coin.value.toString() + coin.ttl.toString() + coin.v.toString() + coin.ID.toString());
+    const h = hashToPointOnCurve(coin.ttl.toString() + coin.v.toString() + coin.ID.toString());
 
     const a1 = new G.ctx.BIG(coin.value);
     a1.norm();

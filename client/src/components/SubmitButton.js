@@ -7,8 +7,8 @@ const SubmitButton = props => (
     disabled={props.isDisabled}
     color="teal"
     labelPosition="left"
-    icon="dollar"
-    content="Get Coin"
+    icon="key"
+    content="Get Credential"
     onClick={props.onSubmit}
     loading={props.isLoading}
   />

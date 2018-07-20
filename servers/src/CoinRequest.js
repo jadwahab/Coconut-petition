@@ -16,7 +16,7 @@ const getBytesProof = (proof) => {
 export const getCoinRequestObject = (
   sk_coin, // to generate proof of secret
   pk_coin, // part of the coin
-  value, // part of the coin
+  // value, // part of the coin
   pk_client_bytes, // part of the coin
   sk_client, // to sign the request
   issuingServer, // to include in the proof of secret, it just has to be some string
@@ -36,7 +36,7 @@ export const getCoinRequestObject = (
 
   const requestStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    value.toString() + // coin's value
+    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer) + // coin's pk
     bytesW.reduce(reducer) + // part of proof of coin's secret
     bytesCm.reduce(reducer) + // part of proof of coin's secret
@@ -53,7 +53,7 @@ export const getCoinRequestObject = (
   return {
     pk_coin_bytes: pk_coin_bytes,
     proof_bytes: proof_bytes,
-    value: value,
+    // value: value,
     pk_client_bytes: pk_client_bytes,
     requestSig: requestSig,
   };
@@ -61,14 +61,14 @@ export const getCoinRequestObject = (
 
 export const verifyRequestSignature = (coin_request) => {
   const {
-    pk_coin_bytes, proof_bytes, value, pk_client_bytes, requestSig,
+    pk_coin_bytes, proof_bytes, pk_client_bytes, requestSig,
   } = coin_request; // object destructuring
   const [bytesW, bytesCm, bytesR] = proof_bytes;
   const reducer = (acc, cur) => acc + cur;
 
   const requestStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    value.toString() + // coin's value
+    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer) + // coin's pk
     bytesW.reduce(reducer) + // part of proof of coin's secret
     bytesCm.reduce(reducer) + // part of proof of coin's secret

@@ -25,15 +25,17 @@ router.post('/', async (req, res) => {
   }
 
   const coin_request = req.body.coin_request;
-  // start by checking whether requested coin value is legit (DONT RELY ON CLIENT-SIDE VALIDATION)
-  if (!Number.isInteger(coin_request.value)) {
-    res.status(200)
-      .json({
-        coin: null,
-        status: ISSUE_STATUS.error_balance,
-      });
-    return;
-  }
+  // // start by checking whether requested coin value is legit (DONT RELY ON CLIENT-SIDE VALIDATION)
+  // if (!Number.isInteger(coin_request.value)) {
+  //   res.status(200)
+  //     .json({
+  //       coin: null,
+  //       status: ISSUE_STATUS.error_balance,
+  //     });
+  //   return;
+  // }
+
+  console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
 
   // then verify whether request is legit:
   const isSignatureValid = verifyRequestSignature(coin_request);
@@ -95,7 +97,7 @@ router.post('/', async (req, res) => {
   }
   const issuedCoin = getIssuedCoin(
     coin_request.pk_coin_bytes,
-    coin_request.value,
+    // coin_request.value,
     coin_request.pk_client_bytes,
     sig_skBytes,
   );

@@ -28,7 +28,7 @@ const getTimeToLive = () => {
   return timeToLive;
 };
 
-export const getIssuedCoin = (pk_coin_bytes, value, pk_client_bytes, issuer_sk_Bytes) => {
+export const getIssuedCoin = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) => {
   const [G, o, g1, g2, e] = params;
 
   const ttl = getTimeToLive();
@@ -38,7 +38,7 @@ export const getIssuedCoin = (pk_coin_bytes, value, pk_client_bytes, issuer_sk_B
 
   const coinStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    value.toString() + // coin's value
+    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer) + // coin's pk
     ttl.toString();
 
@@ -54,7 +54,7 @@ export const getIssuedCoin = (pk_coin_bytes, value, pk_client_bytes, issuer_sk_B
   return {
     pk_coin_bytes: pk_coin_bytes,
     ttl: ttl,
-    value: value,
+    // value: value,
     pk_client_bytes: pk_client_bytes,
     issuedCoinSig: issuedCoinSig,
   };
@@ -62,14 +62,14 @@ export const getIssuedCoin = (pk_coin_bytes, value, pk_client_bytes, issuer_sk_B
 
 export const verifyCoinSignature = (issuedCoin, pk_issuer_bytes) => {
   const {
-    pk_coin_bytes, ttl, value, pk_client_bytes, issuedCoinSig,
+    pk_coin_bytes, ttl, pk_client_bytes, issuedCoinSig,
   } = issuedCoin; // object destructuring
 
   const reducer = (acc, cur) => acc + cur;
 
   const coinStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    value.toString() + // coin's value
+    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer) + // coin's pk
     ttl.toString();
 

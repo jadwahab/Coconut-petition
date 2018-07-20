@@ -110,7 +110,7 @@ router.post('/', async (req, res) => {
 
   if (isProofValid && !wasCoinAlreadySpent && isSignatureValid) {
     await insertUsedId(id);
-    await changeBalance(publicKeys[merchant], coinAttributes.value);
+    // await changeBalance(publicKeys[merchant], coinAttributes.value);
   }
 
   const t1 = new Date().getTime();
