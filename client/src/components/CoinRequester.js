@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ValueInput from './ValueInput';
+// import ValueInput from './ValueInput';
 import SubmitButton from './SubmitButton';
 import { publicKeys } from '../cache';
 import { issuer } from '../config';

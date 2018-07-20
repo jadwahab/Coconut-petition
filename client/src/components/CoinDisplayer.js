@@ -165,8 +165,8 @@ class CoinDisplayer extends React.Component {
   render() {
     return (
       <Segment.Group horizontal>
-        <Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>
-        <Segment style={styles.segmentStyle}><b>Value:</b> {this.props.coin.value}</Segment>
+        {/*<Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>*/}
+        {/*<Segment style={styles.segmentStyle}><b>Value:</b> {this.props.coin.value}</Segment>*/}
         <Segment style={styles.segmentStyle}>
           <CoinActionButton
             onSign={this.handleCoinSign}
@@ -183,7 +183,7 @@ CoinDisplayer.propTypes = {
   coin: PropTypes.shape({
     pk_coin_bytes: PropTypes.arrayOf(PropTypes.number),
     ttl: PropTypes.number,
-    value: PropTypes.number,
+    // value: PropTypes.number,
     pk_client_bytes: PropTypes.arrayOf(PropTypes.number),
     issuedCoinSig: PropTypes.array,
   }).isRequired,
