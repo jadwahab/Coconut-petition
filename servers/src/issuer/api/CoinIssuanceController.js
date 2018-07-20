@@ -34,8 +34,7 @@ router.post('/', async (req, res) => {
   //     });
   //   return;
   // }
-
-  console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+  
 
   // then verify whether request is legit:
   const isSignatureValid = verifyRequestSignature(coin_request);
