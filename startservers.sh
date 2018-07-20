@@ -11,8 +11,6 @@ start_merchant="npm run start_merchant 4000"
 start_issuer="npm run start_issuer 5000"
 start_docker="sudo docker-compose up"
 
-servers_build="npm run build"
-
 # for git
 tmux new-session -s "$sn" -n "git" -d
 
@@ -24,7 +22,6 @@ tmux new-window -t "$sn:$1" -n "docker" $start_docker
 
 
 cd "$base_path/servers"
-$servers_build
 tmux new-window -t "$sn:$2" -n "sign3000" $start_sign1
 tmux new-window -t "$sn:$3" -n "sign3001" $start_sign2
 tmux new-window -t "$sn:$4" -n "sign3002" $start_sign3
