@@ -2,7 +2,6 @@ import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
 import CoinRequester from './CoinRequester';
 import CoinListDisplayer from './CoinListDisplayer';
-import { getCoin } from '../utils/api';
 import { params, DEBUG, DETAILED_DEBUG, issuer, ctx } from '../config';
 import ElGamal from '../../lib/ElGamal';
 
@@ -52,30 +51,7 @@ class MainView extends React.Component {
     }
   }
 
-  generateCoinSecret = () => {
-    const [G, o, g1, g2, e] = params;
-    const sk = ctx.BIG.randomnum(G.order, G.rngGen);
-    const pk = ctx.PAIR.G2mul(g2, sk);
-    return [sk, pk];
-  };
 
-  handleCoinSubmit = async () => {
-    const [sk_coin, pk_coin] = this.generateCoinSecret();
-    const [coin, id] = await getCoin(
-      sk_coin,
-      pk_coin,
-      // value,
-      this.state.pk_client,
-      this.state.sk_client,
-      issuer,
-    );
-
-    if (coin != null && id != null) {
-      this.setState(prevState => ({
-        coins: prevState.coins.concat([{ sk_coin, id, coin }]),
-      }));
-    }
-  };
 
   render() {
     return (
@@ -89,8 +65,10 @@ class MainView extends React.Component {
         <Grid>
           <Grid.Row centered={true}>
             <CoinRequester
-              handleCoinSubmit={this.handleCoinSubmit}
-
+              ElGamalSK={this.state.ElGamalSK}
+              ElGamalPK={this.state.ElGamalPK}
+              sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
+              pk_client={this.state.pk_client}
             />
           </Grid.Row>
 
