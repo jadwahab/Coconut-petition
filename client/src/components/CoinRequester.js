@@ -108,22 +108,7 @@ class CoinRequester extends React.Component {
 
 CoinRequester.propTypes = {
   handleCoinSubmit: PropTypes.func.isRequired,
-  coin: PropTypes.shape({
-    pk_coin_bytes: PropTypes.arrayOf(PropTypes.number),
-    ttl: PropTypes.number,
-    // value: PropTypes.number,
-    pk_client_bytes: PropTypes.arrayOf(PropTypes.number),
-    issuedCoinSig: PropTypes.array,
-  }).isRequired,
-  sk: PropTypes.shape({
-    w: PropTypes.arrayOf(PropTypes.number),
-  }).isRequired,
-  id: PropTypes.shape({
-    w: PropTypes.arrayOf(PropTypes.number),
-  }).isRequired,
-  ElGamalSK: PropTypes.object.isRequired,
-  ElGamalPK: PropTypes.object.isRequired,
-  sk_client: PropTypes.array.isRequired,
+
 };
 
 export default CoinRequester;
