@@ -88,7 +88,13 @@ class MainView extends React.Component {
         />
         <Grid>
           <Grid.Row centered={true}>
-            <CoinRequester handleCoinSubmit={this.handleCoinSubmit}/>
+            <CoinRequester
+              handleCoinSubmit={this.handleCoinSubmit}
+              coins={this.state.coins}
+              ElGamalSK={this.state.ElGamalSK}
+              ElGamalPK={this.state.ElGamalPK}
+              sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
+            />
           </Grid.Row>
 
           <Grid.Row centered={true}>

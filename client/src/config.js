@@ -20,6 +20,7 @@ export const issuer = (process.env.NODE_ENV === 'production') ? '35.178.15.103:3
 export const ctx = new CTX('BN254');
 export const params = CoinSig.setup();
 
+const COIN_STATUS_UNCREATED = 'Ungenerated';
 const COIN_STATUS_CREATED = 'Generated';
 const COIN_STATUS_SIGNING = 'Signing';
 const COIN_STATUS_SIGNED = 'Signed';
@@ -28,6 +29,7 @@ const COIN_STATUS_SPENDING = 'Spending';
 const COIN_STATUS_ERROR = 'Error';
 
 export const COIN_STATUS = {
+  uncreated: COIN_STATUS_UNCREATED,
   created: COIN_STATUS_CREATED,
   signing: COIN_STATUS_SIGNING,
   signed: COIN_STATUS_SIGNED,
@@ -36,6 +38,7 @@ export const COIN_STATUS = {
   error: COIN_STATUS_ERROR,
 };
 
+const BUTTON_COIN_STATUS_GET = 'Get Credential';
 const BUTTON_COIN_STATUS_SIGN = 'Sign Coin';
 const BUTTON_COIN_STATUS_SIGN_IN_PROGRESS = 'Signing...';
 const BUTTON_COIN_STATUS_SPEND = 'Spend Coin';
@@ -44,6 +47,7 @@ const BUTTON_COIN_STATUS_SPENDING_IN_PROGRESS = 'Spending...';
 const BUTTON_COIN_STATUS_ERROR = 'Error';
 
 export const BUTTON_COIN_STATUS = {
+  get: BUTTON_COIN_STATUS_GET,
   sign: BUTTON_COIN_STATUS_SIGN,
   signing: BUTTON_COIN_STATUS_SIGN_IN_PROGRESS,
   spend: BUTTON_COIN_STATUS_SPEND,

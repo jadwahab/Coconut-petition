@@ -9,34 +9,34 @@ const CoinActionButton = (props) => {
   let isDisabled = false;
 
   switch (props.coinState) {
-    case COIN_STATUS.created:
-      buttonContent = BUTTON_COIN_STATUS.sign;
+    case COIN_STATUS.created: // 'Generated'
+      buttonContent = BUTTON_COIN_STATUS.sign; // 'Sign Coin'
       handleButtonClick = props.onSign;
       break;
 
-    case COIN_STATUS.signing:
+    case COIN_STATUS.signing: // 'Signing'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.signing;
+      buttonContent = BUTTON_COIN_STATUS.signing; // 'Signing...'
       break;
 
-    case COIN_STATUS.signed:
-      buttonContent = BUTTON_COIN_STATUS.spend;
+    case COIN_STATUS.signed: // 'Signed'
+      buttonContent = BUTTON_COIN_STATUS.spend; // 'Spend Coin'
       handleButtonClick = props.onSpend;
       break;
 
-    case COIN_STATUS.spent:
+    case COIN_STATUS.spent: // 'Spent'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.spent;
+      buttonContent = BUTTON_COIN_STATUS.spent; // 'Coin was Spent'
       break;
 
-    case COIN_STATUS.spending:
+    case COIN_STATUS.spending: // 'Spending'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.spending;
+      buttonContent = BUTTON_COIN_STATUS.spending; // 'Spending...'
       break;
 
-    case COIN_STATUS.error:
+    case COIN_STATUS.error: // 'Error'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.error;
+      buttonContent = BUTTON_COIN_STATUS.error; // 'Error'
       break;
 
     default:
