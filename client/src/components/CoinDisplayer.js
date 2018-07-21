@@ -15,8 +15,7 @@ class CoinDisplayer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      coinState: COIN_STATUS.created,
-      randomizedSignature: null,
+      coinState: COIN_STATUS.signed,
       remainingValidityString: '',
     };
   }
@@ -29,43 +28,7 @@ class CoinDisplayer extends React.Component {
     clearInterval(this.timer);
   }
 
-  getSignatures = async (serversArg) => {
-    const signingCoin =
-      getSigningCoin(this.props.coin, this.props.ElGamalPK, this.props.id, this.props.sk, this.props.sk_client);
 
-    const signatures = await Promise.all(serversArg.map(async (server) => {
-      try {
-        if (DEBUG) {
-          console.log(`Sending request to ${server}...`);
-        }
-
-        const [h, enc_sig] = await signCoin(server, signingCoin, this.props.ElGamalPK);
-        const sig = ElGamal.decrypt(params, this.props.ElGamalSK, enc_sig);
-
-        if (DEBUG) {
-          console.log('Decrypted signature:', [h, sig]);
-        }
-
-        return [h, sig];
-      } catch (err) {
-        console.warn(err);
-        return null;
-      }
-    }));
-    return signatures;
-  };
-
-  aggregateAndRandomizeSignatures = (signatures) => {
-    // checks if all authorities signed the coin, if not, return error
-    for (let i = 0; i < signatures.length; i++) {
-      if (signatures[i] === null) {
-        return;
-      }
-    }
-    const aggregateSignature = CoinSig.aggregateSignatures(params, signatures);
-    const randomizedSignature = CoinSig.randomize(params, aggregateSignature);
-    this.setState({ randomizedSignature });
-  };
 
   updateRemainingValidityString = () => {
     let remainingValidityString;
@@ -165,7 +128,7 @@ class CoinDisplayer extends React.Component {
   render() {
     return (
       <Segment.Group horizontal>
-        {/*<Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>*/}
+        <Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>
         {/*<Segment style={styles.segmentStyle}><b>Value:</b> {this.props.coin.value}</Segment>*/}
         <Segment style={styles.segmentStyle}>
           <CoinActionButton
@@ -180,19 +143,7 @@ class CoinDisplayer extends React.Component {
 }
 
 CoinDisplayer.propTypes = {
-  coin: PropTypes.shape({
-    pk_coin_bytes: PropTypes.arrayOf(PropTypes.number),
-    ttl: PropTypes.number,
-    // value: PropTypes.number,
-    pk_client_bytes: PropTypes.arrayOf(PropTypes.number),
-    issuedCoinSig: PropTypes.array,
-  }).isRequired,
-  sk: PropTypes.shape({
-    w: PropTypes.arrayOf(PropTypes.number),
-  }).isRequired,
-  id: PropTypes.shape({
-    w: PropTypes.arrayOf(PropTypes.number),
-  }).isRequired,
+  randomizedSignature: PropTypes.object.isRequired,
   ElGamalSK: PropTypes.object.isRequired,
   ElGamalPK: PropTypes.object.isRequired,
   sk_client: PropTypes.array.isRequired,

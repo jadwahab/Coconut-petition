@@ -45,6 +45,7 @@ const BUTTON_COIN_STATUS_SPEND = 'Spend Coin';
 const BUTTON_COIN_STATUS_SPENT = 'Coin was Spent';
 const BUTTON_COIN_STATUS_SPENDING_IN_PROGRESS = 'Spending...';
 const BUTTON_COIN_STATUS_ERROR = 'Error';
+const BUTTON_COIN_STATUS_READY = 'Credential Ready';
 
 export const BUTTON_COIN_STATUS = {
   get: BUTTON_COIN_STATUS_GET,
@@ -54,6 +55,7 @@ export const BUTTON_COIN_STATUS = {
   spent: BUTTON_COIN_STATUS_SPENT,
   spending: BUTTON_COIN_STATUS_SPENDING_IN_PROGRESS,
   error: BUTTON_COIN_STATUS_ERROR,
+  ready: BUTTON_COIN_STATUS_READY,
 };
 
 const SERVER_TYPE_SA = 'Signing Authority';

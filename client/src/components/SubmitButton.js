@@ -26,7 +26,7 @@ const SubmitButton = (props) => {
 
     case COIN_STATUS.signed: // 'Signed'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.spend; // 'Spend Coin'
+      buttonContent = BUTTON_COIN_STATUS.ready; // 'Credential Ready'
       break;
 
     default:

@@ -87,12 +87,22 @@ class CoinRequester extends React.Component {
     this.setState({ randomizedSignature });
   };
 
+  aggregateSignatures = (signatures) => {
+    // checks if all authorities signed the coin, if not, return error
+    for (let i = 0; i < signatures.length; i++) {
+      if (signatures[i] === null) {
+        return;
+      }
+    }
+    return CoinSig.aggregateSignatures(params, signatures);
+  }
 
 
-  // handleInputChange = (value) => {
-  //   this.setState({ value });
-  // };
 
+
+
+
+// BUTTON HANDLER FUNTIONS
   handleSubmit = async (event) => {
     this.setState({ isRequesting: true });
     await this.handleCoinSubmit();
@@ -107,7 +117,12 @@ class CoinRequester extends React.Component {
       console.log('Coin sign request(s) were sent');
     }
     const signatures = await this.getSignatures(signingServers);
-    this.aggregateAndRandomizeSignatures(signatures);
+    // this.aggregateAndRandomizeSignatures(signatures);
+
+    const aggregatedSignature = this.aggregateSignatures(signatures);
+    const randomizedSignature = CoinSig.randomize(params, aggregatedSignature);
+    this.setState({ randomizedSignature });
+
     if (this.state.randomizedSignature !== null) {
       if (DEBUG) {
         console.log('Coin was signed and signatures were aggregated and randomized.');
@@ -124,9 +139,8 @@ class CoinRequester extends React.Component {
   render() {
     return (
         <SubmitButton
-          // isDisabled={this.state.value <= 0 || publicKeys[issuer] == null}
+          isDisabled={this.state.randomizedSignature!=null}
           isLoading={this.state.isRequesting}
-          isDisabled={false}
           onSubmit={this.handleSubmit}
           onSign={this.handleCoinSign}
           coinState={this.state.coinState}

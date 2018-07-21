@@ -10,6 +10,7 @@ class MainView extends React.Component {
     super(props);
     this.state = {
       coins: [],
+      randomizedSignatures: [],
       ElGamalSK: null,
       ElGamalPK: null,
       sk_client: null,
@@ -74,7 +75,7 @@ class MainView extends React.Component {
 
           <Grid.Row centered={true}>
             <CoinListDisplayer
-              coins={this.state.coins}
+              randomizedSignatures={this.state.randomizedSignatures}
               ElGamalSK={this.state.ElGamalSK}
               ElGamalPK={this.state.ElGamalPK}
               sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
