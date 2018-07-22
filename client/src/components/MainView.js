@@ -55,11 +55,13 @@ class MainView extends React.Component {
 
 
   handleRandomize = (sig) => {
-    const randomizedSignature = CoinSig.randomize(params, sig);
+    let randomizedSignature = CoinSig.randomize(params, sig);
 
     this.setState(prevState => ({
       randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
     }));
+
+    console.log(this.state.randomizedSignatures.length);
   };
 
 
@@ -71,15 +73,20 @@ class MainView extends React.Component {
 
 ////////////////////////////////////////////////
   handleRErandomize = () => {
-    // this.handleRandomize(this.state.randomizedSignatures.pop());
 
-    const randomizedSignature = CoinSig.randomize(params, this.state.randomizedSignatures.pop());
+    // console.log(this.state.randomizedSignatures[this.state.randomizedSignatures.length-1]);
+    // console.log(this.state.randomizedSignatures);
 
-    this.setState(prevState => ({
-      randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
-    }));
+    this.handleRandomize(this.state.randomizedSignatures[this.state.randomizedSignatures.length-1]);
 
-    console.log(this.state.randomizedSignatures.pop());
+    // let randomizedSignatureTEMP = CoinSig.randomize(params, this.state.randomizedSignatures.pop());
+    //
+    // this.setState(prevState => ({
+    //   randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
+    // }));
+
+    // console.log(this.state.randomizedSignatures[this.state.randomizedSignatures.length-1]);
+    // console.log(this.state.randomizedSignatures);
 
   }
 
