@@ -4,17 +4,18 @@ import CoinRequester from './CoinRequester';
 import CoinListDisplayer from './CoinListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG, issuer, ctx } from '../config';
 import ElGamal from '../../lib/ElGamal';
+import CoinSig from '../../lib/CoinSig';
 
 class MainView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      coins: [],
       randomizedSignatures: [],
       ElGamalSK: null,
       ElGamalPK: null,
       sk_client: null,
       pk_client: null,
+      coin_params: null,
     };
   }
 
@@ -53,6 +54,35 @@ class MainView extends React.Component {
   }
 
 
+  handleRandomize = (sig) => {
+    const randomizedSignature = CoinSig.randomize(params, sig);
+
+    this.setState(prevState => ({
+      randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
+    }));
+  };
+
+
+  handleCoinForSpend = (coin, sk, id) => {
+    let coin_params = {coin: coin, sk: sk, id: id};
+    this.setState({ coin_params });
+  }
+
+
+////////////////////////////////////////////////
+  handleRErandomize = () => {
+    // this.handleRandomize(this.state.randomizedSignatures.pop());
+
+    const randomizedSignature = CoinSig.randomize(params, this.state.randomizedSignatures.pop());
+
+    this.setState(prevState => ({
+      randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
+    }));
+
+    console.log(this.state.randomizedSignatures.pop());
+
+  }
+
 
   render() {
     return (
@@ -70,15 +100,19 @@ class MainView extends React.Component {
               ElGamalPK={this.state.ElGamalPK}
               sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
               pk_client={this.state.pk_client}
+              handleRandomize={this.handleRandomize}
+              handleCoinForSpend={this.handleCoinForSpend}
             />
           </Grid.Row>
 
           <Grid.Row centered={true}>
             <CoinListDisplayer
               randomizedSignatures={this.state.randomizedSignatures}
+              coin_params={this.state.coin_params}
               ElGamalSK={this.state.ElGamalSK}
               ElGamalPK={this.state.ElGamalPK}
               sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
+              handleRErandomize={this.handleRErandomize}
             />
           </Grid.Row>
         </Grid>

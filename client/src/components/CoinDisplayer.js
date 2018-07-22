@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Segment } from 'semantic-ui-react';
+import { Segment, Button } from 'semantic-ui-react';
 import CoinActionButton from './CoinActionButton';
 import styles from './CoinDisplayer.style';
 import { params, ctx, COIN_STATUS, signingServers, merchant, DEBUG } from '../config';
@@ -21,7 +21,7 @@ class CoinDisplayer extends React.Component {
   }
 
   componentDidMount() {
-    this.timer = setInterval(this.updateRemainingValidityString, 200);
+    // this.timer = setInterval(this.updateRemainingValidityString, 200);
   }
 
   componentWillUnmount() {
@@ -71,25 +71,6 @@ class CoinDisplayer extends React.Component {
     return aX3;
   };
 
-  handleCoinSign = async () => {
-    this.setState({ coinState: COIN_STATUS.signing });
-    if (DEBUG) {
-      console.log('Coin sign request(s) were sent');
-    }
-    const signatures = await this.getSignatures(signingServers);
-    this.aggregateAndRandomizeSignatures(signatures);
-    if (this.state.randomizedSignature !== null) {
-      if (DEBUG) {
-        console.log('Coin was signed and signatures were aggregated and randomized.');
-      }
-      this.setState({ coinState: COIN_STATUS.signed });
-    } else {
-      if (DEBUG) {
-        console.log('There was an error in signing/aggregating the coin');
-      }
-      this.setState({ coinState: COIN_STATUS.error });
-    }
-  };
 
   handleCoinSpend = async () => {
     this.setState({ coinState: COIN_STATUS.spending });
@@ -102,16 +83,17 @@ class CoinDisplayer extends React.Component {
       }, {});
 
     const aX3 = this.aggregate_pkX_component(signingAuthoritiesPublicKeys);
-    const pkX = ctx.PAIR.G2mul(aX3, this.props.sk);
+    const pkX = ctx.PAIR.G2mul(aX3, this.props.coin_params.sk);
 
 
     const merchantStr = publicKeys[merchant].join('');
-    const secretProof = prepareProofOfSecret(params, this.props.sk, merchantStr, aX3);
+    const secretProof = prepareProofOfSecret(params, this.props.coin_params.sk, merchantStr, aX3);
 
     if (DEBUG) {
       console.log('Coin spend request was sent');
     }
-    const success = await spendCoin(this.props.coin, secretProof, this.state.randomizedSignature, pkX, this.props.id, merchant);
+
+    const success = await spendCoin(this.props.coin_params.coin, secretProof, this.props.randomizedSignature, pkX, this.props.coin_params.id, merchant);
     if (success) {
       if (DEBUG) {
         console.log('Coin was successfully spent.');
@@ -128,14 +110,21 @@ class CoinDisplayer extends React.Component {
   render() {
     return (
       <Segment.Group horizontal>
-        <Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>
+        {/*<Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>*/}
         {/*<Segment style={styles.segmentStyle}><b>Value:</b> {this.props.coin.value}</Segment>*/}
         <Segment style={styles.segmentStyle}>
           <CoinActionButton
-            onSign={this.handleCoinSign}
             onSpend={this.handleCoinSpend}
             coinState={this.state.coinState}
           />
+        </Segment>
+        <Segment style={styles.segmentStyle}>
+        <Button
+          // disabled={props.isDisabled}
+          content={'Re-randomize'}
+          onClick={this.props.handleRErandomize}
+          // loading={props.isLoading}
+        />
         </Segment>
       </Segment.Group>
     );
@@ -143,10 +132,12 @@ class CoinDisplayer extends React.Component {
 }
 
 CoinDisplayer.propTypes = {
-  randomizedSignature: PropTypes.object.isRequired,
+  randomizedSignature: PropTypes.array.isRequired,
+  coin_params: PropTypes.object,
   ElGamalSK: PropTypes.object.isRequired,
   ElGamalPK: PropTypes.object.isRequired,
   sk_client: PropTypes.array.isRequired,
+  handleRErandomize: PropTypes.func.isRequired,
 };
 
 export default CoinDisplayer;

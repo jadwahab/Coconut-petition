@@ -9,16 +9,6 @@ const CoinActionButton = (props) => {
   let isDisabled = false;
 
   switch (props.coinState) {
-    case COIN_STATUS.created: // 'Generated'
-      buttonContent = BUTTON_COIN_STATUS.sign; // 'Sign Coin'
-      handleButtonClick = props.onSign;
-      break;
-
-    case COIN_STATUS.signing: // 'Signing'
-      isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.signing; // 'Signing...'
-      break;
-
     case COIN_STATUS.signed: // 'Signed'
       buttonContent = BUTTON_COIN_STATUS.spend; // 'Spend Coin'
       handleButtonClick = props.onSpend;
@@ -54,7 +44,6 @@ const CoinActionButton = (props) => {
 };
 
 CoinActionButton.propTypes = {
-  onSign: PropTypes.func.isRequired,
   onSpend: PropTypes.func.isRequired,
   coinState: PropTypes.string.isRequired,
 };

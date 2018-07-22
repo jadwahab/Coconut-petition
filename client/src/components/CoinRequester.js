@@ -75,17 +75,17 @@ class CoinRequester extends React.Component {
     return signatures;
   };
 
-  aggregateAndRandomizeSignatures = (signatures) => {
-    // checks if all authorities signed the coin, if not, return error
-    for (let i = 0; i < signatures.length; i++) {
-      if (signatures[i] === null) {
-        return;
-      }
-    }
-    const aggregateSignature = CoinSig.aggregateSignatures(params, signatures);
-    const randomizedSignature = CoinSig.randomize(params, aggregateSignature);
-    this.setState({ randomizedSignature });
-  };
+  // aggregateAndRandomizeSignatures = (signatures) => {
+  //   // checks if all authorities signed the coin, if not, return error
+  //   for (let i = 0; i < signatures.length; i++) {
+  //     if (signatures[i] === null) {
+  //       return;
+  //     }
+  //   }
+  //   const aggregateSignature = CoinSig.aggregateSignatures(params, signatures);
+  //   const randomizedSignature = CoinSig.randomize(params, aggregateSignature);
+  //   this.setState({ randomizedSignature });
+  // };
 
   aggregateSignatures = (signatures) => {
     // checks if all authorities signed the coin, if not, return error
@@ -123,6 +123,11 @@ class CoinRequester extends React.Component {
     const randomizedSignature = CoinSig.randomize(params, aggregatedSignature);
     this.setState({ randomizedSignature });
 
+    this.props.handleRandomize(randomizedSignature);
+
+    // pass parameters to other component (CoinDisplayer)
+    this.props.handleCoinForSpend(this.state.coin, this.state.sk, this.state.id);
+
     if (this.state.randomizedSignature !== null) {
       if (DEBUG) {
         console.log('Coin was signed and signatures were aggregated and randomized.');
@@ -154,6 +159,8 @@ CoinRequester.propTypes = {
   ElGamalPK: PropTypes.object.isRequired,
   sk_client: PropTypes.array.isRequired,
   pk_client: PropTypes.array.isRequired,
+  handleRandomize: PropTypes.func.isRequired,
+  handleCoinForSpend: PropTypes.func.isRequired,
 };
 
 export default CoinRequester;
