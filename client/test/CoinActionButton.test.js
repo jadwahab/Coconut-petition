@@ -3,10 +3,10 @@ import { expect, assert } from 'chai';
 import { shallow, mount, render } from 'enzyme';
 import { Button } from 'semantic-ui-react';
 import VoteDisplayer from '../src/components/VoteDisplayer';
-import CoinActionButton from '../src/components/CoinActionButton';
+import VoteActionButton from '../src/components/VoteActionButton';
 import { COIN_STATUS } from '../src/config';
 
-describe('CoinActionButton Component', () => {
+describe('VoteActionButton Component', () => {
   // save time by not generating entire object that we do not need anyway
   const dummyCoin = {
     coin: {
@@ -24,7 +24,7 @@ describe('CoinActionButton Component', () => {
       ElGamalSK={{ dummy: 'value' }}
       sk_client={[]}
     />);
-    const wrapper = mainWrapper.find(CoinActionButton);
+    const wrapper = mainWrapper.find(VoteActionButton);
     expect(wrapper.props().onSign).to.be.a('Function');
   });
 
@@ -37,7 +37,7 @@ describe('CoinActionButton Component', () => {
       ElGamalSK={{ dummy: 'value' }}
       sk_client={[]}
     />);
-    const wrapper = mainWrapper.find(CoinActionButton);
+    const wrapper = mainWrapper.find(VoteActionButton);
     expect(wrapper.props().onSpend).to.be.a('Function');
   });
 
@@ -50,7 +50,7 @@ describe('CoinActionButton Component', () => {
       ElGamalSK={{ dummy: 'value' }}
       sk_client={[]}
     />);
-    const wrapper = mainWrapper.find(CoinActionButton);
+    const wrapper = mainWrapper.find(VoteActionButton);
     const { coinState } = wrapper.props();
     expect(coinState).to.be.a('string');
     assert.isTrue(coinState === COIN_STATUS.created ||
@@ -61,42 +61,42 @@ describe('CoinActionButton Component', () => {
   });
 
   it('Should be disabled if "coinState" is either "signing", "spending", "spent" or "error"', () => {
-    const wrapper1 = shallow(<CoinActionButton
+    const wrapper1 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
       coinState={COIN_STATUS.created}
     />);
-    const wrapper2 = shallow(<CoinActionButton
+    const wrapper2 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
       coinState={COIN_STATUS.signing}
     />);
-    const wrapper3 = shallow(<CoinActionButton
+    const wrapper3 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
       coinState={COIN_STATUS.signed}
     />);
-    const wrapper4 = shallow(<CoinActionButton
+    const wrapper4 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
       coinState={COIN_STATUS.spent}
     />);
-    const wrapper5 = shallow(<CoinActionButton
+    const wrapper5 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
       coinState={COIN_STATUS.spending}
     />);
-    const wrapper6 = shallow(<CoinActionButton
+    const wrapper6 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {

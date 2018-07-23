@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Segment, Button } from 'semantic-ui-react';
-import CoinActionButton from './CoinActionButton';
+import VoteActionButton from './VoteActionButton';
 import styles from './VoteDisplayer.style';
 import { params, ctx, COIN_STATUS, signingServers, merchant, DEBUG } from '../config';
 import { signCoin, spendCoin } from '../utils/api';
@@ -117,7 +117,7 @@ class VoteDisplayer extends React.Component {
         {/*add time left for petition later*/}
 
         <Segment style={styles.segmentStyle}>
-          <CoinActionButton
+          <VoteActionButton
             onSpend={this.handleCoinSpend}
             coinState={this.state.coinState}
           />

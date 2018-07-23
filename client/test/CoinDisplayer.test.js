@@ -4,7 +4,7 @@ import { before } from 'mocha';
 import sinon from 'sinon';
 import { shallow, mount, render } from 'enzyme';
 import VoteDisplayer from '../src/components/VoteDisplayer';
-import CoinActionButton from '../src/components/CoinActionButton';
+import VoteActionButton from '../src/components/VoteActionButton';
 import MainView from '../src/components/MainView';
 import { params, COIN_STATUS, signingServers, issuer, ctx } from '../src/config';
 import CoinSig from '../lib/CoinSig';
@@ -44,14 +44,14 @@ describe('VoteDisplayer Component', async () => {
     });
   });
 
-  describe('CoinActionButton child behaviour', () => {
-    it('Has CoinActionButton child component', () => {
+  describe('VoteActionButton child behaviour', () => {
+    it('Has VoteActionButton child component', () => {
       const wrapper = mount(<VoteDisplayer coin={requestedCoin} sk={null} id={null} ElGamalPK={null} ElGamalSK={null} sk_client={null} />);
 
-      expect(VoteDisplayerNode.find(CoinActionButton)).to.have.length(1);
+      expect(VoteDisplayerNode.find(VoteActionButton)).to.have.length(1);
     });
 
-    it('If VoteDisplayer has coinState "Generated", CoinActionButton will call "handleCoinSign" on click', () => {
+    it('If VoteDisplayer has coinState "Generated", VoteActionButton will call "handleCoinSign" on click', () => {
       const wrapper = mount(<VoteDisplayer coin={requestedCoin} />);
       wrapper.setState({ coinState: COIN_STATUS.created });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSign');
@@ -62,7 +62,7 @@ describe('VoteDisplayer Component', async () => {
       expect(spy.calledOnce).to.equal(true);
     });
 
-    it('If VoteDisplayer has coinState "Signed", CoinActionButton will call "handleCoinSpend" on click', () => {
+    it('If VoteDisplayer has coinState "Signed", VoteActionButton will call "handleCoinSpend" on click', () => {
       const wrapper = mount(<VoteDisplayer coin={requestedCoin} />);
       wrapper.setState({ coinState: COIN_STATUS.signed });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSpend');
