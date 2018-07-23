@@ -124,7 +124,7 @@ class CredentialRequester extends React.Component {
 
     this.setState({ randomizedSignature });
 
-    // pass parameters to other component (CoinDisplayer)
+    // pass parameters to other component (VoteDisplayer)
     this.props.handleCoinForSpend(this.state.coin, this.state.sk, this.state.id);
 
     if (this.state.randomizedSignature !== null) {

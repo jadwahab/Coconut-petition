@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
 import CredentialRequester from './CredentialRequester';
-import CoinListDisplayer from './CoinListDisplayer';
+import VoteListDisplayer from './VoteListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG, issuer, ctx } from '../config';
 import ElGamal from '../../lib/ElGamal';
 import CoinSig from '../../lib/CoinSig';
@@ -97,7 +97,7 @@ class MainView extends React.Component {
           </Grid.Row>
 
           <Grid.Row centered={true}>
-            <CoinListDisplayer
+            <VoteListDisplayer
               randomizedSignatures={this.state.randomizedSignatures}
               coin_params={this.state.coin_params}
               ElGamalSK={this.state.ElGamalSK}

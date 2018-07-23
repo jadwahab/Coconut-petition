@@ -2,7 +2,7 @@ import React from 'react';
 import { expect, assert } from 'chai';
 import { shallow, mount, render } from 'enzyme';
 import { Button } from 'semantic-ui-react';
-import CoinDisplayer from '../src/components/CoinDisplayer';
+import VoteDisplayer from '../src/components/VoteDisplayer';
 import CoinActionButton from '../src/components/CoinActionButton';
 import { COIN_STATUS } from '../src/config';
 
@@ -16,7 +16,7 @@ describe('CoinActionButton Component', () => {
   };
 
   it('Should have received "onSign" function as a prop', () => {
-    const mainWrapper = mount(<CoinDisplayer
+    const mainWrapper = mount(<VoteDisplayer
       coin={dummyCoin}
       sk={{ dummy: 'value' }}
       id={{ dummy: 'value' }}
@@ -29,7 +29,7 @@ describe('CoinActionButton Component', () => {
   });
 
   it('Should have received "onSpend" function as a prop', () => {
-    const mainWrapper = mount(<CoinDisplayer
+    const mainWrapper = mount(<VoteDisplayer
       coin={dummyCoin}
       sk={{ dummy: 'value' }}
       id={{ dummy: 'value' }}
@@ -42,7 +42,7 @@ describe('CoinActionButton Component', () => {
   });
 
   it('Should have received "coinState" string as a prop, which is one of attributes of COIN_STATUS', () => {
-    const mainWrapper = mount(<CoinDisplayer
+    const mainWrapper = mount(<VoteDisplayer
       coin={dummyCoin}
       sk={{ dummy: 'value' }}
       id={{ dummy: 'value' }}

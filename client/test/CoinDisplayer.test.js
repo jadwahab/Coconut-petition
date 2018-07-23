@@ -3,7 +3,7 @@ import { assert, expect } from 'chai';
 import { before } from 'mocha';
 import sinon from 'sinon';
 import { shallow, mount, render } from 'enzyme';
-import CoinDisplayer from '../src/components/CoinDisplayer';
+import VoteDisplayer from '../src/components/VoteDisplayer';
 import CoinActionButton from '../src/components/CoinActionButton';
 import MainView from '../src/components/MainView';
 import { params, COIN_STATUS, signingServers, issuer, ctx } from '../src/config';
@@ -13,7 +13,7 @@ import { getSigningAuthorityPublicKey, getCoin } from '../src/utils/api';
 import CredentialRequester from '../src/components/CredentialRequester';
 import ElGamal from '../lib/ElGamal';
 
-let coinDisplayerNode;
+let VoteDisplayerNode;
 let requestedCoin;
 
 const generateCoinSecret = () => {
@@ -23,7 +23,7 @@ const generateCoinSecret = () => {
   return [sk, pk];
 };
 
-describe('CoinDisplayer Component', async () => {
+describe('VoteDisplayer Component', async () => {
   const coinValue = 42;
   before(async () => {
     const wrapper = mount(<MainView />);
@@ -31,28 +31,28 @@ describe('CoinDisplayer Component', async () => {
     await wrapper.find(CredentialRequester).at(0).props().handleCoinSubmit(coinValue);
 
     wrapper.update();
-    coinDisplayerNode = wrapper.find(CoinDisplayer);
-    requestedCoin = coinDisplayerNode.props().coin;
+    VoteDisplayerNode = wrapper.find(VoteDisplayer);
+    requestedCoin = VoteDisplayerNode.props().coin;
   });
   describe('Should have received Coin as a prop', () => {
     it('That has TTL in a future', () => {
-      expect(coinDisplayerNode.props().coin.ttl > new Date().getTime()).to.equal(true);
+      expect(VoteDisplayerNode.props().coin.ttl > new Date().getTime()).to.equal(true);
     });
 
     it('That has the same value as from the input', () => {
-      expect(coinDisplayerNode.props().coin.value).to.equal(coinValue);
+      expect(VoteDisplayerNode.props().coin.value).to.equal(coinValue);
     });
   });
 
   describe('CoinActionButton child behaviour', () => {
     it('Has CoinActionButton child component', () => {
-      const wrapper = mount(<CoinDisplayer coin={requestedCoin} sk={null} id={null} ElGamalPK={null} ElGamalSK={null} sk_client={null} />);
+      const wrapper = mount(<VoteDisplayer coin={requestedCoin} sk={null} id={null} ElGamalPK={null} ElGamalSK={null} sk_client={null} />);
 
-      expect(coinDisplayerNode.find(CoinActionButton)).to.have.length(1);
+      expect(VoteDisplayerNode.find(CoinActionButton)).to.have.length(1);
     });
 
-    it('If CoinDisplayer has coinState "Generated", CoinActionButton will call "handleCoinSign" on click', () => {
-      const wrapper = mount(<CoinDisplayer coin={requestedCoin} />);
+    it('If VoteDisplayer has coinState "Generated", CoinActionButton will call "handleCoinSign" on click', () => {
+      const wrapper = mount(<VoteDisplayer coin={requestedCoin} />);
       wrapper.setState({ coinState: COIN_STATUS.created });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSign');
 
@@ -62,8 +62,8 @@ describe('CoinDisplayer Component', async () => {
       expect(spy.calledOnce).to.equal(true);
     });
 
-    it('If CoinDisplayer has coinState "Signed", CoinActionButton will call "handleCoinSpend" on click', () => {
-      const wrapper = mount(<CoinDisplayer coin={requestedCoin} />);
+    it('If VoteDisplayer has coinState "Signed", CoinActionButton will call "handleCoinSpend" on click', () => {
+      const wrapper = mount(<VoteDisplayer coin={requestedCoin} />);
       wrapper.setState({ coinState: COIN_STATUS.signed });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSpend');
 
@@ -96,7 +96,7 @@ describe('CoinDisplayer Component', async () => {
         issuer,
       );
 
-      const wrapper = mount(<CoinDisplayer
+      const wrapper = mount(<VoteDisplayer
         key={id}
         coin={coin}
         sk={coin_sk}
@@ -139,7 +139,7 @@ describe('CoinDisplayer Component', async () => {
         issuer,
       );
 
-      const wrapper = mount(<CoinDisplayer
+      const wrapper = mount(<VoteDisplayer
         key={id}
         coin={coin}
         sk={coin_sk}
@@ -177,7 +177,7 @@ describe('CoinDisplayer Component', async () => {
         issuer,
       );
 
-      const wrapper = mount(<CoinDisplayer
+      const wrapper = mount(<VoteDisplayer
         key={id}
         coin={coin}
         sk={coin_sk}
@@ -222,7 +222,7 @@ describe('CoinDisplayer Component', async () => {
         issuer,
       );
 
-      const wrapper = mount(<CoinDisplayer
+      const wrapper = mount(<VoteDisplayer
         key={id}
         coin={coin}
         sk={coin_sk}

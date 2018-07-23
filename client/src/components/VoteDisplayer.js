@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Segment, Button } from 'semantic-ui-react';
 import CoinActionButton from './CoinActionButton';
-import styles from './CoinDisplayer.style';
+import styles from './VoteDisplayer.style';
 import { params, ctx, COIN_STATUS, signingServers, merchant, DEBUG } from '../config';
 import { signCoin, spendCoin } from '../utils/api';
 import CoinSig from '../../lib/CoinSig';
@@ -11,7 +11,7 @@ import { getSigningCoin } from '../../lib/SigningCoin';
 import { prepareProofOfSecret } from '../../lib/auxiliary';
 import { publicKeys } from '../cache';
 
-class CoinDisplayer extends React.Component {
+class VoteDisplayer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -115,7 +115,7 @@ class CoinDisplayer extends React.Component {
       <Segment.Group horizontal>
         {/*<Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>*/}
         {/*add time left for petition later*/}
-        
+
         <Segment style={styles.segmentStyle}>
           <CoinActionButton
             onSpend={this.handleCoinSpend}
@@ -127,7 +127,7 @@ class CoinDisplayer extends React.Component {
   }
 }
 
-CoinDisplayer.propTypes = {
+VoteDisplayer.propTypes = {
   randomizedSignature: PropTypes.array.isRequired,
   coin_params: PropTypes.object,
   ElGamalSK: PropTypes.object.isRequired,
@@ -135,4 +135,4 @@ CoinDisplayer.propTypes = {
   sk_client: PropTypes.array.isRequired,
 };
 
-export default CoinDisplayer;
+export default VoteDisplayer;

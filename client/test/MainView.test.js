@@ -3,7 +3,7 @@ import { expect, assert } from 'chai';
 import { shallow, mount, render } from 'enzyme';
 import MainView from '../src/components/MainView';
 import CredentialRequester from '../src/components/CredentialRequester';
-import CoinListDisplayer from '../src/components/CoinListDisplayer';
+import VoteListDisplayer from '../src/components/VoteListDisplayer';
 import { params } from '../src/config';
 import { wait } from '../src/utils/api';
 
@@ -18,9 +18,9 @@ describe('MainView Component', () => {
     expect(wrapper.find(CredentialRequester)).to.have.length(1);
   });
 
-  it('Has mounted CoinListDisplayer', () => {
+  it('Has mounted VoteListDisplayer', () => {
     const wrapper = mount(<MainView />);
-    expect(wrapper.find(CoinListDisplayer)).to.have.length(1);
+    expect(wrapper.find(VoteListDisplayer)).to.have.length(1);
   });
 
   it('Has initially empty array for coins state', () => {

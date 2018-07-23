@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import CoinDisplayer from './CoinDisplayer';
+import VoteDisplayer from './VoteDisplayer';
 
-const CoinListDisplayer = props => (
+const VoteListDisplayer = props => (
   <div>
     {props.randomizedSignatures.map( (randomizedSignature, index) => (
-      <CoinDisplayer
+      <VoteDisplayer
         key={index} // if it is not unique, that is client's fault ///////chose something other than x
         randomizedSignature={randomizedSignature}
         coin_params={props.coin_params}
@@ -17,7 +17,7 @@ const CoinListDisplayer = props => (
   </div>
 );
 
-CoinListDisplayer.propTypes = {
+VoteListDisplayer.propTypes = {
   randomizedSignatures: PropTypes.array.isRequired,
   coin_params: PropTypes.object,
   ElGamalSK: PropTypes.object.isRequired,
@@ -25,4 +25,4 @@ CoinListDisplayer.propTypes = {
   sk_client: PropTypes.array.isRequired,
 };
 
-export default CoinListDisplayer;
+export default VoteListDisplayer;
