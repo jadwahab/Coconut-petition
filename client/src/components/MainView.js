@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
-import CredentialRequester from './CredentialRequester';
-import VoteListDisplayer from './VoteListDisplayer';
+import CredentialRequester from './MainView/CredentialRequester';
+import VoteListDisplayer from './MainView/VoteListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG, issuer, ctx } from '../config';
 import ElGamal from '../../lib/ElGamal';
 import CoinSig from '../../lib/CoinSig';

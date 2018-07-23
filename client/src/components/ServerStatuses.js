@@ -1,8 +1,8 @@
 import React from 'react';
 import { Container, Table, Header, Segment } from 'semantic-ui-react';
 import { signingServers, merchant, issuer, SERVER_TYPES, DEBUG } from '../config';
-import ServerStatus from './ServerStatus';
-import ResetCacheButton from './ResetCacheButton';
+import ServerStatus from './ServerStatuses/ServerStatus';
+import ResetCacheButton from './ServerStatuses/ResetCacheButton';
 import { publicKeys } from '../cache';
 
 class ServerStatuses extends React.Component {
