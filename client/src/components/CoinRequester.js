@@ -75,7 +75,7 @@ class CoinRequester extends React.Component {
     return signatures;
   };
 
-  // aggregateAndRandomizeSignatures = (signatures) => {
+  // aggregateAndRandomizeSignatures = (signatures) => {          // DELETE LATER
   //   // checks if all authorities signed the coin, if not, return error
   //   for (let i = 0; i < signatures.length; i++) {
   //     if (signatures[i] === null) {
@@ -112,18 +112,21 @@ class CoinRequester extends React.Component {
   };
 
   handleCoinSign = async () => {
-    this.setState({ coinState: COIN_STATUS.signing });
+    // this.setState({ coinState: COIN_STATUS.signing });
+    this.setState({ isRequesting: true });
     if (DEBUG) {
       console.log('Coin sign request(s) were sent');
     }
     const signatures = await this.getSignatures(signingServers);
-    // this.aggregateAndRandomizeSignatures(signatures);
+
+    // this.aggregateAndRandomizeSignatures(signatures); DELETE LATER
 
     const aggregatedSignature = this.aggregateSignatures(signatures);
-    const randomizedSignature = CoinSig.randomize(params, aggregatedSignature);
-    this.setState({ randomizedSignature });
+    // const randomizedSignature = CoinSig.randomize(params, aggregatedSignature);
 
-    this.props.handleRandomize(randomizedSignature);
+    let randomizedSignature = this.props.handleRandomize(aggregatedSignature);
+
+    this.setState({ randomizedSignature });
 
     // pass parameters to other component (CoinDisplayer)
     this.props.handleCoinForSpend(this.state.coin, this.state.sk, this.state.id);
@@ -132,6 +135,7 @@ class CoinRequester extends React.Component {
       if (DEBUG) {
         console.log('Coin was signed and signatures were aggregated and randomized.');
       }
+      this.setState({ isRequesting: false });
       this.setState({ coinState: COIN_STATUS.signed });
     } else {
       if (DEBUG) {
@@ -141,13 +145,27 @@ class CoinRequester extends React.Component {
     }
   };
 
+  handleCredentialRandomize = async () => {
+    this.setState({ isRequesting: true });
+    // await this.handleCoinSubmit();
+    let secondrand = await this.props.handleRandomize(this.state.randomizedSignature);
+    this.setState({ isRequesting: false });
+
+    this.setState({ coinState: COIN_STATUS.signed });
+
+    console.log('handleCredentialRandomize');
+    console.log(secondrand);
+  }
+
   render() {
     return (
         <SubmitButton
-          isDisabled={this.state.randomizedSignature!=null}
+          // isDisabled={this.state.randomizedSignature!=null}
+          isDisabled={false}
           isLoading={this.state.isRequesting}
           onSubmit={this.handleSubmit}
           onSign={this.handleCoinSign}
+          onRandomize={this.handleCredentialRandomize}
           coinState={this.state.coinState}
         />
     );

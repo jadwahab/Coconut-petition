@@ -12,7 +12,6 @@ const CoinListDisplayer = props => (
         ElGamalSK={props.ElGamalSK}
         ElGamalPK={props.ElGamalPK}
         sk_client={props.sk_client}
-        handleRErandomize={props.handleRErandomize}
       />
     ))}
   </div>
@@ -24,7 +23,6 @@ CoinListDisplayer.propTypes = {
   ElGamalSK: PropTypes.object.isRequired,
   ElGamalPK: PropTypes.object.isRequired,
   sk_client: PropTypes.array.isRequired,
-  handleRErandomize: PropTypes.func.isRequired,
 };
 
 export default CoinListDisplayer;

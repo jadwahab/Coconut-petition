@@ -22,7 +22,6 @@ export const params = CoinSig.setup();
 
 const COIN_STATUS_UNCREATED = 'Ungenerated';
 const COIN_STATUS_CREATED = 'Generated';
-const COIN_STATUS_SIGNING = 'Signing';
 const COIN_STATUS_SIGNED = 'Signed';
 const COIN_STATUS_SPENT = 'Spent';
 const COIN_STATUS_SPENDING = 'Spending';
@@ -31,7 +30,6 @@ const COIN_STATUS_ERROR = 'Error';
 export const COIN_STATUS = {
   uncreated: COIN_STATUS_UNCREATED,
   created: COIN_STATUS_CREATED,
-  signing: COIN_STATUS_SIGNING,
   signed: COIN_STATUS_SIGNED,
   spent: COIN_STATUS_SPENT,
   spending: COIN_STATUS_SPENDING,
@@ -39,18 +37,16 @@ export const COIN_STATUS = {
 };
 
 const BUTTON_COIN_STATUS_GET = 'Get Credential';
-const BUTTON_COIN_STATUS_SIGN = 'Sign Coin';
-const BUTTON_COIN_STATUS_SIGN_IN_PROGRESS = 'Signing...';
+const BUTTON_COIN_STATUS_SIGN = 'Sign Credential';
 const BUTTON_COIN_STATUS_SPEND = 'Spend Coin';
 const BUTTON_COIN_STATUS_SPENT = 'Coin was Spent';
 const BUTTON_COIN_STATUS_SPENDING_IN_PROGRESS = 'Spending...';
 const BUTTON_COIN_STATUS_ERROR = 'Error';
-const BUTTON_COIN_STATUS_READY = 'Credential Ready';
+const BUTTON_COIN_STATUS_READY = 'Randomize Credential';
 
 export const BUTTON_COIN_STATUS = {
   get: BUTTON_COIN_STATUS_GET,
   sign: BUTTON_COIN_STATUS_SIGN,
-  signing: BUTTON_COIN_STATUS_SIGN_IN_PROGRESS,
   spend: BUTTON_COIN_STATUS_SPEND,
   spent: BUTTON_COIN_STATUS_SPENT,
   spending: BUTTON_COIN_STATUS_SPENDING_IN_PROGRESS,

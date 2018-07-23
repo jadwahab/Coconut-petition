@@ -62,6 +62,9 @@ class MainView extends React.Component {
     }));
 
     console.log(this.state.randomizedSignatures.length);
+    console.log(this.state.randomizedSignatures);
+
+    return randomizedSignature;
   };
 
 
@@ -70,25 +73,6 @@ class MainView extends React.Component {
     this.setState({ coin_params });
   }
 
-
-////////////////////////////////////////////////
-  handleRErandomize = () => {
-
-    // console.log(this.state.randomizedSignatures[this.state.randomizedSignatures.length-1]);
-    // console.log(this.state.randomizedSignatures);
-
-    this.handleRandomize(this.state.randomizedSignatures[this.state.randomizedSignatures.length-1]);
-
-    // let randomizedSignatureTEMP = CoinSig.randomize(params, this.state.randomizedSignatures.pop());
-    //
-    // this.setState(prevState => ({
-    //   randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
-    // }));
-
-    // console.log(this.state.randomizedSignatures[this.state.randomizedSignatures.length-1]);
-    // console.log(this.state.randomizedSignatures);
-
-  }
 
 
   render() {
@@ -119,7 +103,6 @@ class MainView extends React.Component {
               ElGamalSK={this.state.ElGamalSK}
               ElGamalPK={this.state.ElGamalPK}
               sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
-              handleRErandomize={this.handleRErandomize}
             />
           </Grid.Row>
         </Grid>

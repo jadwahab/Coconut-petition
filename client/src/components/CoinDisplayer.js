@@ -73,6 +73,9 @@ class CoinDisplayer extends React.Component {
 
 
   handleCoinSpend = async () => {
+
+    console.log(this.props.randomizedSignature);
+
     this.setState({ coinState: COIN_STATUS.spending });
 
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
@@ -118,14 +121,6 @@ class CoinDisplayer extends React.Component {
             coinState={this.state.coinState}
           />
         </Segment>
-        <Segment style={styles.segmentStyle}>
-        <Button
-          // disabled={props.isDisabled}
-          content={'Re-randomize'}
-          onClick={this.props.handleRErandomize}
-          // loading={props.isLoading}
-        />
-        </Segment>
       </Segment.Group>
     );
   }
@@ -137,7 +132,6 @@ CoinDisplayer.propTypes = {
   ElGamalSK: PropTypes.object.isRequired,
   ElGamalPK: PropTypes.object.isRequired,
   sk_client: PropTypes.array.isRequired,
-  handleRErandomize: PropTypes.func.isRequired,
 };
 
 export default CoinDisplayer;

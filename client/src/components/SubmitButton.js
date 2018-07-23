@@ -7,6 +7,7 @@ const SubmitButton = (props) => {
   let buttonContent;
   let handleButtonClick;
   let isDisabled = false;
+  let buttonIcon = "key"
 
   switch (props.coinState) {
     case COIN_STATUS.uncreated: // 'Ungenerated'
@@ -15,18 +16,14 @@ const SubmitButton = (props) => {
       break;
 
     case COIN_STATUS.created: // 'Generated'
-      buttonContent = BUTTON_COIN_STATUS.sign; // 'Sign Coin'
+      buttonContent = BUTTON_COIN_STATUS.sign; // 'Sign Credential'
       handleButtonClick = props.onSign;
       break;
 
-    case COIN_STATUS.signing: // 'Signing'
-      isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.signing; // 'Signing...'
-      break;
-
     case COIN_STATUS.signed: // 'Signed'
-      isDisabled = true;
       buttonContent = BUTTON_COIN_STATUS.ready; // 'Credential Ready'
+      handleButtonClick = props.onRandomize;
+      buttonIcon = 'check';
       break;
 
     default:
@@ -40,7 +37,7 @@ const SubmitButton = (props) => {
       disabled={props.isDisabled}
       color="teal"
       labelPosition="left"
-      icon="key"
+      icon={buttonIcon}
       content={buttonContent}
       onClick={handleButtonClick}
       loading={props.isLoading}
@@ -53,6 +50,7 @@ SubmitButton.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onSign: PropTypes.func.isRequired,
+  onRandomize: PropTypes.func.isRequired,
   coinState: PropTypes.string.isRequired,
 };
 
