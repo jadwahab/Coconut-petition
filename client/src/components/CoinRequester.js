@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import ValueInput from './ValueInput';
 import SubmitButton from './SubmitButton';
 import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG } from '../config';
 import { signCoin, getCoin } from '../utils/api';
@@ -18,7 +17,6 @@ class CoinRequester extends React.Component {
       id: null,
       coinState: COIN_STATUS.uncreated,
       randomizedSignature: null,
-      // value: 0,
       isRequesting: false,
     };
   }
@@ -36,7 +34,6 @@ class CoinRequester extends React.Component {
     const [coin, id] = await getCoin(
       sk_coin,
       pk_coin,
-      // value,
       this.props.pk_client,
       this.props.sk_client,
       issuer,
@@ -112,7 +109,6 @@ class CoinRequester extends React.Component {
   };
 
   handleCoinSign = async () => {
-    // this.setState({ coinState: COIN_STATUS.signing });
     this.setState({ isRequesting: true });
     if (DEBUG) {
       console.log('Coin sign request(s) were sent');
@@ -147,12 +143,12 @@ class CoinRequester extends React.Component {
 
   handleCredentialRandomize = async () => {
     this.setState({ isRequesting: true });
-    // await this.handleCoinSubmit();
     let secondrand = await this.props.handleRandomize(this.state.randomizedSignature);
     this.setState({ isRequesting: false });
 
     this.setState({ coinState: COIN_STATUS.signed });
 
+//////////////////
     console.log('handleCredentialRandomize');
     console.log(secondrand);
   }

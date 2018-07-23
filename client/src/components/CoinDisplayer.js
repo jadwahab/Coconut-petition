@@ -114,7 +114,8 @@ class CoinDisplayer extends React.Component {
     return (
       <Segment.Group horizontal>
         {/*<Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>*/}
-        {/*<Segment style={styles.segmentStyle}><b>Value:</b> {this.props.coin.value}</Segment>*/}
+        {/*add time left for petition later*/}
+        
         <Segment style={styles.segmentStyle}>
           <CoinActionButton
             onSpend={this.handleCoinSpend}

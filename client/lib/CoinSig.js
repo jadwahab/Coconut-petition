@@ -18,6 +18,9 @@ export default class CoinSig {
     return [G, o, g1, g2, e];
   }
 
+// note: x1 is there because of the value parameter but commented out
+//       to be deleted if not needed anymore later
+
   static keygen(params) {
     const [G, o, g1, g2, e] = params;
 

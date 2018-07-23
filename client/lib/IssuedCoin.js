@@ -38,7 +38,6 @@ export const getIssuedCoin = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) =
 
   const coinStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer) + // coin's pk
     ttl.toString();
 
@@ -54,7 +53,6 @@ export const getIssuedCoin = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) =
   return {
     pk_coin_bytes: pk_coin_bytes,
     ttl: ttl,
-    // value: value,
     pk_client_bytes: pk_client_bytes,
     issuedCoinSig: issuedCoinSig,
   };
@@ -69,7 +67,6 @@ export const verifyCoinSignature = (issuedCoin, pk_issuer_bytes) => {
 
   const coinStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer) + // coin's pk
     ttl.toString();
 

@@ -177,7 +177,7 @@ export async function signCoin(server, signingCoin, ElGamalPK) {
   return signature;
 }
 
-// ... we can't send v because it would link us to issuance, we just send value, ttl, id, proof of x (on aX3) and sig
+// ... we can't send v because it would link us to issuance, we just send ttl, id, proof of x (on aX3) and sig
 // pkX = aX3^x
 export async function spendCoin(coin, proof, signature, pkX, id, server) {
   const simplifiedProof = getSimplifiedProof(proof);
@@ -188,7 +188,6 @@ export async function spendCoin(coin, proof, signature, pkX, id, server) {
   id.toBytes(idBytes);
 
   const coinAttributes = {
-    // value: coin.value,
     ttl: coin.ttl,
     idBytes: idBytes,
   };

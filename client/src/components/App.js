@@ -7,7 +7,7 @@ import ServerStatuses from './ServerStatuses';
 
 const App = () => (
   <div style={styles.siteStyle}>
-    <TopMenu />
+    {/*<TopMenu />*/}
 
     <div style={styles.siteContentStyle}>
 
@@ -16,7 +16,7 @@ const App = () => (
 
     </div>
 
-    <Footer />
+    {/*<Footer />*/}
   </div>
 );
 
