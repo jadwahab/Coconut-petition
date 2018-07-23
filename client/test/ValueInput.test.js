@@ -2,7 +2,7 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallow, mount, render } from 'enzyme';
 import ValueInput from '../src/components/ValueInput';
-import CoinRequester from '../src/components/CoinRequester';
+import CredentialRequester from '../src/components/CredentialRequester';
 
 describe('ValueInput Component', () => {
   describe("Upon receiving invalid, non-integer input, it sets it's isInputValid state to false", () => {
@@ -42,7 +42,7 @@ describe('ValueInput Component', () => {
 
 
   it('Should have received "onInputChange" function as a prop', () => {
-    const mainWrapper = mount(<CoinRequester />);
+    const mainWrapper = mount(<CredentialRequester />);
     const wrapper = mainWrapper.find(ValueInput);
     expect(wrapper.props().onInputChange).to.be.a('Function');
   });

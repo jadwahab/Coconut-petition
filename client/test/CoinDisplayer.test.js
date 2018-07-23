@@ -10,7 +10,7 @@ import { params, COIN_STATUS, signingServers, issuer, ctx } from '../src/config'
 import CoinSig from '../lib/CoinSig';
 import { getSigningAuthorityPublicKey, getCoin } from '../src/utils/api';
 
-import CoinRequester from '../src/components/CoinRequester';
+import CredentialRequester from '../src/components/CredentialRequester';
 import ElGamal from '../lib/ElGamal';
 
 let coinDisplayerNode;
@@ -28,7 +28,7 @@ describe('CoinDisplayer Component', async () => {
   before(async () => {
     const wrapper = mount(<MainView />);
     wrapper.find('input').simulate('change', { target: { value: coinValue } });
-    await wrapper.find(CoinRequester).at(0).props().handleCoinSubmit(coinValue);
+    await wrapper.find(CredentialRequester).at(0).props().handleCoinSubmit(coinValue);
 
     wrapper.update();
     coinDisplayerNode = wrapper.find(CoinDisplayer);

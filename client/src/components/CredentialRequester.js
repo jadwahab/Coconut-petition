@@ -8,7 +8,7 @@ import ElGamal from '../../lib/ElGamal';
 import { getSigningCoin } from '../../lib/SigningCoin';
 import { publicKeys } from '../cache';
 
-class CoinRequester extends React.Component {
+class CredentialRequester extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -168,7 +168,7 @@ class CoinRequester extends React.Component {
   }
 }
 
-CoinRequester.propTypes = {
+CredentialRequester.propTypes = {
   ElGamalSK: PropTypes.object.isRequired,
   ElGamalPK: PropTypes.object.isRequired,
   sk_client: PropTypes.array.isRequired,
@@ -177,4 +177,4 @@ CoinRequester.propTypes = {
   handleCoinForSpend: PropTypes.func.isRequired,
 };
 
-export default CoinRequester;
+export default CredentialRequester;

@@ -5,7 +5,7 @@ import { shallow, mount, render } from 'enzyme';
 import CoinDisplayer from '../src/components/CoinDisplayer';
 import MainView from '../src/components/MainView';
 import CoinListDisplayer from '../src/components/CoinListDisplayer';
-import CoinRequester from '../src/components/CoinRequester';
+import CredentialRequester from '../src/components/CredentialRequester';
 
 let coinListDisplayerNode;
 
@@ -13,8 +13,8 @@ describe('CoinListDisplayer Component', () => {
   let wrapper;
   before(async () => {
     wrapper = mount(<MainView />);
-    await wrapper.find(CoinRequester).at(0).props().handleCoinSubmit(212);
-    await wrapper.find(CoinRequester).at(0).props().handleCoinSubmit(213);
+    await wrapper.find(CredentialRequester).at(0).props().handleCoinSubmit(212);
+    await wrapper.find(CredentialRequester).at(0).props().handleCoinSubmit(213);
     wrapper.update();
     coinListDisplayerNode = wrapper.find(CoinListDisplayer);
   });

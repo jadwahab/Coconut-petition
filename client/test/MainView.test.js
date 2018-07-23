@@ -2,7 +2,7 @@ import React from 'react';
 import { expect, assert } from 'chai';
 import { shallow, mount, render } from 'enzyme';
 import MainView from '../src/components/MainView';
-import CoinRequester from '../src/components/CoinRequester';
+import CredentialRequester from '../src/components/CredentialRequester';
 import CoinListDisplayer from '../src/components/CoinListDisplayer';
 import { params } from '../src/config';
 import { wait } from '../src/utils/api';
@@ -13,9 +13,9 @@ describe('MainView Component', () => {
     expect(wrapper.children().length).to.equal(1);
   });
 
-  it('Has mounted CoinRequester', () => {
+  it('Has mounted CredentialRequester', () => {
     const wrapper = mount(<MainView />);
-    expect(wrapper.find(CoinRequester)).to.have.length(1);
+    expect(wrapper.find(CredentialRequester)).to.have.length(1);
   });
 
   it('Has mounted CoinListDisplayer', () => {
@@ -31,12 +31,12 @@ describe('MainView Component', () => {
   describe('Coin generation', async () => {
     const coinValue = 42;
     const wrapper = mount(<MainView />);
-    const input = wrapper.find(CoinRequester).find('input');
+    const input = wrapper.find(CredentialRequester).find('input');
     // input value
     input.simulate('change', { target: { value: coinValue } });
 
     // submit value
-    const button = wrapper.find(CoinRequester).find('button');
+    const button = wrapper.find(CredentialRequester).find('button');
     button.simulate('click');
 
     await wait(200);

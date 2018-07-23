@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
-import CoinRequester from './CoinRequester';
+import CredentialRequester from './CredentialRequester';
 import CoinListDisplayer from './CoinListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG, issuer, ctx } from '../config';
 import ElGamal from '../../lib/ElGamal';
@@ -86,7 +86,7 @@ class MainView extends React.Component {
         />
         <Grid>
           <Grid.Row centered={true}>
-            <CoinRequester
+            <CredentialRequester
               ElGamalSK={this.state.ElGamalSK}
               ElGamalPK={this.state.ElGamalPK}
               sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent

@@ -4,18 +4,18 @@ import { shallow, mount, render } from 'enzyme';
 import sinon from 'sinon';
 import { Button } from 'semantic-ui-react';
 import SubmitButton from '../src/components/SubmitButton';
-import CoinRequester from '../src/components/CoinRequester';
+import CredentialRequester from '../src/components/CredentialRequester';
 
 
 describe('SubmitButton Component', () => {
   it('Should have received "onSubmit" function as a prop', () => {
-    const mainWrapper = mount(<CoinRequester />);
+    const mainWrapper = mount(<CredentialRequester />);
     const wrapper = mainWrapper.find(SubmitButton);
     expect(wrapper.props().onSubmit).to.be.a('Function');
   });
 
   it('Should have received "isDisabled" boolean as a prop', () => {
-    const mainWrapper = mount(<CoinRequester />);
+    const mainWrapper = mount(<CredentialRequester />);
     const wrapper = mainWrapper.find(SubmitButton);
     expect(wrapper.props().isDisabled).to.be.a('boolean');
   });
@@ -30,9 +30,9 @@ describe('SubmitButton Component', () => {
     expect(buttonNode2.props().disabled).to.be.a('boolean').to.equal(false);
   });
 
-  it('Should call "handleCoinSubmit" sent from CoinRequester Component when there is a valid value in input field', () => {
+  it('Should call "handleCoinSubmit" sent from CredentialRequester Component when there is a valid value in input field', () => {
     const callback = sinon.spy();
-    const mainWrapper = mount(<CoinRequester handleCoinSubmit={callback} />);
+    const mainWrapper = mount(<CredentialRequester handleCoinSubmit={callback} />);
 
     mainWrapper.find('input').simulate('change', { target: { value: '42' } });
     mainWrapper.find('button').simulate('click');
