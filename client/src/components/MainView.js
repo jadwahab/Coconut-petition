@@ -61,6 +61,7 @@ class MainView extends React.Component {
       randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
     }));
 
+//////////////////////////
     console.log(this.state.randomizedSignatures.length);
     console.log(this.state.randomizedSignatures);
 

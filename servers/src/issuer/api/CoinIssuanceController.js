@@ -25,18 +25,8 @@ router.post('/', async (req, res) => {
   }
 
   const coin_request = req.body.coin_request;
-  // // start by checking whether requested coin value is legit (DONT RELY ON CLIENT-SIDE VALIDATION)
-  // if (!Number.isInteger(coin_request.value)) {
-  //   res.status(200)
-  //     .json({
-  //       coin: null,
-  //       status: ISSUE_STATUS.error_balance,
-  //     });
-  //   return;
-  // }
-  
 
-  // then verify whether request is legit:
+  // Verify whether request signature is legit:
   const isSignatureValid = verifyRequestSignature(coin_request);
   if (!isSignatureValid) {
     if (DEBUG) {
@@ -49,33 +39,10 @@ router.post('/', async (req, res) => {
       });
     return;
   }
-  let balance = await getBalance(coin_request.pk_client_bytes);
-  if (DEBUG) {
-    console.log('Balance of callee is', balance);
-  }
 
-  if (DEBUG || FAKE_BALANCE) {
-    // this will only happen in debug mode to make it easier to test the system
-    const cheat_balance = 1000.00;
-    if (balance === -1) {
-      await changeBalance(coin_request.pk_client_bytes, cheat_balance);
-      balance = cheat_balance;
-    }
-  }
-
-  if (balance < coin_request.value) {
-    if (DEBUG) {
-      console.log('Error in issuing coin', ISSUE_STATUS.error_balance);
-    }
-    res.status(200)
-      .json({
-        coin: null,
-        status: ISSUE_STATUS.error_balance,
-      });
-    return;
-  }
   const issuerStr = sig_pkBytes.join('');
 
+// Verify whether request proof of knowledge is legit:
   const isProofValid = verifyRequestProofOfCoinSecret(
     coin_request.proof_bytes,
     coin_request.pk_coin_bytes,
@@ -94,14 +61,14 @@ router.post('/', async (req, res) => {
       });
     return;
   }
+
+// Issuer finally signs the credential
   const issuedCoin = getIssuedCoin(
     coin_request.pk_coin_bytes,
     // coin_request.value,
     coin_request.pk_client_bytes,
     sig_skBytes,
   );
-
-  await changeBalance(coin_request.pk_client_bytes, -coin_request.value);
 
   if (DEBUG) {
     console.log(ISSUE_STATUS.success);

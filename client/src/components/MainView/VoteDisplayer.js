@@ -61,6 +61,7 @@ class VoteDisplayer extends React.Component {
     this.setState({ remainingValidityString: remainingValidityString });
   };
 
+// AGGREGATE PUBLIC KEYS OF AUTHORITIES
   aggregate_pkX_component = (signingAuthoritiesPublicKeys) => {
     const aX3 = new ctx.ECP2();
     Object.entries(signingAuthoritiesPublicKeys).forEach(([server, publicKey]) => {

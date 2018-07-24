@@ -1,5 +1,5 @@
 export const hostname = '127.0.0.1';
-export const DEBUG = false;
+export const DEBUG = true;
 export const FAKE_BALANCE = true;
 export const POSTGRES_USER = 'issuer';
 export const POSTGRES_PASSWORD = 'secretpassword';

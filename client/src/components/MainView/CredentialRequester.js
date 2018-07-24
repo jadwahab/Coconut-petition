@@ -1,3 +1,4 @@
+//EDIT: clean up handlecoinsubmit and button submit buttons a bit later
 import React from 'react';
 import PropTypes from 'prop-types';
 import SubmitButton from './SubmitButton';
@@ -22,6 +23,8 @@ class CredentialRequester extends React.Component {
   }
 
 
+// GENERATE CREDENTIAL SECRET VALUE(S)
+//EDIT:
   generateCoinSecret = () => {
     const [G, o, g1, g2, e] = params;
     const sk = ctx.BIG.randomnum(G.order, G.rngGen);

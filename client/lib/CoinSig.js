@@ -21,6 +21,7 @@ export default class CoinSig {
 // note: x1 is there because of the value parameter but commented out
 //       to be deleted if not needed anymore later
 
+//EDIT: not used
   static keygen(params) {
     const [G, o, g1, g2, e] = params;
 
@@ -43,6 +44,8 @@ export default class CoinSig {
   }
 
   // sig = (x0 + x1*a1 + x2*a2 + x3*a3 + x4*a4) * h
+
+//EDIT: not used
   static sign(params, sk, coin) {
     const [G, o, g1, g2, e] = params;
     const [x0, x1, x2, x3, x4] = sk;
@@ -98,6 +101,8 @@ export default class CoinSig {
   }
 
   //  e(sig1, X0 + a1 * X1 + ...) == e(sig2, g)
+
+//EDIT: not used
   static verify(params, pk, coin, sig) {
     // aggregation failed because h differed
     if (!sig) {
