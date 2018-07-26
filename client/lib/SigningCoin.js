@@ -11,7 +11,7 @@ export const getSigningCoin = (issuedCoin, ElGamalPK, coin_id, coin_sk, sk_clien
     issuedCoin.pk_client_bytes.reduce(reducer) + // client's key
     // issuedCoin.value.toString() + // coin's value
     issuedCoin.pk_coin_bytes.reduce(reducer) + // coin's pk
-    issuedCoin.ttl.toString() +
+    // issuedCoin.ttl.toString() +
     issuedCoin.issuedCoinSig[0].reduce(reducer) +
     issuedCoin.issuedCoinSig[1].reduce(reducer);
 
@@ -52,7 +52,7 @@ export const getSigningCoin = (issuedCoin, ElGamalPK, coin_id, coin_sk, sk_clien
 
   return {
     pk_coin_bytes: issuedCoin.pk_coin_bytes,
-    ttl: issuedCoin.ttl,
+    // ttl: issuedCoin.ttl,
     // value: issuedCoin.value,
     pk_client_bytes: issuedCoin.pk_client_bytes,
     issuedCoinSig: issuedCoin.issuedCoinSig,
@@ -88,8 +88,8 @@ export const verifySignRequest = (signingCoin, issuerPK) => {
   const coinStr =
     signingCoin.pk_client_bytes.reduce(reducer) + // client's key
     // signingCoin.value.toString() + // coin's value
-    signingCoin.pk_coin_bytes.reduce(reducer) + // coin's pk
-    signingCoin.ttl.toString();
+    signingCoin.pk_coin_bytes.reduce(reducer); // coin's pk
+    // signingCoin.ttl.toString();
 
   if (ctx.ECDH.ECPVP_DSA(sha, issuerPK, coinStr, C1, D1) !== 0) {
     return false;

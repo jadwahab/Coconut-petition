@@ -224,7 +224,7 @@ export default class CoinSig {
     return CoinSig.verify(params, aPk, coin, aggregateSignature);
   }
 
-  // no need to pass h - encryption is already using it
+  // no need to pass h - encryption is already using it EDIT: make sure!
   static blindSignComponent(sk_component, encrypted_param) {
     const [encrypted_param_a, encrypted_param_b] = encrypted_param;
     const sig_a = ctx.PAIR.G1mul(encrypted_param_a, sk_component);
@@ -243,7 +243,7 @@ export default class CoinSig {
       signingCoin.pk_client_bytes.reduce(reducer) + // client's key
       // signingCoin.value.toString() + // coin's value
       signingCoin.pk_coin_bytes.reduce(reducer) + // coin's pk
-      signingCoin.ttl.toString() +
+      // signingCoin.ttl.toString() +
       signingCoin.issuedCoinSig[0].reduce(reducer) +
       signingCoin.issuedCoinSig[1].reduce(reducer);
 
@@ -254,7 +254,7 @@ export default class CoinSig {
 
     // const a1 = new G.ctx.BIG(signingCoin.value);
     // a1.norm();
-    const a2 = hashToBIG(signingCoin.ttl.toString());
+    // const a2 = hashToBIG(signingCoin.ttl.toString());
 
     const [enc_sk_component_a, enc_sk_component_b] = CoinSig.blindSignComponent(x3, enc_sk);
     const [enc_id_component_a, enc_id_component_b] = CoinSig.blindSignComponent(x4, enc_id);
@@ -263,21 +263,21 @@ export default class CoinSig {
     // const a1_cpy = new G.ctx.BIG(a1);
     // a1_cpy.mod(o);
 
-    const a2_cpy = new G.ctx.BIG(a2);
-    a2_cpy.mod(o);
+    // const a2_cpy = new G.ctx.BIG(a2);
+    // a2_cpy.mod(o);
 
     // calculate t1 = x1 * (a1 mod p), t2 = x2 * (a2 mod p)
     // const t1 = G.ctx.BIG.mul(x1, a1_cpy);
-    const t2 = G.ctx.BIG.mul(x2, a2_cpy);
+    // const t2 = G.ctx.BIG.mul(x2, a2_cpy);
 
     // DBIG constructor does not allow to pass it a BIG value hence we copy all word values manually
     const x0DBIG = new G.ctx.DBIG(0);
-    for (let i = 0; i < G.ctx.BIG.NLEN; i++) {
+    for (let i = 0; i < G.ctx.BIG.NLEN; i++) {    //EDIT: remove forloop because only 1 iteration
       x0DBIG.w[i] = x0.w[i];
     }
 
     // x0DBIG.add(t1);
-    x0DBIG.add(t2);
+    // x0DBIG.add(t2);
 
     // K = (x0 + x1*a1 + x2*a2) mod p
     const K = x0DBIG.mod(o);
@@ -312,10 +312,11 @@ export default class CoinSig {
 
     // const a1 = new G.ctx.BIG(coin.value);
     // a1.norm();
-    const a2 = hashToBIG(coin.ttl.toString());
+    // const a2 = hashToBIG(coin.ttl.toString());
 
     // const G2_tmp1 = G.ctx.PAIR.G2mul(X1, a1);
-    const G2_tmp2 = G.ctx.PAIR.G2mul(X2, a2);
+    // const G2_tmp2 = G.ctx.PAIR.G2mul(X2, a2);
+
     // const G2_tmp3 = G.ctx.PAIR.G2mul(X3, a3); // this is now provided as pkX
     const G2_tmp4 = G.ctx.PAIR.G2mul(X4, id);
 
@@ -324,7 +325,7 @@ export default class CoinSig {
 
     X0_cpy.copy(X0);
     // X0_cpy.add(G2_tmp1);
-    X0_cpy.add(G2_tmp2);
+    // X0_cpy.add(G2_tmp2);
     X0_cpy.add(pkX);
     X0_cpy.add(G2_tmp4);
 
