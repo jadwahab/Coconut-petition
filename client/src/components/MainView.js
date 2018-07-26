@@ -64,6 +64,7 @@ class MainView extends React.Component {
 //////////////////////////
     console.log(this.state.randomizedSignatures.length);
     console.log(this.state.randomizedSignatures);
+//////////////////////////
 
     return randomizedSignature;
   };

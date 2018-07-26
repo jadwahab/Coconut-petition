@@ -65,7 +65,7 @@ class VoteDisplayer extends React.Component {
   aggregate_pkX_component = (signingAuthoritiesPublicKeys) => {
     const aX3 = new ctx.ECP2();
     Object.entries(signingAuthoritiesPublicKeys).forEach(([server, publicKey]) => {
-      aX3.add(publicKey[4]); // publicKey has structure [g, X0, X1, X2, X3, X4], so we access element at 4th index
+      aX3.add(publicKey[4]); // publicKey has structure [g, X0, X1, X2, X3, X4], so we access element at 4th index corresponding to sk EDIT: change to 2 (or const) after fixes
     });
     aX3.affine();
 
@@ -97,6 +97,7 @@ class VoteDisplayer extends React.Component {
       console.log('Coin spend request was sent');
     }
 
+    // EDIT: can remove this.props.coin_params.id and this.props.coin_params.coin (used for ttl) and change merchant to UUID
     const success = await spendCoin(this.props.coin_params.coin, secretProof, this.props.randomizedSignature, pkX, this.props.coin_params.id, merchant);
     if (success) {
       if (DEBUG) {

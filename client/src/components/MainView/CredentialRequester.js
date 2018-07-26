@@ -28,7 +28,7 @@ class CredentialRequester extends React.Component {
   generateCoinSecret = () => {
     const [G, o, g1, g2, e] = params;
     const sk = ctx.BIG.randomnum(G.order, G.rngGen);
-    const pk = ctx.PAIR.G2mul(g2, sk);
+    const pk = ctx.PAIR.G2mul(g2, sk);    // EDIT: SHOULD BE g_1 ?
     return [sk, pk];
   };
 
