@@ -70,8 +70,8 @@ class MainView extends React.Component {
   };
 
 
-  handleCoinForSpend = (coin, sk, id) => {
-    let coin_params = {coin: coin, sk: sk, id: id};
+  handleCoinForSpend = (coin, sk) => {
+    let coin_params = {coin: coin, sk: sk};
     this.setState({ coin_params });
   }
 

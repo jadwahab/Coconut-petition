@@ -15,7 +15,6 @@ class CredentialRequester extends React.Component {
     this.state = {
       coin: null,
       sk: null,
-      id: null,
       coinState: COIN_STATUS.uncreated,
       randomizedSignature: null,
       isRequesting: false,
@@ -45,13 +44,12 @@ class CredentialRequester extends React.Component {
     if (coin != null) {
       this.setState({ coin });
       this.setState({ sk: sk_coin });
-      // this.setState({ id });
     };
   };
 
   getSignatures = async (serversArg) => {
     const signingCoin =
-      getSigningCoin(this.state.coin, this.props.ElGamalPK, this.state.id, this.state.sk, this.props.sk_client);
+      getSigningCoin(this.state.coin, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
 
     const signatures = await Promise.all(serversArg.map(async (server) => {
       try {
@@ -128,7 +126,7 @@ class CredentialRequester extends React.Component {
     this.setState({ randomizedSignature });
 
     // pass parameters to other component (VoteDisplayer)
-    this.props.handleCoinForSpend(this.state.coin, this.state.sk, this.state.id);
+    this.props.handleCoinForSpend(this.state.coin, this.state.sk);
 
     if (this.state.randomizedSignature !== null) {
       if (DEBUG) {

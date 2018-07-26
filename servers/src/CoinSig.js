@@ -245,18 +245,16 @@ export default class CoinSig {
     const h = hashToPointOnCurve(coinStr);
 
     const enc_sk = [ctx.ECP.fromBytes(signingCoin.enc_sk_bytes[0]), ctx.ECP.fromBytes(signingCoin.enc_sk_bytes[1])];
-    const enc_id = [ctx.ECP.fromBytes(signingCoin.enc_id_bytes[0]), ctx.ECP.fromBytes(signingCoin.enc_id_bytes[1])];
+    // const enc_id = [ctx.ECP.fromBytes(signingCoin.enc_id_bytes[0]), ctx.ECP.fromBytes(signingCoin.enc_id_bytes[1])];
 
     // const a1 = new G.ctx.BIG(signingCoin.value);
     // a1.norm();
     // const a2 = hashToBIG(signingCoin.ttl.toString());
 
     const [enc_sk_component_a, enc_sk_component_b] = CoinSig.blindSignComponent(x3, enc_sk);
-    const [enc_id_component_a, enc_id_component_b] = CoinSig.blindSignComponent(x4, enc_id);
+    // const [enc_id_component_a, enc_id_component_b] = CoinSig.blindSignComponent(x4, enc_id);
 
     // calculate a1 mod p, a2 mod p, etc.
-
-    // a1 to do with value removed
     // const a1_cpy = new G.ctx.BIG(a1);
     // a1_cpy.mod(o);
 
@@ -264,20 +262,16 @@ export default class CoinSig {
     // a2_cpy.mod(o);
 
     // calculate t1 = x1 * (a1 mod p), t2 = x2 * (a2 mod p)
-
-    // t1 -> a1 -> value removed
     // const t1 = G.ctx.BIG.mul(x1, a1_cpy);
     // const t2 = G.ctx.BIG.mul(x2, a2_cpy);
 
     // DBIG constructor does not allow to pass it a BIG value hence we copy all word values manually
     const x0DBIG = new G.ctx.DBIG(0);
-    for (let i = 0; i < G.ctx.BIG.NLEN; i++) {
+    for (let i = 0; i < G.ctx.BIG.NLEN; i++) {    //EDIT: remove forloop because only 1 iteration
       x0DBIG.w[i] = x0.w[i];
     }
 
-    // t1 removed
     // x0DBIG.add(t1);
-
     // x0DBIG.add(t2);
 
     // K = (x0 + x1*a1 + x2*a2) mod p
@@ -290,13 +284,13 @@ export default class CoinSig {
     const encrypted_full_signature_a = new G.ctx.ECP();
     encrypted_full_signature_a.copy(val_ttl_sig_a);
     encrypted_full_signature_a.add(enc_sk_component_a);
-    encrypted_full_signature_a.add(enc_id_component_a);
+    // encrypted_full_signature_a.add(enc_id_component_a);
     encrypted_full_signature_a.affine();
 
     const encrypted_full_signature_b = new G.ctx.ECP();
     encrypted_full_signature_b.copy(val_ttl_sig_b);
     encrypted_full_signature_b.add(enc_sk_component_b);
-    encrypted_full_signature_b.add(enc_id_component_b);
+    // encrypted_full_signature_b.add(enc_id_component_b);
     encrypted_full_signature_b.affine();
 
     return [h, [encrypted_full_signature_a, encrypted_full_signature_b]];

@@ -2,7 +2,7 @@ import { hashToPointOnCurve } from './auxiliary';
 import { ctx, params } from '../src/config';
 import ElGamal from '../lib/ElGamal';
 
-export const getSigningCoin = (issuedCoin, ElGamalPK, coin_id, coin_sk, sk_client_bytes) => {
+export const getSigningCoin = (issuedCoin, ElGamalPK, coin_sk, sk_client_bytes) => {
   const [G, o, g1, g2, e] = params;
 
   const reducer = (acc, cur) => acc + cur;
