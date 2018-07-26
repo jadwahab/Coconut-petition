@@ -250,14 +250,14 @@ export default class CoinSig {
     const h = hashToPointOnCurve(coinStr);
 
     const enc_sk = [ctx.ECP.fromBytes(signingCoin.enc_sk_bytes[0]), ctx.ECP.fromBytes(signingCoin.enc_sk_bytes[1])];
-    const enc_id = [ctx.ECP.fromBytes(signingCoin.enc_id_bytes[0]), ctx.ECP.fromBytes(signingCoin.enc_id_bytes[1])];
+    // const enc_id = [ctx.ECP.fromBytes(signingCoin.enc_id_bytes[0]), ctx.ECP.fromBytes(signingCoin.enc_id_bytes[1])];
 
     // const a1 = new G.ctx.BIG(signingCoin.value);
     // a1.norm();
     // const a2 = hashToBIG(signingCoin.ttl.toString());
 
     const [enc_sk_component_a, enc_sk_component_b] = CoinSig.blindSignComponent(x3, enc_sk);
-    const [enc_id_component_a, enc_id_component_b] = CoinSig.blindSignComponent(x4, enc_id);
+    // const [enc_id_component_a, enc_id_component_b] = CoinSig.blindSignComponent(x4, enc_id);
 
     // calculate a1 mod p, a2 mod p, etc.
     // const a1_cpy = new G.ctx.BIG(a1);
@@ -289,19 +289,20 @@ export default class CoinSig {
     const encrypted_full_signature_a = new G.ctx.ECP();
     encrypted_full_signature_a.copy(val_ttl_sig_a);
     encrypted_full_signature_a.add(enc_sk_component_a);
-    encrypted_full_signature_a.add(enc_id_component_a);
+    // encrypted_full_signature_a.add(enc_id_component_a);
     encrypted_full_signature_a.affine();
 
     const encrypted_full_signature_b = new G.ctx.ECP();
     encrypted_full_signature_b.copy(val_ttl_sig_b);
     encrypted_full_signature_b.add(enc_sk_component_b);
-    encrypted_full_signature_b.add(enc_id_component_b);
+    // encrypted_full_signature_b.add(enc_id_component_b);
     encrypted_full_signature_b.affine();
 
     return [h, [encrypted_full_signature_a, encrypted_full_signature_b]];
   }
 
   // assumes id has already been revealed and proof of knowledge of x provided
+  //EDIT: REMOVE id
   static verifyMixedBlindSign(params, pk, coin, sig, id, pkX) {
     if (!sig) {
       return false;

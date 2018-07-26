@@ -53,9 +53,9 @@ export async function getSigningAuthorityPublicKey(server) {
 export async function getCoin(sk_coin, pk_coin, pk_client, sk_client, issuingServer) {
   const [G, o, g1, g2, e] = params;
 
-  const coin_id = getRandomNumber();
-  const coin_id_bytes = [];
-  coin_id.toBytes(coin_id_bytes); // don't send it to issuer, unless we generate it together
+  // const coin_id = getRandomNumber();
+  // const coin_id_bytes = [];
+  // coin_id.toBytes(coin_id_bytes); // don't send it to issuer, unless we generate it together
 
   // for some reason we have no cached pk, lets try to get it
   if (publicKeys[issuingServer] == null || publicKeys[issuingServer].length <= 0) {
@@ -65,7 +65,7 @@ export async function getCoin(sk_coin, pk_coin, pk_client, sk_client, issuingSer
     // the call failed
     if (publicKeys[issuingServer] == null || publicKeys[issuingServer].length <= 0) {
       console.warn(ISSUE_STATUS.error_server);
-      return [null, null];
+      return null;
     }
   }
 
@@ -101,13 +101,14 @@ export async function getCoin(sk_coin, pk_coin, pk_client, sk_client, issuingSer
   }
 
   if (issuance_status === ISSUE_STATUS.success) {
-    return [issuedCoin, coin_id];
+    // return [issuedCoin, coin_id];
+    return issuedCoin;
   } else if (issuance_status != null) {
     console.warn(issuance_status);
   } else {
     console.warn(ISSUE_STATUS.error_server);
   }
-  return [null, null];
+  return null;
 }
 
 export async function checkIfAlive(server) {

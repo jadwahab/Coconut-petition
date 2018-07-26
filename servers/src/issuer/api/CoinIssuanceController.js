@@ -56,7 +56,7 @@ router.post('/', async (req, res) => {
     res.status(200)
       .json({
         coin: null,
-        id: null,
+        // id: null,
         status: ISSUE_STATUS.error_proof,
       });
     return;

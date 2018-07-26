@@ -34,7 +34,7 @@ class CredentialRequester extends React.Component {
 
   handleCoinSubmit = async () => {
     const [sk_coin, pk_coin] = this.generateCoinSecret();
-    const [coin, id] = await getCoin(
+    const coin = await getCoin(
       sk_coin,
       pk_coin,
       this.props.pk_client,
@@ -42,10 +42,10 @@ class CredentialRequester extends React.Component {
       issuer,
     );
 
-    if (coin != null && id != null) {
+    if (coin != null) {
       this.setState({ coin });
       this.setState({ sk: sk_coin });
-      this.setState({ id });
+      // this.setState({ id });
     };
   };
 
