@@ -31,15 +31,16 @@ router.post('/', async (req, res) => {
   const pkX = ctx.ECP2.fromBytes(pkXBytes);
   const id = ctx.BIG.fromBytes(coinAttributes.idBytes);
 
-  // start by checking if the coin is still valid
-  if (coinAttributes.ttl < new Date().getTime()) {
-    if (DEBUG) {
-      console.log('Coin has expired, no further checks will be made.');
-    }
-    res.status(200)
-      .json({ success: false });
-    return;
-  }
+// EDIT: remove ttl check if coin valid
+  // // start by checking if the coin is still valid
+  // if (coinAttributes.ttl < new Date().getTime()) {
+  //   if (DEBUG) {
+  //     console.log('Coin has expired, no further checks will be made.');
+  //   }
+  //   res.status(200)
+  //     .json({ success: false });
+  //   return;
+  // }
 
   const signingAuthoritiesPublicKeys = Object.entries(publicKeys)
     .filter(entry => signingServers.includes(entry[0]))
