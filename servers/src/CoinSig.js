@@ -24,20 +24,26 @@ export default class CoinSig {
   static keygen(params) {
     const [G, o, g1, g2, e] = params;
 
-    const x0 = G.ctx.BIG.randomnum(G.order, G.rngGen);
-    const x1 = G.ctx.BIG.randomnum(G.order, G.rngGen);
-    const x2 = G.ctx.BIG.randomnum(G.order, G.rngGen);
-    const x3 = G.ctx.BIG.randomnum(G.order, G.rngGen);
-    const x4 = G.ctx.BIG.randomnum(G.order, G.rngGen);
+    // const x0 = G.ctx.BIG.randomnum(G.order, G.rngGen);
+    // const x1 = G.ctx.BIG.randomnum(G.order, G.rngGen);
+    // const x2 = G.ctx.BIG.randomnum(G.order, G.rngGen);
+    // const x3 = G.ctx.BIG.randomnum(G.order, G.rngGen);
+    // const x4 = G.ctx.BIG.randomnum(G.order, G.rngGen);
 
-    const X0 = G.ctx.PAIR.G2mul(g2, x0);
-    const X1 = G.ctx.PAIR.G2mul(g2, x1);
-    const X2 = G.ctx.PAIR.G2mul(g2, x2);
-    const X3 = G.ctx.PAIR.G2mul(g2, x3);
-    const X4 = G.ctx.PAIR.G2mul(g2, x4);
+    const x = G.ctx.BIG.randomnum(G.order, G.rngGen);
+    const y = G.ctx.BIG.randomnum(G.order, G.rngGen);
 
-    const sk = [x0, x1, x2, x3, x4];
-    const pk = [g2, X0, X1, X2, X3, X4];
+    // const X0 = G.ctx.PAIR.G2mul(g2, x0);
+    // const X1 = G.ctx.PAIR.G2mul(g2, x1);
+    // const X2 = G.ctx.PAIR.G2mul(g2, x2);
+    // const X3 = G.ctx.PAIR.G2mul(g2, x3);
+    // const X4 = G.ctx.PAIR.G2mul(g2, x4);
+
+    const X = G.ctx.PAIR.G2mul(g2, x);
+    const Y = G.ctx.PAIR.G2mul(g2, y);
+
+    const sk = [x, y];
+    const pk = [g2, X, Y];
 
     return [sk, pk];
   }
@@ -182,36 +188,29 @@ export default class CoinSig {
     const [G, o, g1, g2, e] = params;
 
     const ag = new G.ctx.ECP2();
-    const aX0 = new G.ctx.ECP2();
-    const aX1 = new G.ctx.ECP2();
-    const aX2 = new G.ctx.ECP2();
-    const aX3 = new G.ctx.ECP2();
-    const aX4 = new G.ctx.ECP2();
+    // const aX0 = new G.ctx.ECP2();
+    // const aX1 = new G.ctx.ECP2();
+    // const aX2 = new G.ctx.ECP2();
+    // const aX3 = new G.ctx.ECP2();
+    // const aX4 = new G.ctx.ECP2();
+    const aX = new G.ctx.ECP2();
+    const aY = new G.ctx.ECP2();
 
     for (let i = 0; i < pks.length; i++) {
-      const [g, X0, X1, X2, X3, X4] = pks[i];
+      const [g, X, Y] = pks[i];
       if (i === 0) {
         ag.copy(g);
-        aX0.copy(X0);
-        aX1.copy(X1);
-        aX2.copy(X2);
-        aX3.copy(X3);
-        aX4.copy(X4);
+        aX.copy(X);
+        aY.copy(Y);
       } else {
-        aX0.add(X0);
-        aX1.add(X1);
-        aX2.add(X2);
-        aX3.add(X3);
-        aX4.add(X4);
+        aX.add(X);
+        aY.add(Y);
       }
     }
-    aX0.affine();
-    aX1.affine();
-    aX2.affine();
-    aX3.affine();
-    aX4.affine();
+    aX.affine();
+    aY.affine();
 
-    return [ag, aX0, aX1, aX2, aX3, aX4];
+    return [ag, aX, aY];
   }
 
   static verifyAggregation(params, pks, coin, aggregateSignature) {
@@ -230,7 +229,7 @@ export default class CoinSig {
 
   static mixedSignCoin(params, sk, signingCoin, ElGamalPK) {
     const [G, o, g1, g2, e] = params;
-    const [x0, x1, x2, x3, x4] = sk;
+    const [x, y] = sk;
 
     const reducer = (acc, cur) => acc + cur;
 
@@ -251,7 +250,7 @@ export default class CoinSig {
     // a1.norm();
     // const a2 = hashToBIG(signingCoin.ttl.toString());
 
-    const [enc_sk_component_a, enc_sk_component_b] = CoinSig.blindSignComponent(x3, enc_sk);
+    const [enc_sk_component_a, enc_sk_component_b] = CoinSig.blindSignComponent(y, enc_sk);
     // const [enc_id_component_a, enc_id_component_b] = CoinSig.blindSignComponent(x4, enc_id);
 
     // calculate a1 mod p, a2 mod p, etc.
@@ -266,16 +265,16 @@ export default class CoinSig {
     // const t2 = G.ctx.BIG.mul(x2, a2_cpy);
 
     // DBIG constructor does not allow to pass it a BIG value hence we copy all word values manually
-    const x0DBIG = new G.ctx.DBIG(0);
+    const xDBIG = new G.ctx.DBIG(0);
     for (let i = 0; i < G.ctx.BIG.NLEN; i++) {    //EDIT: remove forloop because only 1 iteration
-      x0DBIG.w[i] = x0.w[i];
+      xDBIG.w[i] = x.w[i];
     }
 
     // x0DBIG.add(t1);
     // x0DBIG.add(t2);
 
     // K = (x0 + x1*a1 + x2*a2) mod p
-    const K = x0DBIG.mod(o);
+    const K = xDBIG.mod(o);
 
     // sig = K * h
     // const val_ttl_sig_component = G.ctx.PAIR.G1mul(h, K); // this is done during encryption below

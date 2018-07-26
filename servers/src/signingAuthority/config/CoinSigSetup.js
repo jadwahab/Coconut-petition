@@ -13,28 +13,19 @@ export const setupCoinSigKeys = () => {
   for (let i = 0; i < sk_gen.length; i++) { sk[i] = sk_gen[i]; }
   for (let i = 0; i < pk_gen.length; i++) { pk[i] = pk_gen[i]; }
 
-  const [g, X0, X1, X2, X3, X4] = pk_gen;
+  const [g, X, Y] = pk_gen;
   // for sending to merchant later, we'll also need byte representation
   const g2_bytes = [];
-  const X0_bytes = [];
-  const X1_bytes = [];
-  const X2_bytes = [];
-  const X3_bytes = [];
-  const X4_bytes = [];
+  const X_bytes = [];
+  const Y_bytes = [];
 
   g.toBytes(g2_bytes);
-  X0.toBytes(X0_bytes);
-  X1.toBytes(X1_bytes);
-  X2.toBytes(X2_bytes);
-  X3.toBytes(X3_bytes);
-  X4.toBytes(X4_bytes);
+  X.toBytes(X_bytes);
+  Y.toBytes(Y_bytes);
 
   pkBytes.push(g2_bytes);
-  pkBytes.push(X0_bytes);
-  pkBytes.push(X1_bytes);
-  pkBytes.push(X2_bytes);
-  pkBytes.push(X3_bytes);
-  pkBytes.push(X4_bytes);
+  pkBytes.push(X_bytes);
+  pkBytes.push(Y_bytes);
 
   console.log('Generated CoinSig secret and public sigKeys');
 };

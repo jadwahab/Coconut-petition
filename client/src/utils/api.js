@@ -36,13 +36,11 @@ export async function getSigningAuthorityPublicKey(server) {
     let response = await fetch(`http://${server}/pk`);
     response = await response.json();
     const pkBytes = response.pk;
-    const [gBytes, X0Bytes, X1Bytes, X2Bytes, X3Bytes, X4Bytes] = pkBytes;
+    const [gBytes, XBytes, YBytes] = pkBytes;
     publicKey.push(ctx.ECP2.fromBytes(gBytes));
-    publicKey.push(ctx.ECP2.fromBytes(X0Bytes));
-    publicKey.push(ctx.ECP2.fromBytes(X1Bytes));
-    publicKey.push(ctx.ECP2.fromBytes(X2Bytes));
-    publicKey.push(ctx.ECP2.fromBytes(X3Bytes));
-    publicKey.push(ctx.ECP2.fromBytes(X4Bytes));
+    publicKey.push(ctx.ECP2.fromBytes(XBytes));
+    publicKey.push(ctx.ECP2.fromBytes(YBytes));
+    
   } catch (err) {
     console.log(err);
     console.warn(`Call to ${server} was unsuccessful`);
