@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
 import CredentialRequester from './MainView/CredentialRequester';
 import VoteListDisplayer from './MainView/VoteListDisplayer';
-import { params, DEBUG, DETAILED_DEBUG, issuer, ctx } from '../config';
+import { params, DEBUG, DETAILED_DEBUG } from '../config';
 import ElGamal from '../../lib/ElGamal';
 import CoinSig from '../../lib/CoinSig';
 
@@ -58,20 +58,20 @@ class MainView extends React.Component {
     let randomizedSignature = CoinSig.randomize(params, sig);
 
     this.setState(prevState => ({
-      randomizedSignatures: prevState.randomizedSignatures.concat([ randomizedSignature ]),
+      randomizedSignatures: prevState.randomizedSignatures.concat([randomizedSignature]),
     }));
 
-//////////////////////////
-    console.log(this.state.randomizedSignatures.length);
-    console.log(this.state.randomizedSignatures);
-//////////////////////////
+// ////////////////////////// EDIT: TEST VoteListDisplayer
+//     console.log(this.state.randomizedSignatures.length);
+//     console.log(this.state.randomizedSignatures);
+// //////////////////////////
 
     return randomizedSignature;
   };
 
 
   handleCoinForSpend = (coin, sk) => {
-    let coin_params = {coin: coin, sk: sk};
+    const coin_params = { coin: coin, sk: sk };
     this.setState({ coin_params });
   }
 
@@ -102,9 +102,6 @@ class MainView extends React.Component {
             <VoteListDisplayer
               randomizedSignatures={this.state.randomizedSignatures}
               coin_params={this.state.coin_params}
-              ElGamalSK={this.state.ElGamalSK}
-              ElGamalPK={this.state.ElGamalPK}
-              sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
             />
           </Grid.Row>
         </Grid>

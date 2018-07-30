@@ -118,6 +118,23 @@ export const fromBytesProof = (bytesProof) => {
   return [W, cm, r];
 };
 
+
+export const fromBytesMPCP = (bytesMPCP) => {
+  const [bytesKappa, bytesNu, bytesZeta, bytesPi_v_c, bytesPi_v_rm, bytesPi_v_rt] = bytesMPCP;
+  const kappa = ctx.ECP2.fromBytes(bytesKappa);
+  const nu = ctx.ECP2.fromBytes(bytesNu);
+  const zeta = ctx.ECP2.fromBytes(bytesZeta);
+  const c = ctx.BIG.fromBytes(bytesPi_v_c);
+  const rm = ctx.BIG.fromBytes(bytesPi_v_rm);
+  const rt = ctx.BIG.fromBytes(bytesPi_v_rt);
+  const pi_v = {
+    c: c,
+    rm: rm,
+    rt: rt
+  };
+  return [kappa, nu, zeta, pi_v];
+};
+
 export const getPublicKey = async (server) => {
   try {
     let response = await fetch(`http://${server}/pk`);
@@ -145,4 +162,65 @@ export async function getSigningAuthorityPublicKey(server) {
     console.warn(`Call to ${server} was unsuccessful`);
   }
   return publicKey;
+}
+
+// EDIT: move to proofs.js
+export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_output, petitionID) => {
+  if (!sigma) {
+    return false;
+  }
+  const [G, o, g1, g2, e] = params;
+  const [ag, aX, aY] = agg_vk;
+  const [h, sig] = sigma;
+  const [kappa, nu, zeta, pi_v] = MPCP_output;
+  const c = pi_v.c;
+  const rm = pi_v.rm;
+  const rt = pi_v.rt;
+  const gs = hashToPointOnCurve(petitionID);
+
+  // for some reason h.x, h.y, sig.x and sig.y return false to being instances of FP when signed by SAs,
+  // hence temporary, ugly hack:
+  // I blame javascript pseudo-broken typesystem
+  const tempX1 = new G.ctx.FP(0);
+  const tempY1 = new G.ctx.FP(0);
+  tempX1.copy(h.getx());
+  tempY1.copy(h.gety());
+  h.x = tempX1;
+  h.y = tempY1;
+
+  const tempX2 = new G.ctx.FP(0);
+  const tempY2 = new G.ctx.FP(0);
+  tempX2.copy(sig.getx());
+  tempY2.copy(sig.gety());
+  sig.x = tempX2;
+  sig.y = tempY2;
+
+
+  // re-compute the witness commitments
+  const Aw = ctx.PAIR.G2mul(kappa, c);
+  const temp1 = ctx.PAIR.G2mul(g2, rt)
+  Aw.add(temp1);
+  const oneMinusC = new ctx.BIG(1);
+  oneMinusC.sub(c);
+  oneMinusC.mod(o);
+  const temp2 = ctx.PAIR.G2mul(aX, oneMinusC);
+  Aw.add(temp2);
+  const temp3 = ctx.PAIR.G2mul(aY, rm);
+  Aw.add(temp3);
+  Aw.affine();
+
+  const Bw = ctx.PAIR.G1mul(nu, c);
+  const temp4 = ctx.PAIR.G1mul(h, rt);
+  Bw.add(temp4);
+  Bw.affine();
+
+  const Cw = ctx.PAIR.G1mul(gs, rm);
+  const temp5 = ctx.PAIR.G1mul(zeta, c);
+  Cw.add(temp5);
+  Cw.affine();
+
+  // BIG.comp(a,b): Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b
+  const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() + Aw.toString() + Bw.toString() + Cw.toString())) === 0;
+
+  return (!h.INF && expr1);
 }

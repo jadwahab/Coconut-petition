@@ -3,7 +3,8 @@ import bodyParser from 'body-parser';
 import { checkUsedId, insertUsedId, changeBalance } from '../utils/DatabaseManager';
 import { ctx, merchant, params, signingServers } from '../../globalConfig';
 import { DEBUG } from '../config/appConfig';
-import { fromBytesProof, verifyProofOfSecret, getSigningAuthorityPublicKey, getPublicKey } from '../../auxiliary';
+import { fromBytesMPCP, verifyProofOfSecret, getSigningAuthorityPublicKey,
+  getPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
 import CoinSig from '../../CoinSig';
 import { publicKeys } from '../cache';
 
@@ -20,32 +21,24 @@ router.post('/', async (req, res) => {
     console.log('Deposit coin post');
   }
 
-  const coinAttributes = req.body.coinAttributes;
-  const simplifiedProof = req.body.proof;
   const [hBytes, sigBytes] = req.body.signature;
-  const pkXBytes = req.body.pkXBytes;
+  const simplifiedProof = req.body.proof;
 
-  const proofOfSecret = fromBytesProof(simplifiedProof);
+  const MPCP_output = fromBytesMPCP(simplifiedProof);
   const h = ctx.ECP.fromBytes(hBytes);
   const sig = ctx.ECP.fromBytes(sigBytes);
-  const pkX = ctx.ECP2.fromBytes(pkXBytes);
-  const id = ctx.BIG.fromBytes(coinAttributes.idBytes);
 
-// EDIT: remove ttl check if coin valid
-  // // start by checking if the coin is still valid
-  // if (coinAttributes.ttl < new Date().getTime()) {
-  //   if (DEBUG) {
-  //     console.log('Coin has expired, no further checks will be made.');
-  //   }
-  //   res.status(200)
-  //     .json({ success: false });
-  //   return;
-  // }
+
+  if (publicKeys[merchant] == null || publicKeys[merchant].length <= 0) {
+    const merchantPK = await getPublicKey(merchant);
+    publicKeys[merchant] = merchantPK;
+  }
+
+  const merchantStr = publicKeys[merchant].join('');
 
   const signingAuthoritiesPublicKeys = Object.entries(publicKeys)
     .filter(entry => signingServers.includes(entry[0]))
     .map(entry => entry[1]);
-
 
   // if all keys of signing authorities were cached, we can assume that the aggregate was also cached
   let aggregatePublicKey;
@@ -66,53 +59,33 @@ router.post('/', async (req, res) => {
     aggregatePublicKey = publicKeys['Aggregate'];
   }
 
-  // aggregatePublicKey is [ag, aX0, aX1, aX2, aX3, aX4];
-  const aX3 = aggregatePublicKey[4];
-
-  if (publicKeys[merchant] == null || publicKeys[merchant].length <= 0) {
-    const merchantPK = await getPublicKey(merchant);
-    publicKeys[merchant] = merchantPK;
-  }
-
-  const merchantStr = publicKeys[merchant].join('');
-  const isProofValid = verifyProofOfSecret(params, pkX, proofOfSecret, merchantStr, aX3);
-
+  const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, [h, sig], MPCP_output, merchantStr);
   if (DEBUG) {
-    console.log(`Was proof of knowledge of secret valid: ${isProofValid}`);
+    console.log(`Was credntial proof valid: ${isProofValid}`);
   }
+
   if (!isProofValid) {
     if (DEBUG) {
-      console.log('Proof was invalid, no further checks will be made.');
+      console.log('Credntial proof was invalid.');
     }
     res.status(200)
       .json({ success: false });
     return;
   }
 
-  const isSignatureValid = CoinSig.verifyMixedBlindSign(params, aggregatePublicKey, coinAttributes, [h, sig], id, pkX);
-  if (DEBUG) {
-    console.log(`Was signature valid: ${isSignatureValid}`);
-  }
+  // // now finally check if the coin wasn't already spent
+  // const wasCoinAlreadySpent = await checkUsedId(id);
+  // if (DEBUG) {
+  //   console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
+  // }
+  //
+  // if (isProofValid && !wasCoinAlreadySpent && isSignatureValid) {
+  //   await insertUsedId(id);
+  //   // await changeBalance(publicKeys[merchant], coinAttributes.value);
+  // }
 
-  if (!isSignatureValid) {
-    if (DEBUG) {
-      console.log('Signature was invalid.');
-    }
-    res.status(200)
-      .json({ success: false });
-    return;
-  }
 
-  // now finally check if the coin wasn't already spent
-  const wasCoinAlreadySpent = await checkUsedId(id);
-  if (DEBUG) {
-    console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
-  }
-
-  if (isProofValid && !wasCoinAlreadySpent && isSignatureValid) {
-    await insertUsedId(id);
-    // await changeBalance(publicKeys[merchant], coinAttributes.value);
-  }
+  // EDIT: send to issuer to isert used zeta
 
   const t1 = new Date().getTime();
   console.log('Deposit took: ', t1 - t0);

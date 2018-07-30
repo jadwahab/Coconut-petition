@@ -4,7 +4,7 @@ import fetch from 'isomorphic-fetch';
 import { ctx, params, signingServers, issuer } from '../../globalConfig';
 import CoinSig from '../../CoinSig';
 import { DEBUG } from '../config/appConfig';
-import { fromBytesProof, verifyProofOfSecret, getSigningAuthorityPublicKey } from '../../auxiliary';
+import { fromBytesMPCP, verifyProofOfSecret, getSigningAuthorityPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
 import { sig_pkBytes } from '../config/KeySetup';
 import { publicKeys } from '../cache';
 
@@ -75,13 +75,13 @@ router.post('/', async (req, res) => {
   let success = false;
 
   try {
-    const coinAttributes = req.body.coinAttributes;
-    const simplifiedProof = req.body.proof;
-    const pkXBytes = req.body.pkX;
+    const simplifiedMPCP = req.body.proof;
+    const [hBytes, sigBytes] = req.body.signature;
 
-    const proofOfSecret = fromBytesProof(simplifiedProof);
-    const pkX = ctx.ECP2.fromBytes(pkXBytes);
-    const id = ctx.BIG.fromBytes(coinAttributes.idBytes);
+    const MPCP_output = fromBytesMPCP(simplifiedMPCP);
+    const h = ctx.ECP.fromBytes(hBytes);
+    const sig = ctx.ECP.fromBytes(sigBytes);
+    const sigma = [h, sig];
 
     const signingAuthoritiesPublicKeys = Object.entries(publicKeys)
       .filter(entry => signingServers.includes(entry[0]))
@@ -100,47 +100,46 @@ router.post('/', async (req, res) => {
           console.warn(err);
         }
       }));
-      aggregatePublicKey = CoinSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys);
+      aggregatePublicKey = CoinSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys); // aggregatePublicKey is [ag, aX, aY];
 
       publicKeys['Aggregate'] = aggregatePublicKey;
     } else {
       aggregatePublicKey = publicKeys['Aggregate'];
     }
-
-    // aggregatePublicKey is [ag, aX0, aX1, aX2, aX3, aX4];
-    const aX3 = aggregatePublicKey[4];
-
-    // just check validity of the proof and double spending, we let issuer verify the signature
-    // successful verification of the proof assures the coin was supposed to be used in that transaction
-    const merchantStr = sig_pkBytes.join('');
-    const isProofValid = verifyProofOfSecret(params, pkX, proofOfSecret, merchantStr, aX3);
-
-    if (DEBUG) {
-      console.log(`Was proof of knowledge of secret valid: ${isProofValid}`);
-    }
-    if (!isProofValid) {
-      if (DEBUG) {
-        console.log('Proof was invalid, no further checks will be made.');
-      }
-      res.status(200)
-        .json({ success: false });
-      return;
-    }
-
-    // now finally check if the coin wasn't already spent
-    const wasCoinAlreadySpent = await checkDoubleSpend(id, issuer);
-    if (DEBUG) {
-      console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
-    }
-
-    // we don't need to create byte representations of all objects because we already have them
-    const wasCoinDeposited = await depositCoin(coinAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
-
-    responseStatus = 200;
-    success = isProofValid && !wasCoinAlreadySpent && wasCoinDeposited;
-    if (DEBUG) {
-      console.log(`Was coin successfully spent: ${success}`);
-    }
+    //
+    // const merchantStr = sig_pkBytes.join('');
+    //
+    // // just check validity of the proof and double spending, we let issuer verify the signature
+    // // successful verification of the proof assures the coin was supposed to be used in that transaction
+    // const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, sigma, MPCP_output, merchantStr);
+    //
+    // if (DEBUG) {
+    //   console.log(`Was credntial proof valid: ${isProofValid}`);
+    // }
+    // if (!isProofValid) {
+    //   if (DEBUG) {
+    //     console.log('Proof was invalid, no further checks will be made.');
+    //   }
+    //   res.status(200)
+    //     .json({ success: false });
+    //   return;
+    // }
+    //
+    // // // now finally check if the coin wasn't already spent
+    // // const wasCoinAlreadySpent = await checkDoubleSpend(id, issuer);
+    // // if (DEBUG) {
+    // //   console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
+    // // }
+    // //
+    // // // we don't need to create byte representations of all objects because we already have them
+    // // const wasCoinDeposited = await depositCoin(coinAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
+    //
+    // responseStatus = 200;
+    // // success = isProofValid && !wasCoinAlreadySpent && wasCoinDeposited;
+    // success = isProofValid;
+    // if (DEBUG) {
+    //   console.log(`Was coin successfully spent: ${success}`);
+    // }
   } catch (err) {
     console.warn(err);
     responseStatus = 400;
@@ -148,7 +147,8 @@ router.post('/', async (req, res) => {
   const t1 = new Date().getTime();
   console.log('Request took: ', t1 - t0);
 
-  res.status(responseStatus)
+  res.status(200)
+  // res.status(responseStatus)
     .json({ success: success });
 });
 

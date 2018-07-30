@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import { ctx, DEBUG, ISSUE_STATUS, params } from '../config';
-import { getSimplifiedProof, getSimplifiedSignature, getRandomNumber } from './helpers';
+import { getSimplifiedProof, getSimplifiedSignature, getRandomNumber, getSimplifiedMPCP } from './helpers';
 import ElGamal from '../../lib/ElGamal';
 import { getCoinRequestObject } from '../../lib/CoinRequest';
 import { publicKeys } from '../cache';
@@ -40,7 +40,7 @@ export async function getSigningAuthorityPublicKey(server) {
     publicKey.push(ctx.ECP2.fromBytes(gBytes));
     publicKey.push(ctx.ECP2.fromBytes(XBytes));
     publicKey.push(ctx.ECP2.fromBytes(YBytes));
-    
+
   } catch (err) {
     console.log(err);
     console.warn(`Call to ${server} was unsuccessful`);
@@ -178,18 +178,10 @@ export async function signCoin(server, signingCoin, ElGamalPK) {
 
 // ... we can't send v because it would link us to issuance, we just send ttl, id, proof of x (on aX3) and sig
 // pkX = aX3^x
-export async function spendCoin(coin, proof, signature, pkX, id, server) {
-  const simplifiedProof = getSimplifiedProof(proof);
+export async function spendCoin(MPCP_output, signature, server) {
+  const simplifiedMPCP = getSimplifiedMPCP(MPCP_output);
   const simplifiedSignature = getSimplifiedSignature(signature);
-  const pkXBytes = [];
-  const idBytes = [];
-  pkX.toBytes(pkXBytes);
-  id.toBytes(idBytes);
 
-  const coinAttributes = {
-    ttl: coin.ttl,
-    idBytes: idBytes,
-  };
 
   let success = false;
   try {
@@ -201,17 +193,15 @@ export async function spendCoin(coin, proof, signature, pkX, id, server) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          coinAttributes: coinAttributes,
-          proof: simplifiedProof,
+          proof: simplifiedMPCP,
           signature: simplifiedSignature,
-          pkX: pkXBytes,
         }),
       });
     response = await response.json();
     success = response.success;
   } catch (err) {
     console.warn(err);
-    console.warn(`Call to merchant ${server} was unsuccessful`);
+    console.warn(`Call to merchant ${server} was unsuccessful`); // EDIT:
   }
   return success;
 }
