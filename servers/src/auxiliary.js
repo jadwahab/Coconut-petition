@@ -122,8 +122,8 @@ export const fromBytesProof = (bytesProof) => {
 export const fromBytesMPCP = (bytesMPCP) => {
   const [bytesKappa, bytesNu, bytesZeta, bytesPi_v_c, bytesPi_v_rm, bytesPi_v_rt] = bytesMPCP;
   const kappa = ctx.ECP2.fromBytes(bytesKappa);
-  const nu = ctx.ECP2.fromBytes(bytesNu);
-  const zeta = ctx.ECP2.fromBytes(bytesZeta);
+  const nu = ctx.ECP.fromBytes(bytesNu);
+  const zeta = ctx.ECP.fromBytes(bytesZeta);
   const c = ctx.BIG.fromBytes(bytesPi_v_c);
   const rm = ctx.BIG.fromBytes(bytesPi_v_rm);
   const rt = ctx.BIG.fromBytes(bytesPi_v_rt);
@@ -197,11 +197,12 @@ export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_ou
 
 
   // re-compute the witness commitments
-  const Aw = ctx.PAIR.G2mul(kappa, c);
-  const temp1 = ctx.PAIR.G2mul(g2, rt)
+  let Aw = ctx.PAIR.G2mul(kappa, c);
+  const temp1 = ctx.PAIR.G2mul(g2, rt);
   Aw.add(temp1);
   const oneMinusC = new ctx.BIG(1);
   oneMinusC.sub(c);
+  oneMinusC.add(o); // to ensure positive result
   oneMinusC.mod(o);
   const temp2 = ctx.PAIR.G2mul(aX, oneMinusC);
   Aw.add(temp2);
@@ -209,12 +210,12 @@ export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_ou
   Aw.add(temp3);
   Aw.affine();
 
-  const Bw = ctx.PAIR.G1mul(nu, c);
+  let Bw = ctx.PAIR.G1mul(nu, c);
   const temp4 = ctx.PAIR.G1mul(h, rt);
   Bw.add(temp4);
   Bw.affine();
 
-  const Cw = ctx.PAIR.G1mul(gs, rm);
+  let Cw = ctx.PAIR.G1mul(gs, rm);
   const temp5 = ctx.PAIR.G1mul(zeta, c);
   Cw.add(temp5);
   Cw.affine();
