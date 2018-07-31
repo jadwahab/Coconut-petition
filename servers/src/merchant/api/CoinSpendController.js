@@ -4,7 +4,7 @@ import fetch from 'isomorphic-fetch';
 import { ctx, params, signingServers, issuer } from '../../globalConfig';
 import CoinSig from '../../CoinSig';
 import { DEBUG } from '../config/appConfig';
-import { fromBytesMPCP, verifyProofOfSecret, getSigningAuthorityPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
+import { fromBytesMPCP, getSigningAuthorityPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
 import { sig_pkBytes } from '../config/KeySetup';
 import { publicKeys } from '../cache';
 
@@ -13,55 +13,55 @@ const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-const checkDoubleSpend = async (id, server) => {
-  const id_bytes = [];
-  id.toBytes(id_bytes);
-  try {
-    let response = await
-      fetch(`http://${server}/checkid`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: id_bytes,
-        }),
-      });
-    response = await response.json();
-    return response.wasIdUsed;
-  } catch (err) {
-    console.log(err);
-    console.warn(`Call to ${server} was unsuccessful`);
-    return true; // if call was unsuccessful assume coin was already spent
-  }
-};
+// const checkDoubleSpend = async (id, server) => {
+//   const id_bytes = [];
+//   id.toBytes(id_bytes);
+//   try {
+//     let response = await
+//       fetch(`http://${server}/checkid`, {
+//         method: 'POST',
+//         mode: 'cors',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           id: id_bytes,
+//         }),
+//       });
+//     response = await response.json();
+//     return response.wasIdUsed;
+//   } catch (err) {
+//     console.log(err);
+//     console.warn(`Call to ${server} was unsuccessful`);
+//     return true; // if call was unsuccessful assume coin was already spent
+//   }
+// };
 
-const depositCoin = async (coinAttributes, simplifiedProof, sigBytes, pkXBytes, server) => {
-  try {
-    let response = await
-      fetch(`http://${server}/depositcoin`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          coinAttributes: coinAttributes,
-          proof: simplifiedProof,
-          signature: sigBytes,
-          pkXBytes: pkXBytes,
-        }),
-      });
-    response = await response.json();
-    const success = response.success;
-    return success;
-  } catch (err) {
-    console.log(err);
-    console.warn(`Call to ${server} was unsuccessful`);
-    return false; // if call was unsuccessful assume deposit failed
-  }
-};
+// const depositCoin = async (coinAttributes, simplifiedProof, sigBytes, pkXBytes, server) => {
+//   try {
+//     let response = await
+//       fetch(`http://${server}/depositcoin`, {
+//         method: 'POST',
+//         mode: 'cors',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           coinAttributes: coinAttributes,
+//           proof: simplifiedProof,
+//           signature: sigBytes,
+//           pkXBytes: pkXBytes,
+//         }),
+//       });
+//     response = await response.json();
+//     const success = response.success;
+//     return success;
+//   } catch (err) {
+//     console.log(err);
+//     console.warn(`Call to ${server} was unsuccessful`);
+//     return false; // if call was unsuccessful assume deposit failed
+//   }
+// };
 
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
@@ -100,46 +100,47 @@ router.post('/', async (req, res) => {
           console.warn(err);
         }
       }));
-      aggregatePublicKey = CoinSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys); // aggregatePublicKey is [ag, aX, aY];
+      // aggregatePublicKey is [ag, aX, aY];
+      aggregatePublicKey = CoinSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys);
 
       publicKeys['Aggregate'] = aggregatePublicKey;
     } else {
       aggregatePublicKey = publicKeys['Aggregate'];
     }
-    //
-    // const merchantStr = sig_pkBytes.join('');
-    //
-    // // just check validity of the proof and double spending, we let issuer verify the signature
-    // // successful verification of the proof assures the coin was supposed to be used in that transaction
-    // const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, sigma, MPCP_output, merchantStr);
-    //
+    
+    const merchantStr = sig_pkBytes.join('');
+    
+    // just check validity of the proof and double spending, we let issuer verify the signature
+    // successful verification of the proof assures the coin was supposed to be used in that transaction
+    const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, sigma, MPCP_output, merchantStr);
+    
+    if (DEBUG) {
+      console.log(`Was credntial proof valid: ${isProofValid}`);
+    }
+    if (!isProofValid) {
+      if (DEBUG) {
+        console.log('Proof was invalid, no further checks will be made.');
+      }
+      res.status(200)
+        .json({ success: false });
+      return;
+    }
+    
+    // // now finally check if the coin wasn't already spent
+    // const wasCoinAlreadySpent = await checkDoubleSpend(id, issuer);
     // if (DEBUG) {
-    //   console.log(`Was credntial proof valid: ${isProofValid}`);
-    // }
-    // if (!isProofValid) {
-    //   if (DEBUG) {
-    //     console.log('Proof was invalid, no further checks will be made.');
-    //   }
-    //   res.status(200)
-    //     .json({ success: false });
-    //   return;
+    //   console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
     // }
     //
-    // // // now finally check if the coin wasn't already spent
-    // // const wasCoinAlreadySpent = await checkDoubleSpend(id, issuer);
-    // // if (DEBUG) {
-    // //   console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
-    // // }
-    // //
-    // // // we don't need to create byte representations of all objects because we already have them
-    // // const wasCoinDeposited = await depositCoin(coinAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
-    //
-    // responseStatus = 200;
-    // // success = isProofValid && !wasCoinAlreadySpent && wasCoinDeposited;
-    // success = isProofValid;
-    // if (DEBUG) {
-    //   console.log(`Was coin successfully spent: ${success}`);
-    // }
+    // // we don't need to create byte representations of all objects because we already have them
+    // const wasCoinDeposited = await depositCoin(coinAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
+    
+    responseStatus = 200;
+    // success = isProofValid && !wasCoinAlreadySpent && wasCoinDeposited;
+    success = isProofValid;
+    if (DEBUG) {
+      console.log(`Was coin successfully spent: ${success}`);
+    }
   } catch (err) {
     console.warn(err);
     responseStatus = 400;
@@ -147,8 +148,7 @@ router.post('/', async (req, res) => {
   const t1 = new Date().getTime();
   console.log('Request took: ', t1 - t0);
 
-  res.status(200)
-  // res.status(responseStatus)
+  res.status(responseStatus)
     .json({ success: success });
 });
 

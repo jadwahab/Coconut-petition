@@ -57,15 +57,12 @@ export const getRandomCoinId = () => {
   return ctx.BIG.randomnum(groupOrder, rng);
 };
 
-export const prepareProofOfSecret = (params, x, verifierStr, proofBase = null) => {
+export const prepareProofOfSecret = (params, x, verifierStr) => {
   const [G, o, g1, g2, e] = params;
   const w = ctx.BIG.randomnum(G.order, G.rngGen);
-  let W;
-  if (!proofBase) {
-    W = ctx.PAIR.G2mul(g2, w);
-  } else {
-    W = ctx.PAIR.G2mul(proofBase, w);
-  }
+
+  const W = ctx.PAIR.G1mul(g1, w);
+
   const cm = hashToBIG(W.toString() + verifierStr);
 
   // to prevent object mutation
@@ -85,21 +82,16 @@ export const prepareProofOfSecret = (params, x, verifierStr, proofBase = null) =
   r.add(o); // to ensure positive result
   r.mod(o);
 
-  return [W, cm, r]; // G2Elem, BIG, BIG
+  return [W, cm, r]; // G1Elem, BIG, BIG
 };
 
-export const verifyProofOfSecret = (params, pub, proof, verifierStr, proofBase = null) => {
+export const verifyProofOfSecret = (params, pub, proof, verifierStr) => {
   const [G, o, g1, g2, e] = params;
   const [W, cm, r] = proof;
 
-  let t1;
-  if (!proofBase) {
-    t1 = ctx.PAIR.G2mul(g2, r);
-  } else {
-    t1 = ctx.PAIR.G2mul(proofBase, r);
-  }
+  const t1 = ctx.PAIR.G1mul(g1, r);
 
-  const t2 = ctx.PAIR.G2mul(pub, cm);
+  const t2 = ctx.PAIR.G1mul(pub, cm);
 
   t1.add(t2);
   t1.affine();
@@ -112,7 +104,7 @@ export const verifyProofOfSecret = (params, pub, proof, verifierStr, proofBase =
 
 export const fromBytesProof = (bytesProof) => {
   const [bytesW, bytesCm, bytesR] = bytesProof;
-  const W = ctx.ECP2.fromBytes(bytesW);
+  const W = ctx.ECP.fromBytes(bytesW);
   const cm = ctx.BIG.fromBytes(bytesCm);
   const r = ctx.BIG.fromBytes(bytesR);
   return [W, cm, r];
@@ -178,29 +170,29 @@ export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_ou
   const rt = pi_v.rt;
   const gs = hashToPointOnCurve(petitionID);
 
-  // for some reason h.x, h.y, sig.x and sig.y return false to being instances of FP when signed by SAs,
-  // hence temporary, ugly hack:
-  // I blame javascript pseudo-broken typesystem
-  const tempX1 = new G.ctx.FP(0);
-  const tempY1 = new G.ctx.FP(0);
-  tempX1.copy(h.getx());
-  tempY1.copy(h.gety());
-  h.x = tempX1;
-  h.y = tempY1;
+  // // for some reason h.x, h.y, sig.x and sig.y return false to being instances of FP when signed by SAs,
+  // // hence temporary, ugly hack:
+  // // I blame javascript pseudo-broken typesystem
+  // const tempX1 = new G.ctx.FP(0);
+  // const tempY1 = new G.ctx.FP(0);
+  // tempX1.copy(h.getx());
+  // tempY1.copy(h.gety());
+  // h.x = tempX1;
+  // h.y = tempY1;
 
-  const tempX2 = new G.ctx.FP(0);
-  const tempY2 = new G.ctx.FP(0);
-  tempX2.copy(sig.getx());
-  tempY2.copy(sig.gety());
-  sig.x = tempX2;
-  sig.y = tempY2;
+  // const tempX2 = new G.ctx.FP(0);
+  // const tempY2 = new G.ctx.FP(0);
+  // tempX2.copy(sig.getx());
+  // tempY2.copy(sig.gety());
+  // sig.x = tempX2;
+  // sig.y = tempY2;
 
 
   // re-compute the witness commitments
   let Aw = ctx.PAIR.G2mul(kappa, c);
   const temp1 = ctx.PAIR.G2mul(g2, rt);
   Aw.add(temp1);
-  const oneMinusC = new ctx.BIG(1);
+  let oneMinusC = new ctx.BIG(1);
   oneMinusC.sub(c);
   oneMinusC.add(o); // to ensure positive result
   oneMinusC.mod(o);

@@ -82,6 +82,7 @@ export const verifyRequestSignature = (coin_request) => {
 
 export const verifyRequestProofOfCoinSecret = (proof_bytes, pk_coin_bytes, issuer) => {
   const proof = fromBytesProof(proof_bytes);
-  const pk_coin = ctx.ECP2.fromBytes(pk_coin_bytes);
+  const pk_coin = ctx.ECP.fromBytes(pk_coin_bytes);
+  pk_coin.affine();
   return verifyProofOfSecret(params, pk_coin, proof, issuer);
 };

@@ -47,15 +47,12 @@ export const hashG2ElemToBIG = (G2elem) => {
 };
 
 // EDIT: move to file called proofs.js
-export const prepareProofOfSecret = (params, x, verifierStr, proofBase = null) => {
+export const prepareProofOfSecret = (params, x, verifierStr) => {
   const [G, o, g1, g2, e] = params;
   const w = ctx.BIG.randomnum(G.order, G.rngGen);
-  let W;
-  if (!proofBase) {
-    W = ctx.PAIR.G2mul(g2, w);
-  } else {
-    W = ctx.PAIR.G2mul(proofBase, w);
-  }
+
+  const W = ctx.PAIR.G1mul(g1, w);
+
   const cm = hashToBIG(W.toString() + verifierStr);
 
   // to prevent object mutation
@@ -75,21 +72,16 @@ export const prepareProofOfSecret = (params, x, verifierStr, proofBase = null) =
   r.add(o); // to ensure positive result
   r.mod(o);
 
-  return [W, cm, r]; // G2Elem, BIG, BIG
+  return [W, cm, r]; // G1Elem, BIG, BIG
 };
 
-export const verifyProofOfSecret = (params, pub, proof, verifierStr, proofBase = null) => {
+export const verifyProofOfSecret = (params, pub, proof, verifierStr) => {
   const [G, o, g1, g2, e] = params;
   const [W, cm, r] = proof;
 
-  let t1;
-  if (!proofBase) {
-    t1 = ctx.PAIR.G2mul(g2, r);
-  } else {
-    t1 = ctx.PAIR.G2mul(proofBase, r);
-  }
+  const t1 = ctx.PAIR.G1mul(g1, r);
 
-  const t2 = ctx.PAIR.G2mul(pub, cm);
+  const t2 = ctx.PAIR.G1mul(pub, cm);
 
   t1.add(t2);
   t1.affine();
@@ -121,12 +113,12 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
 
   // nu = t*h
   // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCoinSecret of CredentialRequester.js
-  const nu = ctx.PAIR.G1mul(h, t);  //QUEST: WHY HAD TO CHANGE TO G1??
+  const nu = ctx.PAIR.G1mul(h, t); 
 
   const gs = hashToPointOnCurve(petitionID);
 
   // zeta = m*gs
-  zeta = ctx.PAIR.G1mul(gs, m);     //QUEST: WHY HAD TO CHANGE TO G1??
+  zeta = ctx.PAIR.G1mul(gs, m);    
 
   // PROOF: pi_v
   // create witnesses
@@ -142,6 +134,8 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   const Bw = ctx.PAIR.G1mul(h, wt);
   const Cw = ctx.PAIR.G1mul(gs, wm);
 
+  console.log('sigma');
+  console.log(sigma);
   console.log('MPCP:');
   console.log('Aw');
   console.log(Aw);
