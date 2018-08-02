@@ -99,11 +99,8 @@ class VoteDisplayer extends React.Component {
 
     const merchantStr = publicKeys[merchant].join('');  // EDIT: petitionID
 
-    const MPCP_output = make_proof_credentials_petition(params, aggregatePublicKey, this.props.randomizedSignature, this.props.coin_params.sk, merchantStr);
-
-    // const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, this.props.randomizedSignature, MPCP_output, merchantStr);
-    //
-    // console.log(`Was credntial proof valid: ${isProofValid}`);
+    const MPCP_output = CoinSig.make_proof_credentials_petition(params, aggregatePublicKey, 
+                        this.props.randomizedSignature, this.props.coin_params.sk, merchantStr);
 
     if (DEBUG) {
       console.log('Sending ShowBlingSign output');
@@ -112,12 +109,12 @@ class VoteDisplayer extends React.Component {
     const success = await spendCoin(MPCP_output, this.props.randomizedSignature, merchant);
     if (success) {
       if (DEBUG) {
-        console.log('Successfully voted');
+        console.log('Signature verified');
       }
       this.setState({ coinState: COIN_STATUS.spent }); // EDIT:
     } else {
       if (DEBUG) {
-        console.log('There was an error in voting');
+        console.log('There was an error in verifying signature');
       }
       this.setState({ coinState: COIN_STATUS.error });// EDIT:
     }

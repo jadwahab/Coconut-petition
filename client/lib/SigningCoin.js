@@ -52,23 +52,17 @@ export const getSigningCoin = (issuedCoin, ElGamalPK, coin_sk, sk_client_bytes) 
 
   return {
     pk_coin_bytes: issuedCoin.pk_coin_bytes,
-    // ttl: issuedCoin.ttl,
-    // value: issuedCoin.value,
     pk_client_bytes: issuedCoin.pk_client_bytes,
     issuedCoinSig: issuedCoin.issuedCoinSig,
     enc_sk_bytes: enc_sk_bytes,
-    // enc_id_bytes: enc_id_bytes,
     requestSig: requestSig,
   };
 
   // Representation:
   /*
   { { v
-      val
-      ttl
       pk_c
     }signed by issuer
-    // E[h^id]
     E[h^x]
   }signed by client
  */

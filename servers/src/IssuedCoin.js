@@ -31,16 +31,12 @@ import { ctx, params } from './globalConfig';
 export const getIssuedCoin = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) => {
   const [G, o, g1, g2, e] = params;
 
-  // const ttl = getTimeToLive();
-
   // same reasoning as with CoinRequest
   const reducer = (acc, cur) => acc + cur;
 
   const coinStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer); // coin's pk
-    // ttl.toString();
 
   const sha = ctx.ECDH.HASH_TYPE;
 
@@ -53,8 +49,6 @@ export const getIssuedCoin = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) =
 
   return {
     pk_coin_bytes: pk_coin_bytes,
-    // ttl: ttl,
-    // value: value,
     pk_client_bytes: pk_client_bytes,
     issuedCoinSig: issuedCoinSig,
   };
@@ -69,9 +63,7 @@ export const verifyCoinSignature = (issuedCoin, pk_issuer_bytes) => {
 
   const coinStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    // value.toString() + // coin's value
     pk_coin_bytes.reduce(reducer); // coin's pk
-    // ttl.toString();
 
   const sha = ctx.ECDH.HASH_TYPE;
 

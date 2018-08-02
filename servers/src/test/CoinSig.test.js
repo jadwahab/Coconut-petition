@@ -1,48 +1,48 @@
-import { before, beforeEach, describe, it, xit } from 'mocha';
+import { describe, it } from 'mocha';
 import { expect, assert } from 'chai';
 import { ctx } from '../globalConfig';
 import CoinSig from '../CoinSig';
 import BpGroup from '../BpGroup';
-import { getRandomCoinId, hashToBIG, hashG2ElemToBIG } from '../auxiliary';
+import { hashToBIG, hashToPointOnCurve } from '../auxiliary';
 import ElGamal from '../ElGamal';
-import { getSigningCoin } from '../SigningCoin';
-import { getIssuedCoin } from '../IssuedCoin';
+import { getSigningCoin, verifySignRequest } from '../SigningCoin';
+import { getIssuedCoin, verifyCoinSignature } from '../IssuedCoin';
 
 const generateCoinSecret = (params) => {
   const [G, o, g1, g2, e] = params;
-  const sk = G.ctx.BIG.randomnum(G.order, G.rngGen);
-  const pk = G.ctx.PAIR.G2mul(g2, sk);
+  const sk = ctx.BIG.randomnum(G.order, G.rngGen);
+  const pk = ctx.PAIR.G1mul(g1, sk);
   return [sk, pk];
 };
 
-describe('CoinSig Scheme', () => {
-  describe('Setup', () => {
+describe('Coconut Scheme:', () => {
+  describe('Setup:', () => {
     const params = CoinSig.setup();
     const [G, o, g1, g2, e] = params;
 
     it('Returns BpGroup Object', () => {
       assert.isNotNull(G);
-      assert.isTrue(G instanceof (BpGroup));
+      assert.isTrue(G instanceof(BpGroup));
     });
 
     it('Returns Group Order', () => {
       assert.isNotNull(o);
-      assert.isTrue(o instanceof (G.ctx.BIG));
+      assert.isTrue(o instanceof(G.ctx.BIG));
     });
 
     it('Returns Gen1', () => {
       assert.isNotNull(g1);
-      assert.isTrue(g1 instanceof (G.ctx.ECP));
+      assert.isTrue(g1 instanceof(G.ctx.ECP));
     });
 
     it('Returns Gen2', () => {
       assert.isNotNull(g2);
-      assert.isTrue(g2 instanceof (G.ctx.ECP2));
+      assert.isTrue(g2 instanceof(G.ctx.ECP2));
     });
 
     it('Returns Pair function', () => {
       assert.isNotNull(e);
-      assert.isTrue(e instanceof (Function));
+      assert.isTrue(e instanceof(Function));
     });
   });
 
@@ -51,172 +51,80 @@ describe('CoinSig Scheme', () => {
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = CoinSig.keygen(params);
 
-    const [x0, x1, x2, x3, x4] = sk;
-    const [g, X0, X1, X2, X3, X4] = pk;
+    const [x, y] = sk;
+    const [g, X, Y] = pk;
 
     it('Returns Secret Key (x0, x1, x2, x3, x4)', () => {
-      assert.isTrue(x0 instanceof (G.ctx.BIG));
-      assert.isTrue(x1 instanceof (G.ctx.BIG));
-      assert.isTrue(x2 instanceof (G.ctx.BIG));
-      assert.isTrue(x3 instanceof (G.ctx.BIG));
-      assert.isTrue(x4 instanceof (G.ctx.BIG));
+      assert.isTrue(x instanceof(G.ctx.BIG));
+      assert.isTrue(y instanceof(G.ctx.BIG));
     });
 
-    describe('Returns Valid Private Key (g, X0, X1, X2, X3, X4)', () => {
+    describe('Returns Valid Private Key (g, X, Y)', () => {
       it('g = g2', () => {
         assert.isTrue(g2.equals(g));
       });
 
-      it('X0 = g2*x0', () => {
-        assert.isTrue(X0.equals(G.ctx.PAIR.G2mul(g2, x0)));
+      it('X = g2*x', () => {
+        assert.isTrue(X.equals(G.ctx.PAIR.G2mul(g2, x)));
       });
 
-      it('X1 = g2*x1', () => {
-        assert.isTrue(X1.equals(G.ctx.PAIR.G2mul(g2, x1)));
+      it('Y = g2*y', () => {
+        assert.isTrue(Y.equals(G.ctx.PAIR.G2mul(g2, y)));
       });
 
-      it('X2 = g2*x2', () => {
-        assert.isTrue(X2.equals(G.ctx.PAIR.G2mul(g2, x2)));
-      });
-
-      it('X3 = g2*x3', () => {
-        assert.isTrue(X3.equals(G.ctx.PAIR.G2mul(g2, x3)));
-      });
-
-      it('X4 = g2*x4', () => {
-        assert.isTrue(X4.equals(G.ctx.PAIR.G2mul(g2, x4)));
-      });
     });
   });
 
-  // h, sig = (x0 + x1*a1 + x2*a2 + ...) * h
+  // [h, sig = (x + m*y) * h]
   describe('Sign', () => {
-    it('For signature(sig1, sig2), sig2 = (x0 + x1*a1 + x2*a2 + ...) * sig1', () => {
+    it('For signature(h, sig): sig = (x + m*y) * h', () => {
       const params = CoinSig.setup();
       const [G, o, g1, g2, e] = params;
       const [sk, pk] = CoinSig.keygen(params);
-      const [x0, x1, x2, x3, x4] = sk;
+      const [x, y] = sk;
 
       const coin_params = CoinSig.setup();
+      // create commitment
       const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
-      const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-      const ID = G.ctx.PAIR.G1mul(g1, coin_id);
-      const dummyCoin = {
-        value: 42,
-        ttl: new Date().getTime(),
-        v: coin_pk,
-        ID: ID,
-      };
 
-      const signature = CoinSig.sign(params, sk, dummyCoin);
-      const [sig1, sig2] = signature;
+      const signature = CoinSig.sign(params, sk, coin_sk, coin_pk);
+      const [h, sig] = signature;
 
-      const a1 = new G.ctx.BIG(dummyCoin.value);
-      a1.norm();
-      const a2 = hashToBIG(dummyCoin.ttl.toString());
-      const a3 = hashG2ElemToBIG(dummyCoin.v);
-      const a4 = hashG2ElemToBIG(dummyCoin.ID);
+      const m = new G.ctx.BIG(coin_sk);
 
-      const a1_cpy = new G.ctx.BIG(a1);
-      a1_cpy.mod(o);
-      const a2_cpy = new G.ctx.BIG(a2);
-      a2_cpy.mod(o);
-      const a3_cpy = new G.ctx.BIG(a3);
-      a3_cpy.mod(o);
-      const a4_cpy = new G.ctx.BIG(a4);
-      a4_cpy.mod(o);
+      // calculate t1 = (y * m) mod p
+      const t1 = G.ctx.BIG.mul(y, m);
+      t1.mod(o);
+      // x + t1
+      const K = new G.ctx.BIG(t1);
+      K.add(x);
+      // K = (x + m*y) mod p
+      K.mod(o);
 
-      const t1 = G.ctx.BIG.mul(x1, a1_cpy);
-      const t2 = G.ctx.BIG.mul(x2, a2_cpy);
-      const t3 = G.ctx.BIG.mul(x3, a3_cpy);
-      const t4 = G.ctx.BIG.mul(x4, a4_cpy);
+      const sig_test = G.ctx.PAIR.G1mul(h, K);
 
-      const x0DBIG = new G.ctx.DBIG(0);
-      for (let i = 0; i < G.ctx.BIG.NLEN; i++) {
-        x0DBIG.w[i] = x0.w[i];
-      }
-
-      x0DBIG.add(t1);
-      x0DBIG.add(t2);
-      x0DBIG.add(t3);
-      x0DBIG.add(t4);
-
-      const K = x0DBIG.mod(o);
-
-      const sig_test = G.ctx.PAIR.G1mul(sig1, K);
-      assert.isTrue(sig2.equals(sig_test));
+      assert.isTrue(sig.equals(sig_test));
     });
   });
 
   describe('Verify', () => {
-    let params;
-    let G;
-    let o;
-    let g1;
-    let g2;
-    let e;
-    let sk;
-    let pk;
-    let dummyCoin;
-    let testCoin;
-    let sig;
-    let coin_params;
-    before(() => {
-      params = CoinSig.setup();
-      [G, o, g1, g2, e] = params;
-      [sk, pk] = CoinSig.keygen(params);
+    const params = CoinSig.setup();
+    const [G, o, g1, g2, e] = params;
+    const [sk, pk] = CoinSig.keygen(params);
+    const coin_params = CoinSig.setup();
+    const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
 
-      coin_params = CoinSig.setup();
-      const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
-      const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-      const ID = G.ctx.PAIR.G1mul(g1, coin_id);
-      dummyCoin = {
-        value: 42,
-        ttl: new Date().getTime().toString(),
-        v: coin_pk,
-        ID: ID,
-      };
+    const sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
 
-      testCoin = {};
 
-      sig = CoinSig.sign(params, sk, dummyCoin);
+    it('Successful verification of original credential', () => {
+      assert.isTrue(CoinSig.verify(params, pk, coin_sk, sigma));
     });
 
-    // 'resets' the test coin
-    beforeEach(() => {
-      testCoin.ttl = dummyCoin.ttl;
-      testCoin.ID = new G.ctx.ECP();
-      testCoin.ID.copy(dummyCoin.ID);
-      testCoin.value = dummyCoin.value;
-      testCoin.v = new G.ctx.ECP2();
-      testCoin.v.copy(dummyCoin.v);
-    });
-
-    it('Successful verification of original coin', () => {
-      assert.isTrue(CoinSig.verify(params, pk, dummyCoin, sig));
-    });
-
-    it('Failed verification for coin with different value', () => {
-      testCoin.value = 256;
-      assert.isNotTrue(CoinSig.verify(params, pk, testCoin, sig));
-    });
-
-    it('Failed verification for coin with different ttl', () => {
-      // ttl of actual coin will never be equal to that
-      testCoin.value = new Date().getTime() - 12345678;
-      assert.isNotTrue(CoinSig.verify(params, pk, testCoin, sig));
-    });
-
-    it('Failed verification for coin with different id, hence ID', () => {
-      const newCoinIde = getRandomCoinId();
-      testCoin.ID = G.ctx.PAIR.G1mul(g1, newCoinIde);
-      assert.isNotTrue(CoinSig.verify(params, pk, testCoin, sig));
-    });
-
-    it('Failed verification for coin with different secret', () => {
+    it('Failed verification for credential with different secret', () => {
       const [new_coin_sk, new_coin_pk] = generateCoinSecret(coin_params);
-      testCoin.v = new_coin_pk;
-      assert.isNotTrue(CoinSig.verify(params, pk, testCoin, sig));
+      const testCoin = new_coin_sk;
+      assert.isNotTrue(CoinSig.verify(params, pk, testCoin, sigma));
     });
   });
 
@@ -224,28 +132,14 @@ describe('CoinSig Scheme', () => {
     const params = CoinSig.setup();
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = CoinSig.keygen(params);
-
     const coin_params = CoinSig.setup();
     const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
-    const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-    const ID = G.ctx.PAIR.G1mul(g1, coin_id);
-    const dummyCoin = {
-      value: 42,
-      ttl: new Date().getTime(),
-      v: coin_pk,
-      ID: ID,
-    };
 
-    let sig = CoinSig.sign(params, sk, dummyCoin);
-    sig = CoinSig.randomize(params, sig);
+    let sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
+    sigma = CoinSig.randomize(params, sigma);
 
-    it('Successful verification for original coin with randomized signature', () => {
-      assert.isTrue(CoinSig.verify(params, pk, dummyCoin, sig));
-    });
-
-    it('Failed verification for modified coin with the same randomized signature', () => {
-      dummyCoin.value = 43;
-      assert.isNotTrue(CoinSig.verify(params, pk, dummyCoin, sig));
+    it('Successful verification for original credential with randomized signature', () => {
+      assert.isTrue(CoinSig.verify(params, pk, coin_sk, sigma));
     });
   });
 
@@ -256,20 +150,12 @@ describe('CoinSig Scheme', () => {
       const [sk, pk] = CoinSig.keygen(params);
       const coin_params = CoinSig.setup();
       const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
-      const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-      const ID = G.ctx.PAIR.G1mul(g1, coin_id);
-      const dummyCoin = {
-        value: 42,
-        ttl: new Date().getTime(),
-        v: coin_pk,
-        ID: ID,
-      };
 
-      const sig = CoinSig.sign(params, sk, dummyCoin);
-      const aggregateSig = CoinSig.aggregateSignatures(params, [sig]);
+      const sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
+      const aggregateSig = CoinSig.aggregateSignatures(params, [sigma]);
 
-      assert.isTrue(sig[0].equals(aggregateSig[0]));
-      assert.isTrue(sig[1].equals(aggregateSig[1]));
+      assert.isTrue(sigma[0].equals(aggregateSig[0]));
+      assert.isTrue(sigma[1].equals(aggregateSig[1]));
     });
 
     it('Returns null if one of signatures is invalid (different h)', () => {
@@ -281,39 +167,21 @@ describe('CoinSig Scheme', () => {
       const [coin_sk1, coin_pk1] = generateCoinSecret(coin_params);
       const [coin_sk2, coin_pk2] = generateCoinSecret(coin_params);
 
-      const coin_id1 = G.ctx.BIG.randomnum(G.order, G.rngGen);
-      const ID1 = G.ctx.PAIR.G1mul(g1, coin_id1);
-      const dummyCoin1 = {
-        value: 42,
-        ttl: new Date().getTime(),
-        v: coin_pk1,
-        ID: ID1,
-      };
+      const sigma1 = CoinSig.sign(params, sk, coin_sk1, coin_pk1);
+      const sigma2 = CoinSig.sign(params, sk, coin_sk2, coin_pk2);
 
-      const coin_id2 = G.ctx.BIG.randomnum(G.order, G.rngGen);
-      const ID2 = G.ctx.PAIR.G1mul(g1, coin_id2);
-      const dummyCoin2 = {
-        value: 42,
-        ttl: new Date().getTime(),
-        v: coin_pk2,
-        ID: ID2,
-      };
-
-
-      const sig1 = CoinSig.sign(params, sk, dummyCoin1);
-      const sig2 = CoinSig.sign(params, sk, dummyCoin2);
-
-      const aggregateSig = CoinSig.aggregateSignatures(params, [sig1, sig2]);
+      const aggregateSig = CoinSig.aggregateSignatures(params, [sigma1, sigma2]);
 
       expect(aggregateSig).to.be.a('null');
     });
   });
+
   describe('Aggregate Verification', () => {
     describe('Public Key Aggregation', () => {
       it('Returns same key if single key is sent', () => {
         const params = CoinSig.setup();
         const [sk, pk] = CoinSig.keygen(params);
-        const aPk = CoinSig.aggregatePublicKeys(params, [pk]);
+        const aPk = CoinSig.aggregatePublicKeys_array(params, [pk]);
         for (let i = 0; i < pk.length; i++) {
           assert.isTrue(pk[i].equals(aPk[i]));
         }
@@ -325,39 +193,21 @@ describe('CoinSig Scheme', () => {
         const params = CoinSig.setup();
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CoinSig.keygen(params);
-
         const coin_params = CoinSig.setup();
         const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
-        const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-        const ID = G.ctx.PAIR.G1mul(g1, coin_id);
-        const dummyCoin = {
-          value: 42,
-          ttl: new Date().getTime(),
-          v: coin_pk,
-          ID: ID,
-        };
 
-        const sig = CoinSig.sign(params, sk, dummyCoin);
-        const aggregateSig = CoinSig.aggregateSignatures(params, [sig]);
+        const sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
+        const aggregateSig = CoinSig.aggregateSignatures(params, [sigma]);
 
-        assert.isTrue(CoinSig.verifyAggregation(params, [pk], dummyCoin, aggregateSig));
+        assert.isTrue(CoinSig.verifyAggregation(params, [pk], coin_sk, aggregateSig));
       });
 
       it('Works for three distinct signatures', () => {
         const params = CoinSig.setup();
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CoinSig.keygen(params);
-
-        const coin_params = CoinSig.setup();
+        const coin_params = CoinSig.setup(); // EDIT:
         const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
-        const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-        const ID = G.ctx.PAIR.G1mul(g1, coin_id);
-        const dummyCoin = {
-          value: 42,
-          ttl: new Date().getTime(),
-          v: coin_pk,
-          ID: ID,
-        };
 
         const coinsToSign = 3;
         const pks = [];
@@ -366,30 +216,21 @@ describe('CoinSig Scheme', () => {
         for (let i = 0; i < coinsToSign; i++) {
           const [sk, pk] = CoinSig.keygen(params);
           pks.push(pk);
-          const signature = CoinSig.sign(params, sk, dummyCoin);
+          const signature = CoinSig.sign(params, sk, coin_sk, coin_pk);
           signatures.push(signature);
         }
 
         const aggregateSignature = CoinSig.aggregateSignatures(params, signatures);
 
-        assert.isTrue(CoinSig.verifyAggregation(params, pks, dummyCoin, aggregateSignature));
+        assert.isTrue(CoinSig.verifyAggregation(params, pks, coin_sk, aggregateSignature));
       });
 
-      it('Doesn\'t work when one of three signatures is on different coin (but for some reason has same ID)', () => {
+      it('Doesn\'t work when one of three signatures is on different credential', () => {
         const params = CoinSig.setup();
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CoinSig.keygen(params);
-
         const coin_params = CoinSig.setup();
         const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
-        const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-        const ID = G.ctx.PAIR.G1mul(g1, coin_id);
-        const dummyCoin = {
-          value: 42,
-          ttl: new Date().getTime(),
-          v: coin_pk,
-          ID: ID,
-        };
 
         const coinsToSign = 2;
         const pks = [];
@@ -398,69 +239,186 @@ describe('CoinSig Scheme', () => {
         for (let i = 0; i < coinsToSign; i++) {
           const [sk, pk] = CoinSig.keygen(params);
           pks.push(pk);
-          const signature = CoinSig.sign(params, sk, dummyCoin);
+          const signature = CoinSig.sign(params, sk, coin_sk, coin_pk);
           signatures.push(signature);
         }
 
         const [another_coin_sk, another_coin_pk] = generateCoinSecret(coin_params);
-        const anotherCoin = {
-          value: 42,
-          ttl: new Date().getTime(),
-          v: another_coin_pk,
-          ID: ID,
-        };
 
         const [skm, pkm] = CoinSig.keygen(params);
         pks.push(pkm);
-        const maliciousSignature = CoinSig.sign(params, skm, anotherCoin);
+        const maliciousSignature = CoinSig.sign(params, skm, another_coin_sk, another_coin_pk);
         signatures.push(maliciousSignature);
 
         const aggregateSignature = CoinSig.aggregateSignatures(params, signatures);
-        assert.isNotTrue(CoinSig.verifyAggregation(params, pks, dummyCoin, aggregateSignature));
+        assert.isNotTrue(CoinSig.verifyAggregation(params, pks, coin_sk, aggregateSignature));
       });
     });
   });
 
-  describe('Blind Signature', () => {
-    it('Can produce a blind signature and successfully verify it after decryption', () => {
-      const params = CoinSig.setup();
-      const [G, o, g1, g2, e] = params;
+  describe('Full Coconut Scheme', () => {
+    const params = CoinSig.setup();
+    const [G, o, g1, g2, e] = params;
 
-      const value = 42;
-      const coin_id = G.ctx.BIG.randomnum(G.order, G.rngGen);
-      // first we need to create a coin to sign
-      const pkBytes_client = [];
-      const skBytes_client = [];
-      const sk_client = G.ctx.BIG.randomnum(o, G.rngGen);
-      const pk_client = g1.mul(sk_client);
-      sk_client.toBytes(skBytes_client);
-      pk_client.toBytes(pkBytes_client);
+    // first we need to create a coin to sign
+    const coin_params = CoinSig.setup(); // EDIT:
+    const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+    const coin_pk_bytes = [];
+    coin_pk.toBytes(coin_pk_bytes);
 
-      const coin_pk_bytes = [];
-      const coin_sk = G.ctx.BIG.randomnum(G.order, G.rngGen);
-      const coin_pk = G.ctx.PAIR.G2mul(g2, coin_sk);
-      coin_pk.toBytes(coin_pk_bytes);
+    // get client key pair
+    const pkBytes_client = [];
+    const skBytes_client = [];
+    const sk_client = G.ctx.BIG.randomnum(o, G.rngGen);
+    const pk_client = g1.mul(sk_client);
+    sk_client.toBytes(skBytes_client);
+    pk_client.toBytes(pkBytes_client);
 
+    const sk_issuer_bytes = [];
+    const pk_issuer_bytes = [];
+    const sk_issuer = G.ctx.BIG.randomnum(o, G.rngGen);
+    const pk_issuer = g1.mul(sk_issuer);
+    sk_issuer.toBytes(sk_issuer_bytes);
+    pk_issuer.toBytes(pk_issuer_bytes);
 
-      const sk_issuer_bytes = [];
-      const sk_issuer = G.ctx.BIG.randomnum(o, G.rngGen);
-      const pk_issuer = g1.mul(sk_issuer);
-      sk_issuer.toBytes(sk_issuer_bytes);
+    const [ElGamalSK, ElGamalPK] = ElGamal.keygen(params);
 
-      const [ElGamalSK, ElGamalPK] = ElGamal.keygen(params);
+    // PREPARE_BLIND_SIGN: issuer sign credential commitment | return: pk_coin_bytes, pk_client_bytes, issuedCoinSig
+    const issuedCoin = getIssuedCoin(coin_pk_bytes, pkBytes_client, sk_issuer_bytes);
+    it('Credential commitment verified by issuer', () => {
+      assert.isTrue(verifyCoinSignature(issuedCoin, pk_issuer_bytes));
+    });
 
-      const issuedCoin = getIssuedCoin(coin_pk_bytes, value, pkBytes_client, sk_issuer_bytes);
-      const signingCoin = getSigningCoin(issuedCoin, ElGamalPK, coin_id, coin_sk, skBytes_client);
+    // PREPARE_BLIND_SIGN: client prepare credential to be signed by authorities
+    const signingCoin = getSigningCoin(issuedCoin, ElGamalPK, coin_sk, skBytes_client);
+    it('Credential sign request (signatures by issuer and client) verified by signing authority', () => {
+      assert.isTrue(verifySignRequest(signingCoin, pk_issuer_bytes));
+    });
 
-      const [sk, pk] = CoinSig.keygen(params);
-      const [h, enc_sig] = CoinSig.mixedSignCoin(params, sk, signingCoin, ElGamalPK);
+    // BLIND_SIGN: authority signs the credential
+    const [sk, pk] = CoinSig.keygen(params);
+    const [h, enc_sig] = CoinSig.mixedSignCoin(params, sk, signingCoin);
 
-      const sig = ElGamal.decrypt(params, ElGamalSK, enc_sig);
+    // UNBLIND: client decrypts signature
+    const sig = ElGamal.decrypt(params, ElGamalSK, enc_sig);
 
-      const signature = [h, sig];
+    // RANDOMIZE: client randomizes signature
+    let sigma = [h, sig];
+    sigma = CoinSig.randomize(params, sigma);
 
-      const pkX = G.ctx.PAIR.G2mul(pk[4], coin_sk);
-      assert.isTrue(CoinSig.verifyMixedBlindSign(params, pk, signingCoin, [h, sig], coin_id, pkX));
+    // SHOW_BLIND_SIGN: client prepares credential proofs
+    const petitionID = 'e-petition';
+    it('Aw verified', () => {
+      const gs = hashToPointOnCurve(petitionID);
+      const t = ctx.BIG.randomnum(G.order, G.rngGen);
+      // kappa = t*g2 + aX + m*aY :
+      const kappa = ctx.PAIR.G2mul(g2, t);      // t*g2
+      const aX = pk[1];                         // aX
+      const aY = pk[2];                         // aY
+      const pkY = ctx.PAIR.G2mul(aY, coin_sk);  // m*Y
+      kappa.add(aX);
+      kappa.add(pkY);
+      kappa.affine();
+
+      const wm = ctx.BIG.randomnum(G.order, G.rngGen);
+      const wt = ctx.BIG.randomnum(G.order, G.rngGen);
+      const Aw = ctx.PAIR.G2mul(g2, wt);
+      Aw.add(aX);
+      const pkYw = ctx.PAIR.G2mul(aY, wm);
+      Aw.add(pkYw);
+      Aw.affine();
+
+      const c = hashToBIG(g2.toString() + Aw.toString());
+      const m_cpy = new ctx.BIG(coin_sk);
+      m_cpy.mod(o);
+      const t1 = ctx.BIG.mul(m_cpy, c); // produces DBIG
+      const t2 = t1.mod(o); // but this gives BIG back
+      const rm = new ctx.BIG(wm);
+      rm.sub(t2);
+      rm.add(o); // to ensure positive result EDIT: REMOVE?
+      rm.mod(o);
+      const t_cpy = new ctx.BIG(t);
+      t_cpy.mod(o);
+      const t3 = ctx.BIG.mul(t_cpy, c); // produces DBIG
+      const t4 = t3.mod(o); // but this gives BIG back
+      const rt = new ctx.BIG(wt);
+      rt.sub(t4);
+      rt.add(o); // to ensure positive result
+      rt.mod(o);
+
+      const Aw2 = ctx.PAIR.G2mul(kappa, c);
+      const temp1 = ctx.PAIR.G2mul(g2, rt);
+      Aw2.add(temp1);
+      Aw2.add(aX);
+      const temp2 = ctx.PAIR.G2mul(aX, c);
+      Aw2.sub(temp2);
+      const temp3 = ctx.PAIR.G2mul(aY, rm);
+      Aw2.add(temp3);
+      Aw2.affine();
+
+      const expr = Aw.equals(Aw2);
+
+      assert.isTrue(expr);
+    });
+
+    it('Bw verified', () => {
+      const t = ctx.BIG.randomnum(G.order, G.rngGen);
+      const nu = ctx.PAIR.G1mul(h, t);
+      const wt = ctx.BIG.randomnum(G.order, G.rngGen);
+      const Bw = ctx.PAIR.G1mul(h, wt);
+      Bw.affine();
+
+      const c = hashToBIG(g1.toString() + Bw.toString());
+      const t_cpy = new ctx.BIG(t);
+      t_cpy.mod(o);
+      const t3 = ctx.BIG.mul(t_cpy, c); // produces DBIG
+      const t4 = t3.mod(o); // but this gives BIG back
+      const rt = new ctx.BIG(wt);
+      rt.sub(t4);
+      rt.add(o); // to ensure positive result
+      rt.mod(o);
+
+      const Bw2 = ctx.PAIR.G1mul(nu, c);
+      const temp4 = ctx.PAIR.G1mul(h, rt);
+      Bw2.add(temp4);
+      Bw2.affine();
+
+      const expr = Bw.equals(Bw2);
+
+      assert.isTrue(expr);
+    });
+
+    it('Cw verified', () => {
+      const gs = hashToPointOnCurve(petitionID);
+      const zeta = ctx.PAIR.G1mul(gs, coin_sk);
+      const wm = ctx.BIG.randomnum(G.order, G.rngGen);
+      const Cw = ctx.PAIR.G1mul(gs, wm);
+      Cw.affine();
+
+      const c = hashToBIG(g1.toString() + Cw.toString());
+      const m_cpy = new ctx.BIG(coin_sk);
+      m_cpy.mod(o);
+      const t1 = ctx.BIG.mul(m_cpy, c); // produces DBIG
+      const t2 = t1.mod(o); // but this gives BIG back
+      const rm = new ctx.BIG(wm);
+      rm.sub(t2);
+      rm.add(o); // to ensure positive result EDIT: REMOVE?
+      rm.mod(o);
+
+      const Cw2 = ctx.PAIR.G1mul(gs, rm);
+      const temp5 = ctx.PAIR.G1mul(zeta, c);
+      Cw2.add(temp5);
+      Cw2.affine();
+
+      const expr = Cw.equals(Cw2);
+
+      assert.isTrue(expr);
+    });
+    
+    // BLIND_VERIFY: merchant/issuer verifies credential
+    it('Credential shown by client is verified', () => {
+      const MPCP_output = CoinSig.make_proof_credentials_petition(params, pk, sigma, coin_sk, petitionID);
+      assert.isTrue(CoinSig.verify_proof_credentials_petition(params, pk, sigma, MPCP_output, petitionID));
     });
   });
 });

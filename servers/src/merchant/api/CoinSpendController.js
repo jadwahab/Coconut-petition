@@ -101,7 +101,7 @@ router.post('/', async (req, res) => {
         }
       }));
       // aggregatePublicKey is [ag, aX, aY];
-      aggregatePublicKey = CoinSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys);
+      aggregatePublicKey = CoinSig.aggregatePublicKeys_array(params, signingAuthoritiesPublicKeys);
 
       publicKeys['Aggregate'] = aggregatePublicKey;
     } else {
@@ -112,7 +112,7 @@ router.post('/', async (req, res) => {
     
     // just check validity of the proof and double spending, we let issuer verify the signature
     // successful verification of the proof assures the coin was supposed to be used in that transaction
-    const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, sigma, MPCP_output, merchantStr);
+    const isProofValid = CoinSig.verify_proof_credentials_petition(params, aggregatePublicKey, sigma, MPCP_output, merchantStr);
     
     if (DEBUG) {
       console.log(`Was credntial proof valid: ${isProofValid}`);

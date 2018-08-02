@@ -192,12 +192,14 @@ export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_ou
   let Aw = ctx.PAIR.G2mul(kappa, c);
   const temp1 = ctx.PAIR.G2mul(g2, rt);
   Aw.add(temp1);
-  let oneMinusC = new ctx.BIG(1);
-  oneMinusC.sub(c);
-  oneMinusC.add(o); // to ensure positive result
-  oneMinusC.mod(o);
-  const temp2 = ctx.PAIR.G2mul(aX, oneMinusC);
-  Aw.add(temp2);
+  // let oneMinusC = new ctx.BIG(1);
+  // oneMinusC.sub(c);
+  // oneMinusC.add(o); // to ensure positive result
+  // oneMinusC.mod(o);
+  // const temp2 = ctx.PAIR.G2mul(aX, oneMinusC);
+  Aw.add(aX);
+  const temp2 = ctx.PAIR.G2mul(aX, c);
+  Aw.sub(temp2);
   const temp3 = ctx.PAIR.G2mul(aY, rm);
   Aw.add(temp3);
   Aw.affine();

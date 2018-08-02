@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
 
     const ElGamalPK = ElGamal.getPKFromBytes(params, ElGamalPKBytes);
 
-    const [h, enc_sig] = CoinSig.mixedSignCoin(params, sk, signingCoin, ElGamalPK);
+    const [h, enc_sig] = CoinSig.mixedSignCoin(params, sk, signingCoin);
     const hBytes = [];
     const enc_sig_a_Bytes = [];
     const enc_sig_b_Bytes = [];

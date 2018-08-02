@@ -106,8 +106,6 @@ class CredentialRequester extends React.Component {
     }
     const signatures = await this.getSignatures(signingServers);
 
-    // this.aggregateAndRandomizeSignatures(signatures); DELETE LATER
-
     const aggregatedSignature = this.aggregateSignatures(signatures);
     // const randomizedSignature = CoinSig.randomize(params, aggregatedSignature);
 
