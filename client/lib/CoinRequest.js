@@ -1,16 +1,16 @@
 import { ctx, params } from '../src/config';
 import { prepareProofOfSecret, verifyProofOfSecret } from './auxiliary';
 
-const getBytesProof = (proof) => {
-  const [W, cm, r] = proof;
-  const bytesW = [];
-  const bytesCm = [];
-  const bytesR = [];
-  W.toBytes(bytesW);
-  cm.toBytes(bytesCm);
-  r.toBytes(bytesR);
+export const getBytesProof = (proof) => {
+  const [C, rm, ro] = proof;
+  const bytesC = [];
+  const bytesRm = [];
+  const bytesRo = [];
+  C.toBytes(bytesC);
+  rm.toBytes(bytesRm);
+  ro.toBytes(bytesRo);
 
-  return [bytesW, bytesCm, bytesR];
+  return [bytesC, bytesRm, bytesRo];
 };
 
 export const getCoinRequestObject = (
@@ -27,7 +27,7 @@ export const getCoinRequestObject = (
   const secretProof = prepareProofOfSecret(params, sk_coin, issuingServerStr);
   const proof_bytes = getBytesProof(secretProof);
 
-  const [bytesW, bytesCm, bytesR] = proof_bytes; // expand to include in our signature
+  const [bytesC, bytesRm, bytesRo] = proof_bytes; // expand to include in our signature
 
   // we just need to have same representation of both the string on both ends
   // so for bytes representations, just add up the bytes (it is quicker than concating all elements)
@@ -36,9 +36,9 @@ export const getCoinRequestObject = (
   const requestStr =
     pk_client_bytes.reduce(reducer) + // client's key
     pk_coin_bytes.reduce(reducer) + // coin's pk
-    bytesW.reduce(reducer) + // part of proof of coin's secret
-    bytesCm.reduce(reducer) + // part of proof of coin's secret
-    bytesR.reduce(reducer); // part of proof of coin's secret
+    bytesC.reduce(reducer) + // part of proof of coin's secret
+    bytesRm.reduce(reducer) + // part of proof of coin's secret
+    bytesRo.reduce(reducer); // part of proof of coin's secret
 
   const sha = ctx.ECDH.HASH_TYPE;
 

@@ -17,7 +17,8 @@ export const getSigningCoin = (issuedCoin, ElGamalPK, coin_sk, sk_client_bytes) 
 
   const h = hashToPointOnCurve(coinStr);
 
-  const [a1, b1, k1] = ElGamal.encrypt(params, ElGamalPK, coin_sk, h);
+
+  const [a1, b1, k1] = ElGamal.encrypt(params, ElGamalPK, coin_sk.m, h);
   // const [a2, b2, k2] = ElGamal.encrypt(params, ElGamalPK, coin_id, h);
 
   const enc_sk = [a1, b1];

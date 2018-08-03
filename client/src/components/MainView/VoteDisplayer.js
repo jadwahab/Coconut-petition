@@ -100,7 +100,7 @@ class VoteDisplayer extends React.Component {
     const merchantStr = publicKeys[merchant].join('');  // EDIT: petitionID
 
     const MPCP_output = CoinSig.make_proof_credentials_petition(params, aggregatePublicKey, 
-                        this.props.randomizedSignature, this.props.coin_params.sk, merchantStr);
+                        this.props.randomizedSignature, this.props.coin_params.sk.m, merchantStr);
 
     if (DEBUG) {
       console.log('Sending ShowBlingSign output');

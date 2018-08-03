@@ -1,17 +1,34 @@
 import { describe, it } from 'mocha';
 import { expect, assert } from 'chai';
-import { ctx } from '../globalConfig';
+import { ctx, power } from '../globalConfig';
 import CoinSig from '../CoinSig';
 import BpGroup from '../BpGroup';
-import { hashToBIG, hashToPointOnCurve } from '../auxiliary';
+import { hashToBIG, hashToPointOnCurve, prepareProofOfSecret, verifyProofOfSecret, fromBytesProof } from '../auxiliary';
 import ElGamal from '../ElGamal';
 import { getSigningCoin, verifySignRequest } from '../SigningCoin';
 import { getIssuedCoin, verifyCoinSignature } from '../IssuedCoin';
+import { getBytesProof } from '../CoinRequest';
 
 const generateCoinSecret = (params) => {
   const [G, o, g1, g2, e] = params;
-  const sk = ctx.BIG.randomnum(G.order, G.rngGen);
-  const pk = ctx.PAIR.G1mul(g1, sk);
+  const m = ctx.BIG.randomnum(G.order, G.rngGen);
+  const pk = ctx.PAIR.G1mul(g1, m);
+
+  // create h to ge g1^power
+  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
+
+  // random blindling factor o_blind
+  const o_blind = ctx.BIG.randomnum(G.order, G.rngGen);
+  const h_blind = ctx.PAIR.G1mul(h1, o_blind);
+
+  pk.add(h_blind);
+  pk.affine();
+
+  const sk = {
+    m: m,
+    o: o_blind,
+  };
+
   return [sk, pk];
 };
 
@@ -75,6 +92,21 @@ describe('Coconut Scheme:', () => {
     });
   });
 
+  describe('NIZK proof of secret to the commitment', () => {
+    it('Verified proofOfSecret', () => {
+      const params = CoinSig.setup();
+      const [G, o, g1, g2, e] = params;
+      const [coin_sks, coin_pk] = generateCoinSecret(params);
+
+      const issuingServerStr = 'issuer';
+      const secretProof = prepareProofOfSecret(params, coin_sks, issuingServerStr);
+      const proof_bytes = getBytesProof(secretProof);
+
+      const proof = fromBytesProof(proof_bytes);
+      assert.isTrue(verifyProofOfSecret(params, coin_pk, proof, issuingServerStr));
+    });
+  });
+
   // [h, sig = (x + m*y) * h]
   describe('Sign', () => {
     it('For signature(h, sig): sig = (x + m*y) * h', () => {
@@ -85,7 +117,8 @@ describe('Coconut Scheme:', () => {
 
       const coin_params = CoinSig.setup();
       // create commitment
-      const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+      const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+      const coin_sk = coin_sks.m;
 
       const signature = CoinSig.sign(params, sk, coin_sk, coin_pk);
       const [h, sig] = signature;
@@ -112,7 +145,8 @@ describe('Coconut Scheme:', () => {
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = CoinSig.keygen(params);
     const coin_params = CoinSig.setup();
-    const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+    const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+    const coin_sk = coin_sks.m;
 
     const sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
 
@@ -122,7 +156,8 @@ describe('Coconut Scheme:', () => {
     });
 
     it('Failed verification for credential with different secret', () => {
-      const [new_coin_sk, new_coin_pk] = generateCoinSecret(coin_params);
+      const [new_coin_sks, new_coin_pk] = generateCoinSecret(coin_params);
+      const new_coin_sk = new_coin_sks.m;
       const testCoin = new_coin_sk;
       assert.isNotTrue(CoinSig.verify(params, pk, testCoin, sigma));
     });
@@ -133,7 +168,8 @@ describe('Coconut Scheme:', () => {
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = CoinSig.keygen(params);
     const coin_params = CoinSig.setup();
-    const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+    const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+    const coin_sk = coin_sks.m;
 
     let sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
     sigma = CoinSig.randomize(params, sigma);
@@ -149,7 +185,8 @@ describe('Coconut Scheme:', () => {
       const [G, o, g1, g2, e] = params;
       const [sk, pk] = CoinSig.keygen(params);
       const coin_params = CoinSig.setup();
-      const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+      const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+      const coin_sk = coin_sks.m;
 
       const sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
       const aggregateSig = CoinSig.aggregateSignatures(params, [sigma]);
@@ -164,8 +201,10 @@ describe('Coconut Scheme:', () => {
       const [sk, pk] = CoinSig.keygen(params);
 
       const coin_params = CoinSig.setup();
-      const [coin_sk1, coin_pk1] = generateCoinSecret(coin_params);
-      const [coin_sk2, coin_pk2] = generateCoinSecret(coin_params);
+      const [coin_sks1, coin_pk1] = generateCoinSecret(coin_params);
+      const coin_sk1 = coin_sks1.m;
+      const [coin_sks2, coin_pk2] = generateCoinSecret(coin_params);
+      const coin_sk2 = coin_sks2.m;
 
       const sigma1 = CoinSig.sign(params, sk, coin_sk1, coin_pk1);
       const sigma2 = CoinSig.sign(params, sk, coin_sk2, coin_pk2);
@@ -194,7 +233,8 @@ describe('Coconut Scheme:', () => {
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CoinSig.keygen(params);
         const coin_params = CoinSig.setup();
-        const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+        const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+        const coin_sk = coin_sks.m;
 
         const sigma = CoinSig.sign(params, sk, coin_sk, coin_pk);
         const aggregateSig = CoinSig.aggregateSignatures(params, [sigma]);
@@ -207,7 +247,8 @@ describe('Coconut Scheme:', () => {
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CoinSig.keygen(params);
         const coin_params = CoinSig.setup(); // EDIT:
-        const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+        const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+        const coin_sk = coin_sks.m;
 
         const coinsToSign = 3;
         const pks = [];
@@ -230,7 +271,8 @@ describe('Coconut Scheme:', () => {
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CoinSig.keygen(params);
         const coin_params = CoinSig.setup();
-        const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+        const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+        const coin_sk = coin_sks.m;
 
         const coinsToSign = 2;
         const pks = [];
@@ -243,7 +285,8 @@ describe('Coconut Scheme:', () => {
           signatures.push(signature);
         }
 
-        const [another_coin_sk, another_coin_pk] = generateCoinSecret(coin_params);
+        const [another_coin_sks, another_coin_pk] = generateCoinSecret(coin_params);
+        const another_coin_sk = another_coin_sks.m;
 
         const [skm, pkm] = CoinSig.keygen(params);
         pks.push(pkm);
@@ -262,7 +305,8 @@ describe('Coconut Scheme:', () => {
 
     // first we need to create a coin to sign
     const coin_params = CoinSig.setup(); // EDIT:
-    const [coin_sk, coin_pk] = generateCoinSecret(coin_params);
+    const [coin_sks, coin_pk] = generateCoinSecret(coin_params);
+    const coin_sk = coin_sks.m;
     const coin_pk_bytes = [];
     coin_pk.toBytes(coin_pk_bytes);
 

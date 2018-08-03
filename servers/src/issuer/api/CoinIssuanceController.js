@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
 
   const issuerStr = sig_pkBytes.join('');
 
-// Verify whether request proof of knowledge is legit:
+  // Verify whether request proof of knowledge is legit:
   const isProofValid = verifyRequestProofOfCoinSecret(
     coin_request.proof_bytes,
     coin_request.pk_coin_bytes,
@@ -56,7 +56,6 @@ router.post('/', async (req, res) => {
     res.status(200)
       .json({
         coin: null,
-        // id: null,
         status: ISSUE_STATUS.error_proof,
       });
     return;
@@ -65,7 +64,7 @@ router.post('/', async (req, res) => {
 // Issuer finally signs the credential
   const issuedCoin = getIssuedCoin(
     coin_request.pk_coin_bytes,
-    // coin_request.value,
+
     coin_request.pk_client_bytes,
     sig_skBytes,
   );

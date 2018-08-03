@@ -19,6 +19,7 @@ export const issuer = (process.env.NODE_ENV === 'production') ? '35.178.15.103:3
 
 export const ctx = new CTX('BN254');
 export const params = CoinSig.setup();
+export const power = new ctx.BIG(2);
 
 const COIN_STATUS_UNCREATED = 'Ungenerated';
 const COIN_STATUS_CREATED = 'Generated';

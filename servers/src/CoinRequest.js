@@ -1,7 +1,7 @@
 import { ctx, params } from './globalConfig';
 import { prepareProofOfSecret, verifyProofOfSecret, fromBytesProof } from './auxiliary';
 
-const getBytesProof = (proof) => {
+export const getBytesProof = (proof) => {
   const [W, cm, r] = proof;
   const bytesW = [];
   const bytesCm = [];

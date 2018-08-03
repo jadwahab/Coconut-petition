@@ -55,16 +55,20 @@ class MainView extends React.Component {
 
 
   handleRandomize = (sig) => {
-    let randomizedSignature = CoinSig.randomize(params, sig);
+    const randomizedSignature = CoinSig.randomize(params, sig);
 
-    this.setState(prevState => ({
-      randomizedSignatures: prevState.randomizedSignatures.concat([randomizedSignature]),
-    }));
+    // // Not working right for some reason: (consider fixing in future)
+    // this.setState(prevState => ({
+    //   randomizedSignatures: prevState.randomizedSignatures.concat([randomizedSignature]),
+    // }));
+    // // Messes up with length as seen below with console.logs below:
+    // console.log(this.state.randomizedSignatures.length);
+    // console.log(this.state.randomizedSignatures);
 
-// ////////////////////////// EDIT: TEST VoteListDisplayer
-//     console.log(this.state.randomizedSignatures.length);
-//     console.log(this.state.randomizedSignatures);
-// //////////////////////////
+    // works but is less elegant:
+    const randSigs = this.state.randomizedSignatures;
+    randSigs.push(randomizedSignature);
+    this.setState({ randomizedSignatures: randSigs });
 
     return randomizedSignature;
   };
@@ -74,8 +78,6 @@ class MainView extends React.Component {
     const coin_params = { coin: coin, sk: sk };
     this.setState({ coin_params });
   }
-
-
 
   render() {
     return (
@@ -91,7 +93,8 @@ class MainView extends React.Component {
             <CredentialRequester
               ElGamalSK={this.state.ElGamalSK}
               ElGamalPK={this.state.ElGamalPK}
-              sk_client={this.state.sk_client} // will be required to sign requests to SAs, but is NOT sent
+              // sk_client will be required to sign requests to SAs, but is NOT sent:
+              sk_client={this.state.sk_client}
               pk_client={this.state.pk_client}
               handleRandomize={this.handleRandomize}
               handleCoinForSpend={this.handleCoinForSpend}

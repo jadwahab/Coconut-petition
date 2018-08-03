@@ -1,6 +1,6 @@
 // set of auxiliary functions that don't belong to any existing class/module
 
-import { ctx } from '../src/config';
+import { ctx, power } from '../src/config';
 import CoinSig from './CoinSig';
 
 export const stringToBytes = (s) => {
@@ -47,49 +47,71 @@ export const hashG2ElemToBIG = (G2elem) => {
 };
 
 // EDIT: move to file called proofs.js
-export const prepareProofOfSecret = (params, x, verifierStr) => {
+export const prepareProofOfSecret = (params, sk, verifierStr) => {
   const [G, o, g1, g2, e] = params;
-  const w = ctx.BIG.randomnum(G.order, G.rngGen);
+  const x = sk.m;
+  const o_blind = sk.o;
+  // get h1
+  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
+  // create random witnesses
+  const wm = ctx.BIG.randomnum(G.order, G.rngGen);
+  const wo = ctx.BIG.randomnum(G.order, G.rngGen);
 
-  const W = ctx.PAIR.G1mul(g1, w);
+  const W = ctx.PAIR.G1mul(g1, wm);
+  const blind_factor = ctx.PAIR.G1mul(h1, wo);
+  W.add(blind_factor);
+  W.affine();
 
-  const cm = hashToBIG(W.toString() + verifierStr);
+  const C = hashToBIG(W.toString() + verifierStr);
 
   // to prevent object mutation
   const x_cpy = new ctx.BIG(x);
-  const cm_cpy = new ctx.BIG(cm);
+  const C_cpy = new ctx.BIG(C);
+  const o_cpy = new ctx.BIG(o_blind);
   x_cpy.mod(o);
-  cm_cpy.mod(o);
+  C_cpy.mod(o);
+  o_cpy.mod(o);
 
-  const t1 = ctx.BIG.mul(x_cpy, cm_cpy); // produces DBIG
+  const t1 = ctx.BIG.mul(x_cpy, C_cpy); // produces DBIG
   const t2 = t1.mod(o); // but this gives BIG back
+  wm.mod(o);
+  const rm = new ctx.BIG(wm);
 
-  w.mod(o);
-  const r = new ctx.BIG(w);
+  rm.copy(wm);
+  rm.sub(t2);
+  rm.add(o); // to ensure positive result
+  rm.mod(o);
 
-  r.copy(w);
-  r.sub(t2);
-  r.add(o); // to ensure positive result
-  r.mod(o);
+  const t3 = ctx.BIG.mul(o_cpy, C_cpy); // produces DBIG
+  const t4 = t3.mod(o); // but this gives BIG back
+  wo.mod(o);
+  const ro = new ctx.BIG(wo);
 
-  return [W, cm, r]; // G1Elem, BIG, BIG
+  ro.copy(wo);
+  ro.sub(t4);
+  ro.add(o); // to ensure positive result
+  ro.mod(o);
+
+  return [C, rm, ro];
 };
 
 export const verifyProofOfSecret = (params, pub, proof, verifierStr) => {
   const [G, o, g1, g2, e] = params;
-  const [W, cm, r] = proof;
+  const [C, rm, ro] = proof;
+  // get h1
+  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
 
-  const t1 = ctx.PAIR.G1mul(g1, r);
+  const W_prove = ctx.PAIR.G1mul(g1, rm);
+  const t1 = ctx.PAIR.G1mul(h1, ro);
+  const t2 = ctx.PAIR.G1mul(pub, C);
 
-  const t2 = ctx.PAIR.G1mul(pub, cm);
+  W_prove.add(t1);
+  W_prove.add(t2);
+  W_prove.affine();
 
-  t1.add(t2);
-  t1.affine();
+  const expr = ctx.BIG.comp(C, hashToBIG(W_prove.toString() + verifierStr)) === 0;
 
-  const expr1 = t1.equals(W);
-  const expr2 = ctx.BIG.comp(cm, hashToBIG(W.toString() + verifierStr)) === 0;
-
-  return expr1 && expr2;
+  return expr;
 };
 
 

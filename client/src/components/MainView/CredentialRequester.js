@@ -1,8 +1,7 @@
-//EDIT: clean up handlecoinsubmit and button submit buttons a bit later
 import React from 'react';
 import PropTypes from 'prop-types';
 import SubmitButton from './SubmitButton';
-import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG } from '../../config';
+import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG, power } from '../../config';
 import { signCoin, getCoin } from '../../utils/api';
 import CoinSig from '../../../lib/CoinSig';
 import ElGamal from '../../../lib/ElGamal';
@@ -20,6 +19,50 @@ class CredentialRequester extends React.Component {
       isRequesting: false,
     };
   }
+
+  /* eslint-disable */
+  generateCoinSecret = () => {
+    const [G, o, g1, g2, e] = params;
+    const m = ctx.BIG.randomnum(G.order, G.rngGen);
+    const pk = ctx.PAIR.G1mul(g1, m);
+
+    // create h to ge g1^power
+    const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
+
+    // random blindling factor o_blind
+    const o_blind = ctx.BIG.randomnum(G.order, G.rngGen);
+    const h_blind = ctx.PAIR.G1mul(h1, o_blind);
+
+    pk.add(h_blind);
+    pk.affine();
+
+    const sk = {
+      m: m,
+      o: o_blind
+    };
+
+    return [sk, pk];
+  };
+  /* eslint-enable */
+
+  handleCoinSubmit = async () => {
+    const [sk_coin, pk_coin] = this.generateCoinSecret();
+    const coin = await getCoin(
+      sk_coin,
+      pk_coin,
+      this.props.pk_client,
+      this.props.sk_client,
+      issuer,
+    );
+
+    if (coin != null) {
+      this.setState({ coin });
+      this.setState({ sk: sk_coin });
+      if (DEBUG) {
+        console.log(`Got credential signed by the issuer @${issuer}`);
+      }
+    }
+  };
 
   getSignatures = async (serversArg) => {
     const signingCoin =
@@ -45,34 +88,6 @@ class CredentialRequester extends React.Component {
       }
     }));
     return signatures;
-  };
-
-  handleCoinSubmit = async () => {
-    const [sk_coin, pk_coin] = this.generateCoinSecret();
-    const coin = await getCoin(
-      sk_coin,
-      pk_coin,
-      this.props.pk_client,
-      this.props.sk_client,
-      issuer,
-    );
-
-    if (coin != null) {
-      this.setState({ coin });
-      this.setState({ sk: sk_coin });
-      if (DEBUG) {
-        console.log(`Got credential signed by the issuer @${issuer}`);
-      }
-    }
-  };
-
-  // GENERATE CREDENTIAL SECRET VALUE(S)
-  // EDIT:
-  generateCoinSecret = () => {
-    const [G, o, g1, g2, e] = params;
-    const sk = ctx.BIG.randomnum(G.order, G.rngGen);
-    const pk = ctx.PAIR.G1mul(g1, sk);
-    return [sk, pk];
   };
 
   aggregateSignatures = (signatures) => {
@@ -107,9 +122,14 @@ class CredentialRequester extends React.Component {
     const signatures = await this.getSignatures(signingServers);
 
     const aggregatedSignature = this.aggregateSignatures(signatures);
-    // const randomizedSignature = CoinSig.randomize(params, aggregatedSignature);
+    if (aggregatedSignature === null) {
+      if (DEBUG) {
+        console.log('There was an error in aggregating the signatures');
+      }
+      this.setState({ coinState: COIN_STATUS.error });
+    }
 
-    let randomizedSignature = this.props.handleRandomize(aggregatedSignature);
+    const randomizedSignature = this.props.handleRandomize(aggregatedSignature);
 
     this.setState({ randomizedSignature });
 
@@ -124,7 +144,7 @@ class CredentialRequester extends React.Component {
       this.setState({ coinState: COIN_STATUS.signed });
     } else {
       if (DEBUG) {
-        console.log('There was an error in signing/aggregating the coin');
+        console.log('There was an error in signing the coin');
       }
       this.setState({ coinState: COIN_STATUS.error });
     }
