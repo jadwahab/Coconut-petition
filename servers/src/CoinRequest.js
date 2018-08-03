@@ -13,6 +13,22 @@ export const getBytesProof = (proof) => {
   return [bytesW, bytesCm, bytesR];
 };
 
+export const getBytesProof_Auth = (proof) => {
+  const [C, rd, rm, ro, rk] = proof;
+  const bytesC = [];
+  const bytesRd = [];
+  const bytesRm = [];
+  const bytesRo = [];
+  const bytesRk = [];
+  C.toBytes(bytesC);
+  rd.toBytes(bytesRd);
+  rm.toBytes(bytesRm);
+  ro.toBytes(bytesRo);
+  rk.toBytes(bytesRk);
+
+  return [bytesC, bytesRd, bytesRm, bytesRo, bytesRk];
+};
+
 export const getCoinRequestObject = (
   sk_coin, // to generate proof of secret
   pk_coin, // part of the coin

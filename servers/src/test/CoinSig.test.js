@@ -3,11 +3,12 @@ import { expect, assert } from 'chai';
 import { ctx, power } from '../globalConfig';
 import CoinSig from '../CoinSig';
 import BpGroup from '../BpGroup';
-import { hashToBIG, hashToPointOnCurve, prepareProofOfSecret, verifyProofOfSecret, fromBytesProof } from '../auxiliary';
+import { hashToBIG, hashToPointOnCurve, prepareProofOfSecret, verifyProofOfSecret, fromBytesProof,
+  prepareProofOfSecret_Auth, verifyProofOfSecret_Auth, fromBytesProof_Auth } from '../auxiliary';
 import ElGamal from '../ElGamal';
 import { getSigningCoin, verifySignRequest } from '../SigningCoin';
 import { getIssuedCoin, verifyCoinSignature } from '../IssuedCoin';
-import { getBytesProof } from '../CoinRequest';
+import { getBytesProof, getBytesProof_Auth } from '../CoinRequest';
 
 const generateCoinSecret = (params) => {
   const [G, o, g1, g2, e] = params;
@@ -92,18 +93,42 @@ describe('Coconut Scheme:', () => {
     });
   });
 
-  describe('NIZK proof of secret to the commitment', () => {
-    it('Verified proofOfSecret', () => {
+  describe('NIZK proof of secret for the commitment (sent to issuer)', () => {
+    it('Verified proofOfSecret_Issuer', () => {
       const params = CoinSig.setup();
       const [G, o, g1, g2, e] = params;
       const [coin_sks, coin_pk] = generateCoinSecret(params);
 
       const issuingServerStr = 'issuer';
       const secretProof = prepareProofOfSecret(params, coin_sks, issuingServerStr);
-      const proof_bytes = getBytesProof(secretProof);
+      const proof_bytes = getBytesProof(secretProof); // EDIT: FIX to c rm ro
 
       const proof = fromBytesProof(proof_bytes);
       assert.isTrue(verifyProofOfSecret(params, coin_pk, proof, issuingServerStr));
+    });
+  });
+
+  describe('NIZK proof of secret for the encryption of the commitment (sent to signing authorities)', () => {
+    it('Verified proofOfSecret_Auth', () => {
+      const params = CoinSig.setup();
+      const [G, o, g1, g2, e] = params;
+      const [coin_sks, coin_pk] = generateCoinSecret(params);
+      const [sk_elgamal, pk_elgamal] = ElGamal.keygen(params);
+
+      const coinStr = coin_pk.toString() + pk_elgamal.toString();
+  
+      const h = hashToPointOnCurve(coinStr);
+    
+      const [a, b, k] = ElGamal.encrypt(params, pk_elgamal, coin_sks.m, h);
+    
+      const enc_sk = [a, b];
+
+      const signingAuthStr = 'signing authority';
+      const secretProof = prepareProofOfSecret_Auth(params, h, coin_sks, sk_elgamal, k, signingAuthStr);
+      const proof_bytes = getBytesProof_Auth(secretProof);
+
+      const proof = fromBytesProof_Auth(proof_bytes);
+      assert.isTrue(verifyProofOfSecret_Auth(params, h, coin_pk, pk_elgamal, enc_sk, proof, signingAuthStr));
     });
   });
 
@@ -352,7 +377,7 @@ describe('Coconut Scheme:', () => {
 
     // SHOW_BLIND_SIGN: client prepares credential proofs
     const petitionID = 'e-petition';
-    it('Aw verified', () => {
+    it('Aw/kappa verified', () => {
       const gs = hashToPointOnCurve(petitionID);
       const t = ctx.BIG.randomnum(G.order, G.rngGen);
       // kappa = t*g2 + aX + m*aY :
@@ -405,7 +430,7 @@ describe('Coconut Scheme:', () => {
       assert.isTrue(expr);
     });
 
-    it('Bw verified', () => {
+    it('Bw/nu verified', () => {
       const t = ctx.BIG.randomnum(G.order, G.rngGen);
       const nu = ctx.PAIR.G1mul(h, t);
       const wt = ctx.BIG.randomnum(G.order, G.rngGen);
@@ -432,7 +457,7 @@ describe('Coconut Scheme:', () => {
       assert.isTrue(expr);
     });
 
-    it('Cw verified', () => {
+    it('Cw/zeta verified', () => {
       const gs = hashToPointOnCurve(petitionID);
       const zeta = ctx.PAIR.G1mul(gs, coin_sk);
       const wm = ctx.BIG.randomnum(G.order, G.rngGen);
