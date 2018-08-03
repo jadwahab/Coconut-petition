@@ -114,6 +114,124 @@ export const verifyProofOfSecret = (params, pub, proof, verifierStr) => {
   return expr;
 };
 
+export const prepareProofOfSecret_Auth = (params, h, sks, d, k) => {
+  const [G, o, g1, g2, e] = params;
+  const m = sks.m;
+  const o_blind = sks.o;
+  // get h1
+  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
+
+  // create random witnesses
+  const wd = ctx.BIG.randomnum(G.order, G.rngGen);
+  const wm = ctx.BIG.randomnum(G.order, G.rngGen);
+  const wo = ctx.BIG.randomnum(G.order, G.rngGen);
+  const wk = ctx.BIG.randomnum(G.order, G.rngGen);
+
+  const Aw = ctx.PAIR.G1mul(g1, wd);
+  Aw.affine();
+  
+  const Bw = ctx.PAIR.G1mul(g1, wm);
+  const blind_factor = ctx.PAIR.G1mul(h1, wo);
+  Bw.add(blind_factor);
+  Bw.affine();
+
+  const Cw_0 = ctx.PAIR.G1mul(g1, wk);
+  Cw_0.affine();
+  const elgamal_pk = ctx.PAIR.G1mul(g1, d);
+  const Cw_1 = ctx.PAIR.G1mul(elgamal_pk, wk);
+  const temp = ctx.PAIR.G1mul(h, wm);
+  Cw_1.add(temp);
+  Cw_1.affine();
+  const Cw = [Cw_0, Cw_1];
+
+  const C = hashToBIG(g1.toString() + g2.toString() + h.toString() + elgamal_pk.toString() +
+  Aw.toString() + Bw.toString() + Cw.toString());
+
+  // to prevent object mutation
+  const d_cpy = new ctx.BIG(d);
+  const m_cpy = new ctx.BIG(m);
+  const o_cpy = new ctx.BIG(o_blind);
+  const k_cpy = new ctx.BIG(k);
+  const C_cpy = new ctx.BIG(C);
+  d_cpy.mod(o);
+  m_cpy.mod(o);
+  o_cpy.mod(o);
+  k_cpy.mod(o);
+  C_cpy.mod(o);
+
+  // rd
+  const td1 = ctx.BIG.mul(d_cpy, C_cpy); // produces DBIG
+  const td2 = td1.mod(o); // but this gives BIG back
+  const rd = new ctx.BIG(wd);
+  rd.sub(td2);
+  rd.add(o); // to ensure positive result
+  rd.mod(o);
+
+  // rm
+  const tm1 = ctx.BIG.mul(m_cpy, C_cpy); // produces DBIG
+  const tm2 = tm1.mod(o); // but this gives BIG back
+  const rm = new ctx.BIG(wm);
+  rm.sub(tm2);
+  rm.add(o); // to ensure positive result
+  rm.mod(o);
+
+  // ro
+  const to1 = ctx.BIG.mul(o_cpy, C_cpy); // produces DBIG
+  const to2 = to1.mod(o); // but this gives BIG back
+  const ro = new ctx.BIG(wo);
+  ro.sub(to2);
+  ro.add(o); // to ensure positive result
+  ro.mod(o);
+
+  // rk
+  const tk1 = ctx.BIG.mul(k_cpy, C_cpy); // produces DBIG
+  const tk2 = tk1.mod(o); // but this gives BIG back
+  const rk = new ctx.BIG(wk);
+  rk.sub(tk2);
+  rk.add(o); // to ensure positive result
+  rk.mod(o);
+
+  return [C, rd, rm, ro, rk];
+};
+
+export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk, proof) => {
+  const [G, o, g1, g2, e] = params;
+  const [C, rd, rm, ro, rk] = proof;
+  // get h1
+  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
+
+  const Aw_prove = ctx.PAIR.G1mul(g1, rd);
+  const tAw1 = ctx.PAIR.G1mul(elgamal_pk, C);
+  Aw_prove.add(tAw1);
+  Aw_prove.affine();
+
+  const Bw_prove = ctx.PAIR.G1mul(g1, rm);
+  const tBw1 = ctx.PAIR.G1mul(h1, ro);
+  const tBw2 = ctx.PAIR.G1mul(coin_pk, C);
+  Bw_prove.add(tBw1);
+  Bw_prove.add(tBw2);
+  Bw_prove.affine();
+
+  const Cw_0_prove = ctx.PAIR.G1mul(g1, rk);
+  const tCw_0 = ctx.PAIR.G1mul(enc_sk[0], C);
+  Cw_0_prove.add(tCw_0);
+  Cw_0_prove.affine();
+
+  const Cw_1_prove = ctx.PAIR.G1mul(elgamal_pk, rk);
+  const tCw_1 = ctx.PAIR.G1mul(h, rm);
+  const t2Cw_1 = ctx.PAIR.G1mul(enc_sk[1], C);
+  Cw_1_prove.add(tCw_1);
+  Cw_1_prove.add(t2Cw_1);
+
+  const Cw_prove = [Cw_0_prove, Cw_1_prove];
+
+  const C_prove = hashToBIG(g1.toString() + g2.toString() + h.toString() + elgamal_pk.toString() +
+  Aw_prove.toString() + Bw_prove.toString() + Cw_prove.toString());
+
+  const expr = ctx.BIG.comp(C, C_prove) === 0;
+
+  return expr;
+};
 
 export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petitionID) => {
   const [G, o, g1, g2, e] = params;

@@ -13,6 +13,22 @@ export const getBytesProof = (proof) => {
   return [bytesC, bytesRm, bytesRo];
 };
 
+export const getBytesProof_Auth = (proof) => {
+  const [C, rd, rm, ro, rk] = proof;
+  const bytesC = [];
+  const bytesRd = [];
+  const bytesRm = [];
+  const bytesRo = [];
+  const bytesRk = [];
+  C.toBytes(bytesC);
+  rd.toBytes(bytesRd);
+  rm.toBytes(bytesRm);
+  ro.toBytes(bytesRo);
+  rk.toBytes(bytesRk);
+
+  return [bytesC, bytesRd, bytesRm, bytesRo, bytesRk];
+};
+
 export const getCoinRequestObject = (
   sk_coin, // to generate proof of secret
   pk_coin, // part of the coin
@@ -77,7 +93,7 @@ export const verifyRequestSignature = (coin_request) => {
   return ctx.ECDH.ECPVP_DSA(sha, pk_client_bytes, requestStr, C, D) === 0;
 };
 
-const fromBytesProof = (bytesProof) => {
+export const fromBytesProof = (bytesProof) => {
   const [bytesW, bytesCm, bytesR] = bytesProof;
   const W = ctx.ECP.fromBytes(bytesW);
   const cm = ctx.BIG.fromBytes(bytesCm);

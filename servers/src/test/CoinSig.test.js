@@ -123,12 +123,14 @@ describe('Coconut Scheme:', () => {
     
       const enc_sk = [a, b];
 
-      const signingAuthStr = 'signing authority';
-      const secretProof = prepareProofOfSecret_Auth(params, h, coin_sks, sk_elgamal, k, signingAuthStr);
+      // const signingAuthStr = 'signing authority';
+      // const secretProof = prepareProofOfSecret_Auth(params, h, coin_sks, sk_elgamal, k, signingAuthStr);
+      const secretProof = prepareProofOfSecret_Auth(params, h, coin_sks, sk_elgamal, k);
       const proof_bytes = getBytesProof_Auth(secretProof);
 
       const proof = fromBytesProof_Auth(proof_bytes);
-      assert.isTrue(verifyProofOfSecret_Auth(params, h, coin_pk, pk_elgamal, enc_sk, proof, signingAuthStr));
+      // assert.isTrue(verifyProofOfSecret_Auth(params, h, coin_pk, pk_elgamal, enc_sk, proof, signingAuthStr));
+      assert.isTrue(verifyProofOfSecret_Auth(params, h, coin_pk, pk_elgamal, enc_sk, proof));
     });
   });
 

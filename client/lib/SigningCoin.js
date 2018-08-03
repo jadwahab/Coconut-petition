@@ -1,8 +1,9 @@
-import { hashToPointOnCurve } from './auxiliary';
+import { hashToPointOnCurve, prepareProofOfSecret_Auth } from './auxiliary';
 import { ctx, params } from '../src/config';
-import ElGamal from '../lib/ElGamal';
+import ElGamal from './ElGamal';
+import { getBytesProof_Auth } from './CoinRequest';
 
-export const getSigningCoin = (issuedCoin, ElGamalPK, coin_sk, sk_client_bytes) => {
+export const getSigningCoin = (issuedCoin, ElGamalSK, ElGamalPK, coin_sks, sk_client_bytes) => {
   const [G, o, g1, g2, e] = params;
 
   const reducer = (acc, cur) => acc + cur;
@@ -10,12 +11,12 @@ export const getSigningCoin = (issuedCoin, ElGamalPK, coin_sk, sk_client_bytes) 
   const coinStr =
     issuedCoin.pk_client_bytes.reduce(reducer) + // client's key
     issuedCoin.pk_coin_bytes.reduce(reducer) + // coin's pk
-    issuedCoin.issuedCoinSig[0].reduce(reducer) +
-    issuedCoin.issuedCoinSig[1].reduce(reducer);
+    issuedCoin.issuedCoinSig[0].reduce(reducer) + // issuer sig
+    issuedCoin.issuedCoinSig[1].reduce(reducer); // client sig
 
   const h = hashToPointOnCurve(coinStr);
 
-  const [a, b, k] = ElGamal.encrypt(params, ElGamalPK, coin_sk.m, h);
+  const [a, b, k] = ElGamal.encrypt(params, ElGamalPK, coin_sks.m, h);
 
   const enc_sk = [a, b];
 
@@ -39,12 +40,17 @@ export const getSigningCoin = (issuedCoin, ElGamalPK, coin_sk, sk_client_bytes) 
   ctx.ECDH.ECPSP_DSA(sha, G.rngGen, sk_client_bytes, requestStr, C, D);
   const requestSig = [C, D];
 
+  // proof of secret:
+  const secretProof = prepareProofOfSecret_Auth(params, h, coin_sks, ElGamalSK, k);
+  const proof_bytes = getBytesProof_Auth(secretProof);
+
   return {
     pk_coin_bytes: issuedCoin.pk_coin_bytes,
     pk_client_bytes: issuedCoin.pk_client_bytes,
     issuedCoinSig: issuedCoin.issuedCoinSig,
     enc_sk_bytes: enc_sk_bytes,
     requestSig: requestSig,
+    proof: proof_bytes,
   };
 
   // Representation:
@@ -54,6 +60,7 @@ export const getSigningCoin = (issuedCoin, ElGamalPK, coin_sk, sk_client_bytes) 
     }signed by issuer
     E[h^x]
   }signed by client
+  proof
  */
 };
 

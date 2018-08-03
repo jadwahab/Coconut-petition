@@ -6,8 +6,8 @@ import { DEBUG } from '../config/appConfig';
 import ElGamal from '../../ElGamal';
 import { verifySignRequest } from '../../SigningCoin';
 import { sessionSignatures, publicKeys } from '../cache';
-import { issuer } from '../../globalConfig';
-import { getPublicKey } from '../../auxiliary';
+import { issuer, ctx } from '../../globalConfig';
+import { getPublicKey, hashToPointOnCurve, fromBytesProof_Auth, verifyProofOfSecret_Auth } from '../../auxiliary';
 
 const router = express.Router();
 
@@ -42,8 +42,33 @@ router.post('/', async (req, res) => {
       throw new Error('Coin was tampered with.');
     }
 
+    const reducer = (acc, cur) => acc + cur;
+
+    const coinStr =
+      signingCoin.pk_client_bytes.reduce(reducer) + // client's key
+      signingCoin.pk_coin_bytes.reduce(reducer) + // coin's pk
+      signingCoin.issuedCoinSig[0].reduce(reducer) + // issuer sig
+      signingCoin.issuedCoinSig[1].reduce(reducer); // client sig
+
+    const h_comit = hashToPointOnCurve(coinStr);
 
     const ElGamalPK = ElGamal.getPKFromBytes(params, ElGamalPKBytes);
+    const proof = fromBytesProof_Auth(signingCoin.proof);
+    const coin_pk = ctx.ECP.fromBytes(signingCoin.pk_coin_bytes);
+    const [enc_sk_a_bytes, enc_sk_b_bytes] = signingCoin.enc_sk_bytes;
+    const enc_sk_a = ctx.ECP.fromBytes(enc_sk_a_bytes);
+    const enc_sk_b = ctx.ECP.fromBytes(enc_sk_b_bytes);
+    const enc_sk = [enc_sk_a, enc_sk_b];
+    const isProofValid = verifyProofOfSecret_Auth(params, h_comit, coin_pk, ElGamalPK, enc_sk, proof);
+
+    if (!isProofValid) {
+      console.log('Proof was not correct');
+      throw new Error('Proof was not correct');
+    }
+
+    if (DEBUG) {
+      console.log(`Was credntial proof valid: ${isProofValid}`);
+    }
 
     const [h, enc_sig] = CoinSig.mixedSignCoin(params, sk, signingCoin);
     const hBytes = [];

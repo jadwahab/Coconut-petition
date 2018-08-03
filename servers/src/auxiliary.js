@@ -118,7 +118,7 @@ export const verifyProofOfSecret = (params, pub, proof, verifierStr) => {
   return expr;
 };
 
-export const prepareProofOfSecret_Auth = (params, h, sks, d, k, verifierStr) => {
+export const prepareProofOfSecret_Auth = (params, h, sks, d, k) => {
   const [G, o, g1, g2, e] = params;
   const m = sks.m;
   const o_blind = sks.o;
@@ -149,7 +149,7 @@ export const prepareProofOfSecret_Auth = (params, h, sks, d, k, verifierStr) => 
   const Cw = [Cw_0, Cw_1];
 
   const C = hashToBIG(g1.toString() + g2.toString() + h.toString() + elgamal_pk.toString() +
-  Aw.toString() + Bw.toString() + Cw.toString() + verifierStr);
+  Aw.toString() + Bw.toString() + Cw.toString());
 
   // to prevent object mutation
   const d_cpy = new ctx.BIG(d);
@@ -198,7 +198,7 @@ export const prepareProofOfSecret_Auth = (params, h, sks, d, k, verifierStr) => 
   return [C, rd, rm, ro, rk];
 };
 
-export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk, proof, verifierStr) => {
+export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk, proof) => {
   const [G, o, g1, g2, e] = params;
   const [C, rd, rm, ro, rk] = proof;
   // get h1
@@ -230,7 +230,7 @@ export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk,
   const Cw_prove = [Cw_0_prove, Cw_1_prove];
 
   const C_prove = hashToBIG(g1.toString() + g2.toString() + h.toString() + elgamal_pk.toString() +
-  Aw_prove.toString() + Bw_prove.toString() + Cw_prove.toString() + verifierStr);
+  Aw_prove.toString() + Bw_prove.toString() + Cw_prove.toString());
 
   const expr = ctx.BIG.comp(C, C_prove) === 0;
 

@@ -65,8 +65,7 @@ class CredentialRequester extends React.Component {
   };
 
   getSignatures = async (serversArg) => {
-    const signingCoin =
-      getSigningCoin(this.state.coin, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
+    const signingCoin = getSigningCoin(this.state.coin, this.props.ElGamalSK, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
 
     const signatures = await Promise.all(serversArg.map(async (server) => {
       try {
