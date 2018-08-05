@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { checkUsedId, insertUsedId, changeBalance } from '../utils/DatabaseManager';
-import { ctx, merchant, params, signingServers } from '../../globalConfig';
+import { ctx, petitionOwner, params, signingServers } from '../../globalConfig';
 import { DEBUG } from '../config/appConfig';
 import { fromBytesMPCP, verifyProofOfSecret, getSigningAuthorityPublicKey,
   getPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
@@ -29,12 +29,12 @@ router.post('/', async (req, res) => {
   const sig = ctx.ECP.fromBytes(sigBytes);
 
 
-  if (publicKeys[merchant] == null || publicKeys[merchant].length <= 0) {
-    const merchantPK = await getPublicKey(merchant);
-    publicKeys[merchant] = merchantPK;
+  if (publicKeys[petitionOwner] == null || publicKeys[petitionOwner].length <= 0) {
+    const petitionOwnerPK = await getPublicKey(petitionOwner);
+    publicKeys[petitionOwner] = petitionOwnerPK;
   }
 
-  const merchantStr = publicKeys[merchant].join('');
+  const petitionOwnerStr = publicKeys[petitionOwner].join('');
 
   const signingAuthoritiesPublicKeys = Object.entries(publicKeys)
     .filter(entry => signingServers.includes(entry[0]))
@@ -59,7 +59,7 @@ router.post('/', async (req, res) => {
     aggregatePublicKey = publicKeys['Aggregate'];
   }
 
-  const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, [h, sig], MPCP_output, merchantStr);
+  const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, [h, sig], MPCP_output, petitionOwnerStr);
   if (DEBUG) {
     console.log(`Was credntial proof valid: ${isProofValid}`);
   }
@@ -81,7 +81,7 @@ router.post('/', async (req, res) => {
   //
   // if (isProofValid && !wasCoinAlreadySpent && isSignatureValid) {
   //   await insertUsedId(id);
-  //   // await changeBalance(publicKeys[merchant], coinAttributes.value);
+  //   // await changeBalance(publicKeys[petitionOwner], coinAttributes.value);
   // }
 
 

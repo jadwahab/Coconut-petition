@@ -201,7 +201,7 @@ export async function spendCoin(MPCP_output, signature, server, petitionID) {
     success = response.success;
   } catch (err) {
     console.warn(err);
-    console.warn(`Call to merchant ${server} was unsuccessful`); // EDIT:
+    console.warn(`Call to petitionOwner ${server} was unsuccessful`); // EDIT:
   }
   return success;
 }

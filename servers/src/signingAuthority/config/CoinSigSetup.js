@@ -14,7 +14,7 @@ export const setupCoinSigKeys = () => {
   for (let i = 0; i < pk_gen.length; i++) { pk[i] = pk_gen[i]; }
 
   const [g, X, Y] = pk_gen;
-  // for sending to merchant later, we'll also need byte representation
+  // for sending to petitionOwner later, we'll also need byte representation
   const g2_bytes = [];
   const X_bytes = [];
   const Y_bytes = [];

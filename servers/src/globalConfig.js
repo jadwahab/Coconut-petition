@@ -11,7 +11,7 @@ export const signingServers = (process.env.NODE_ENV === 'production') ? [
   '127.0.0.1:3002',
 ];
 
-export const merchant = (process.env.NODE_ENV === 'production') ? '35.178.0.223:3001' : '127.0.0.1:4000';
+export const petitionOwner = (process.env.NODE_ENV === 'production') ? '35.178.0.223:3001' : '127.0.0.1:4000';
 export const issuer = (process.env.NODE_ENV === 'production') ? '35.178.15.103:3002' : '127.0.0.1:5000';
 
 export const ctx = new CTX('BN254');

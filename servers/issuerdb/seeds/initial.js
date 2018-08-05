@@ -14,7 +14,7 @@
 //             Balance: 1000.00,
 //           },
 //           {
-//             Name: 'Merchant',
+//             Name: 'petitionOwner',
 //             Address: '127.0.0.1',
 //             Balance: 1000.00,
 //           },

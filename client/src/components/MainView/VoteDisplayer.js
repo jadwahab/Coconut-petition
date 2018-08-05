@@ -4,7 +4,7 @@ import { Segment } from 'semantic-ui-react';
 import VoteActionButton from './VoteActionButton';
 import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
-import { params, COIN_STATUS, signingServers, merchant, DEBUG } from '../../config';
+import { params, COIN_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
 import { spendCoin } from '../../utils/api';
 import CoinSig from '../../../lib/CoinSig';
 import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/auxiliary';
@@ -71,12 +71,12 @@ class VoteDisplayer extends React.Component {
 
     const aggregatePublicKey = CoinSig.aggregatePublicKeys_obj(params, signingAuthoritiesPublicKeys);
 
-    const petitionOwner = publicKeys[merchant].join('');
+    const petitionOwnerStr = publicKeys[petitionOwner].join('');
 
     const MPCP_output = CoinSig.make_proof_credentials_petition(params, aggregatePublicKey,
-      this.props.randomizedSignature, this.props.coin_params.sk.m, petitionOwner, this.state.petitionID);
+      this.props.randomizedSignature, this.props.coin_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
-    const success = await spendCoin(MPCP_output, this.props.randomizedSignature, merchant, this.state.petitionID);
+    const success = await spendCoin(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
     if (success) {
       if (DEBUG) {
         console.log('Signature verified');

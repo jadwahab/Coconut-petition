@@ -486,7 +486,7 @@ describe('Coconut Scheme:', () => {
   //     assert.isTrue(expr);
   //   });
     
-  //   // BLIND_VERIFY: merchant/issuer verifies credential
+  //   // BLIND_VERIFY: petitionOwner/issuer verifies credential
   //   it('Credential shown by client is verified', () => {
   //     const MPCP_output = CoinSig.make_proof_credentials_petition(params, pk, sigma, coin_sk, petitionID);
   //     assert.isTrue(CoinSig.verify_proof_credentials_petition(params, pk, sigma, MPCP_output, petitionID));

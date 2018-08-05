@@ -14,7 +14,7 @@ export const signingServers = (process.env.NODE_ENV === 'production') ? [
   '127.0.0.1:3002',
 ];
 
-export const merchant = (process.env.NODE_ENV === 'production') ? '35.178.0.223:3001' : '127.0.0.1:4000';
+export const petitionOwner = (process.env.NODE_ENV === 'production') ? '35.178.0.223:3001' : '127.0.0.1:4000';
 export const issuer = (process.env.NODE_ENV === 'production') ? '35.178.15.103:3002' : '127.0.0.1:5000';
 
 export const ctx = new CTX('BN254');
@@ -56,12 +56,12 @@ export const BUTTON_COIN_STATUS = {
 };
 
 const SERVER_TYPE_SA = 'Signing Authority';
-const SERVER_TYPE_MERCHANT = 'Merchant';
+const SERVER_TYPE_PO = 'Petition Owner';
 const SERVER_TYPE_ISSUER = 'Issuer';
 
 export const SERVER_TYPES = {
   signing: SERVER_TYPE_SA,
-  merchant: SERVER_TYPE_MERCHANT,
+  petitionOwner: SERVER_TYPE_PO,
   issuer: SERVER_TYPE_ISSUER,
 };
 
