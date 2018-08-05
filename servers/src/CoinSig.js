@@ -2,8 +2,9 @@
 // to allow for larger number of signed messages from multiple authorities
 
 import BpGroup from './BpGroup';
-import { ctx } from './globalConfig';
+import { power, ctx } from './globalConfig';
 import { hashToBIG, hashG2ElemToBIG, hashToPointOnCurve, hashMessage } from './auxiliary';
+import ElGamal from './ElGamal';
 
 export default class CoinSig {
   static setup() {
@@ -13,8 +14,11 @@ export default class CoinSig {
     const g2 = G.gen2;
     const e = G.pair;
     const o = G.order;
+    // create h to ge g1^power
+    const p = new ctx.BIG(2);
+    const h1 = G.ctx.PAIR.G1mul(g1, p);
 
-    return [G, o, g1, g2, e];
+    return [G, o, g1, g2, e, h1];
   }
 
   static keygen(params) {
@@ -116,6 +120,23 @@ export default class CoinSig {
 
     aggregateSignature.affine();
     return [signatures[0][0], aggregateSignature];
+  }
+
+  // for threshold decryption
+  static aggregateElGamalPublicKeys(params, pks) {
+    const [G, o, g1, g2, e] = params;
+    const aPk = new G.ctx.ECP();
+
+    for (let i = 0; i < pks.length; i++) {
+      if (i === 0) {
+        aPk.copy(pks[i]);
+      } else {
+        aPk.add(pks[i]);
+      }
+    }
+    aPk.affine();
+
+    return aPk;
   }
 
   // array for servers (issuer or SA)
@@ -342,5 +363,140 @@ export default class CoinSig {
       aY.toString() + Aw.toString() + Bw.toString() + Cw.toString())) === 0;
 
     return (!h.INF && expr1);
+  }
+
+  static make_proof_vote_petition(params, pub, vote) {
+    const [G, o, g1, g2, e, h1] = params;
+    if (typeof vote === 'number') {
+      vote = new ctx.BIG(vote);
+    }
+    const [a, b, k] = ElGamal.encrypt(params, pub, vote, h1);
+    const enc_v = [a, b];
+    
+    const r1 = ctx.BIG.randomnum(G.order, G.rngGen);
+    const r2 = new ctx.BIG(r1);
+    const vote_cpy = new ctx.BIG(vote); // to prevent object mutation
+    const t1 = ctx.BIG.mul(vote_cpy, r1); // produces DBIG
+    const t2 = t1.mod(o); // but this gives BIG back
+    r2.sub(t2);
+    r2.add(o); // to ensure positive result
+    r2.mod(o);
+
+    const Cv = ctx.PAIR.G1mul(g1, vote);
+    const temp4 = ctx.PAIR.G1mul(h1, r1);
+    Cv.add(temp4);
+    Cv.affine();
+
+    // create random witnesses
+    const wk = ctx.BIG.randomnum(G.order, G.rngGen);
+    const wv = ctx.BIG.randomnum(G.order, G.rngGen);
+    const wr1 = ctx.BIG.randomnum(G.order, G.rngGen);
+    const wr2 = ctx.BIG.randomnum(G.order, G.rngGen);
+
+    const Wa = ctx.PAIR.G1mul(g1, wk);
+    Wa.affine();
+    
+    const Wb = ctx.PAIR.G1mul(pub, wk);
+    const blind_factor = ctx.PAIR.G1mul(h1, wv);
+    Wb.add(blind_factor);
+    Wb.affine();
+  
+    const WCv = ctx.PAIR.G1mul(g1, wv);
+    const blind_factor2 = ctx.PAIR.G1mul(h1, wr1);
+    WCv.add(blind_factor2);
+    WCv.affine();
+    
+    const WCv2 = ctx.PAIR.G1mul(Cv, wv);
+    const blind_factor3 = ctx.PAIR.G1mul(h1, wr2);
+    WCv2.add(blind_factor3);
+    WCv2.affine();
+  
+    const C = hashToBIG(g1.toString() + h1.toString() + a.toString() + b.toString() +
+      Cv.toString() + Wa.toString() + Wb.toString() + WCv.toString() + WCv2.toString());
+
+    // to prevent object mutation
+    const k_cpy = new ctx.BIG(k);
+    const v_cpy = new ctx.BIG(vote);
+    const r1_cpy = new ctx.BIG(r1);
+    const r2_cpy = new ctx.BIG(r2);
+    const C_cpy = new ctx.BIG(C);
+    k_cpy.mod(o);
+    v_cpy.mod(o);
+    r1_cpy.mod(o);
+    r2_cpy.mod(o);
+    C_cpy.mod(o);
+
+    // rk
+    const tk1 = ctx.BIG.mul(k_cpy, C_cpy); // produces DBIG
+    const tk2 = tk1.mod(o); // but this gives BIG back
+    const rk = new ctx.BIG(wk);
+    rk.sub(tk2);
+    rk.add(o); // to ensure positive result
+    rk.mod(o);
+    
+    // rv
+    const tv1 = ctx.BIG.mul(v_cpy, C_cpy); // produces DBIG
+    const tv2 = tv1.mod(o); // but this gives BIG back
+    const rv = new ctx.BIG(wv);
+    rv.sub(tv2);
+    rv.add(o); // to ensure positive result
+    rv.mod(o);
+
+    // rr1
+    const tr1_1 = ctx.BIG.mul(r1_cpy, C_cpy); // produces DBIG
+    const tr1_2 = tr1_1.mod(o); // but this gives BIG back
+    const rr1 = new ctx.BIG(wr1);
+    rr1.sub(tr1_2);
+    rr1.add(o); // to ensure positive result
+    rr1.mod(o);
+
+    // rr2
+    const tr2_1 = ctx.BIG.mul(r2_cpy, C_cpy); // produces DBIG
+    const tr2_2 = tr2_1.mod(o); // but this gives BIG back
+    const rr2 = new ctx.BIG(wr2);
+    rr2.sub(tr2_2);
+    rr2.add(o); // to ensure positive result
+    rr2.mod(o);
+
+    return [enc_v, C, Cv, rk, rv, rr1, rr2];
+  }
+
+  static verify_proof_vote_petition(params, pub, MPVP_output) {
+    const [G, o, g1, g2, e, h1] = params;
+    const [enc_v, C, Cv, rk, rv, rr1, rr2] = MPVP_output;
+    const [a, b] = enc_v;
+
+    const Wa_prove = ctx.PAIR.G1mul(g1, rk);
+    const tWa1 = ctx.PAIR.G1mul(a, C);
+    Wa_prove.add(tWa1);
+    Wa_prove.affine();
+  
+    const Wb_prove = ctx.PAIR.G1mul(pub, rk);
+    const tWb1 = ctx.PAIR.G1mul(h1, rv);
+    const tWb2 = ctx.PAIR.G1mul(b, C);
+    Wb_prove.add(tWb1);
+    Wb_prove.add(tWb2);
+    Wb_prove.affine();
+
+    const WCv_prove = ctx.PAIR.G1mul(g1, rv);
+    const tWCv1 = ctx.PAIR.G1mul(h1, rr1);
+    const tWCv2 = ctx.PAIR.G1mul(Cv, C);
+    WCv_prove.add(tWCv1);
+    WCv_prove.add(tWCv2);
+    WCv_prove.affine();
+    
+    const WCv2_prove = ctx.PAIR.G1mul(Cv, rv);
+    const tWCv2_1 = ctx.PAIR.G1mul(h1, rr2);
+    const tWCv2_2 = ctx.PAIR.G1mul(Cv, C);
+    WCv2_prove.add(tWCv2_1);
+    WCv2_prove.add(tWCv2_2);
+    WCv2_prove.affine();
+
+    const C_prove = hashToBIG(g1.toString() + h1.toString() + a.toString() + b.toString() +
+    Cv.toString() + Wa_prove.toString() + Wb_prove.toString() + WCv_prove.toString() + WCv2_prove.toString());
+  
+    const expr = ctx.BIG.comp(C, C_prove) === 0;
+  
+    return expr;
   }
 }

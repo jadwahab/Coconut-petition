@@ -272,6 +272,20 @@ export const fromBytesMPCP = (bytesMPCP) => {
   return [kappa, nu, zeta, pi_v];
 };
 
+export const fromBytesMPVP = (bytesProof) => {
+  const [bytesA, bytesB, bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2] = bytesProof;
+  const a = ctx.ECP.fromBytes(bytesA);
+  const b = ctx.ECP.fromBytes(bytesB);
+  const enc_v = [a, b];
+  const C = ctx.BIG.fromBytes(bytesC);
+  const Cv = ctx.ECP.fromBytes(bytesCv);
+  const rk = ctx.BIG.fromBytes(bytesRk);
+  const rv = ctx.BIG.fromBytes(bytesRv);
+  const rr1 = ctx.BIG.fromBytes(bytesRr1);
+  const rr2 = ctx.BIG.fromBytes(bytesRr2);
+  return [enc_v, C, Cv, rk, rv, rr1, rr2];
+};
+
 export const getPublicKey = async (server) => {
   try {
     let response = await fetch(`http://${server}/pk`);

@@ -39,6 +39,21 @@ export default class ElGamal {
     return b_cpy;
   }
 
+  static logh(params, hm, h, max) {
+    const [G, o, g1, g2, e] = params;
+    try {
+      for (let i = 0; i < max; i++) {
+        const m = new G.ctx.BIG(i);
+        if (G.ctx.PAIR.G1mul(h, m).equals(hm)) {
+          return m;
+        }
+      }
+      throw "m not found";
+    } catch (error) {
+      return false;
+    }
+  }
+
   static getPKBytes(pk) {
     const PKBytes = [];
     pk.toBytes(PKBytes);

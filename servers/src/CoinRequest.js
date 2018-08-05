@@ -29,6 +29,29 @@ export const getBytesProof_Auth = (proof) => {
   return [bytesC, bytesRd, bytesRm, bytesRo, bytesRk];
 };
 
+export const getBytesMPVP = (proof) => {
+  const [enc_v, C, Cv, rk, rv, rr1, rr2] = proof;
+  const [a, b] = enc_v;
+  const bytesA = [];
+  const bytesB = [];
+  const bytesC = [];
+  const bytesCv = [];
+  const bytesRk = [];
+  const bytesRv = [];
+  const bytesRr1 = [];
+  const bytesRr2 = [];
+  a.toBytes(bytesA);
+  b.toBytes(bytesB);
+  C.toBytes(bytesC);
+  Cv.toBytes(bytesCv);
+  rk.toBytes(bytesRk);
+  rv.toBytes(bytesRv);
+  rr1.toBytes(bytesRr1);
+  rr2.toBytes(bytesRr2);
+
+  return [bytesA, bytesB, bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2];
+};
+
 export const getCoinRequestObject = (
   sk_coin, // to generate proof of secret
   pk_coin, // part of the coin
