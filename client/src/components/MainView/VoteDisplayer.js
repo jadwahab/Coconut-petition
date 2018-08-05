@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Segment } from 'semantic-ui-react';
 import VoteActionButton from './VoteActionButton';
+import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
 import { params, COIN_STATUS, signingServers, merchant, DEBUG } from '../../config';
 import { spendCoin } from '../../utils/api';
@@ -14,6 +15,7 @@ class VoteDisplayer extends React.Component {
     super(props);
     this.state = {
       coinState: COIN_STATUS.signed,
+      petitionID: null,
       // remainingValidityString: '',
     };
   }
@@ -57,35 +59,7 @@ class VoteDisplayer extends React.Component {
   //   this.setState({ remainingValidityString: remainingValidityString });
   // };
 
-// // AGGREGATE PUBLIC KEYS OF AUTHORITIES
-//   aggregate_pkX_component = (signingAuthoritiesPublicKeys) => {
-//     const aX = new ctx.ECP2();
-//     Object.entries(signingAuthoritiesPublicKeys).forEach(([server, publicKey]) => {
-//       aX.add(publicKey[1]); // publicKey has structure [g, X, Y], so we access element at 2nd index corresponding to sk (m)
-//     });
-//     aX.affine();
-//
-//     return aX;
-//   };
-//
-//   aggregate_pkY_component = (signingAuthoritiesPublicKeys) => {
-//     const aY = new ctx.ECP2();
-//     Object.entries(signingAuthoritiesPublicKeys).forEach(([server, publicKey]) => {
-//       aY.add(publicKey[2]); // publicKey has structure [g, X, Y], so we access element at 2nd index corresponding to sk
-//     });
-//     aY.affine();
-//
-//     return aY;
-//   };
-
-
   handleCoinSpend = async () => {
-
-// ///////
-//     console.log('VoteDisplayer_randomizedSignature:');
-//     console.log(this.props.randomizedSignature);
-// ///////
-
     this.setState({ coinState: COIN_STATUS.spending });
 
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
@@ -97,21 +71,18 @@ class VoteDisplayer extends React.Component {
 
     const aggregatePublicKey = CoinSig.aggregatePublicKeys_obj(params, signingAuthoritiesPublicKeys);
 
-    const merchantStr = publicKeys[merchant].join('');  // EDIT: petitionID
+    const petitionOwner = publicKeys[merchant].join('');
 
-    const MPCP_output = CoinSig.make_proof_credentials_petition(params, aggregatePublicKey, 
-                        this.props.randomizedSignature, this.props.coin_params.sk.m, merchantStr);
+    const MPCP_output = CoinSig.make_proof_credentials_petition(params, aggregatePublicKey,
+      this.props.randomizedSignature, this.props.coin_params.sk.m, petitionOwner, this.state.petitionID);
 
-    if (DEBUG) {
-      console.log('Sending ShowBlingSign output');
-    }
-
-    const success = await spendCoin(MPCP_output, this.props.randomizedSignature, merchant);
+    const success = await spendCoin(MPCP_output, this.props.randomizedSignature, merchant, this.state.petitionID);
     if (success) {
       if (DEBUG) {
         console.log('Signature verified');
       }
       this.setState({ coinState: COIN_STATUS.spent }); // EDIT:
+      this.props.handleRandomizeDisabled(false);
     } else {
       if (DEBUG) {
         console.log('There was an error in verifying signature');
@@ -121,18 +92,25 @@ class VoteDisplayer extends React.Component {
 
   };
 
+  handleInputChange = (petitionID) => {
+    this.setState({ petitionID: petitionID.toString() });
+  };
+
   render() {
     return (
       <Segment.Group horizontal>
+        <Segment style={styles.segmentStyle}>
+          <InputPetitionID onInputChange={this.handleInputChange}>
+            <VoteActionButton
+              onSpend={this.handleCoinSpend}
+              coinState={this.state.coinState}
+              voteDisabled={this.state.petitionID == null}
+            />
+          </InputPetitionID>
+        </Segment>
+
         {/*<Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>*/}
         {/*EDIT: add time left for petition later*/}
-
-        <Segment style={styles.segmentStyle}>
-          <VoteActionButton
-            onSpend={this.handleCoinSpend}
-            coinState={this.state.coinState}
-          />
-        </Segment>
       </Segment.Group>
     );
   }
@@ -141,6 +119,7 @@ class VoteDisplayer extends React.Component {
 VoteDisplayer.propTypes = {
   randomizedSignature: PropTypes.array.isRequired,
   coin_params: PropTypes.object,
+  handleRandomizeDisabled: PropTypes.func.isRequired,
 };
 
 export default VoteDisplayer;

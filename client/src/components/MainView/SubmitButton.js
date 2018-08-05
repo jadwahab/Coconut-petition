@@ -25,6 +25,12 @@ const SubmitButton = (props) => {
       handleButtonClick = props.onRandomize;
       buttonIcon = 'check';
       break;
+    
+    case COIN_STATUS.error:
+      isDisabled = true;
+      buttonContent = BUTTON_COIN_STATUS.error; //  'Error'
+      buttonIcon = 'warning';
+      break;
 
     default:
       break;

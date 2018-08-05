@@ -16,6 +16,7 @@ class MainView extends React.Component {
       sk_client: null,
       pk_client: null,
       coin_params: null,
+      randomizeDisabled: false,
     };
   }
 
@@ -68,7 +69,12 @@ class MainView extends React.Component {
     // works but is less elegant:
     const randSigs = this.state.randomizedSignatures;
     randSigs.push(randomizedSignature);
-    this.setState({ randomizedSignatures: randSigs });
+    this.setState({
+      randomizedSignatures: randSigs,
+      randomizeDisabled: false,
+    });
+
+    this.handleRandomizeDisabled(true);
 
     return randomizedSignature;
   };
@@ -77,6 +83,10 @@ class MainView extends React.Component {
   handleCoinForSpend = (coin, sk) => {
     const coin_params = { coin: coin, sk: sk };
     this.setState({ coin_params });
+  }
+
+  handleRandomizeDisabled = (state) => {
+    this.setState({ randomizeDisabled: state });
   }
 
   render() {
@@ -98,6 +108,7 @@ class MainView extends React.Component {
               pk_client={this.state.pk_client}
               handleRandomize={this.handleRandomize}
               handleCoinForSpend={this.handleCoinForSpend}
+              randomizeDisabled={this.state.randomizeDisabled}
             />
           </Grid.Row>
 
@@ -105,6 +116,7 @@ class MainView extends React.Component {
             <VoteListDisplayer
               randomizedSignatures={this.state.randomizedSignatures}
               coin_params={this.state.coin_params}
+              handleRandomizeDisabled={this.handleRandomizeDisabled}
             />
           </Grid.Row>
         </Grid>

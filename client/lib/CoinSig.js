@@ -147,7 +147,7 @@ export default class CoinSig {
     return [h, [enc_sig_a, enc_sig_b]];
   }
 
-  static make_proof_credentials_petition(params, agg_vk, sigma, m, petitionID) {
+  static make_proof_credentials_petition(params, agg_vk, sigma, m, petitionOwner, petitionID) {
     const [G, o, g1, g2, e] = params;
     // const agg_vk = CoinSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
 
@@ -191,8 +191,8 @@ export default class CoinSig {
     Cw.affine();
 
     // create the challenge
-    const c = hashToBIG(g1.toString() + g2.toString() + aX.toString() +
-      aY.toString() + Aw.toString() + Bw.toString() + Cw.toString());
+    const c = hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString()
+      + Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString());
 
     // create responses
     const rm = new ctx.BIG(wm);
@@ -232,7 +232,7 @@ export default class CoinSig {
     return [kappa, nu, zeta, pi_v];
   }
 
-  static verify_proof_credentials_petition(params, agg_vk, sigma, MPCP_output, petitionID) {
+  static verify_proof_credentials_petition(params, agg_vk, sigma, MPCP_output, petitionOwner, petitionID) {
     if (!sigma) {
       return false;
     }
@@ -267,8 +267,8 @@ export default class CoinSig {
     Cw.affine();
 
     // BIG.comp(a,b): Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b
-    const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() +
-      aY.toString() + Aw.toString() + Bw.toString() + Cw.toString())) === 0;
+    const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString()
+      + Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString())) === 0;
 
     return (!h.INF && expr1);
   }

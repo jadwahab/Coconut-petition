@@ -77,6 +77,7 @@ router.post('/', async (req, res) => {
   try {
     const simplifiedMPCP = req.body.proof;
     const [hBytes, sigBytes] = req.body.signature;
+    const petitionID = req.body.petitionID;
 
     const MPCP_output = fromBytesMPCP(simplifiedMPCP);
     const h = ctx.ECP.fromBytes(hBytes);
@@ -108,11 +109,12 @@ router.post('/', async (req, res) => {
       aggregatePublicKey = publicKeys['Aggregate'];
     }
     
-    const merchantStr = sig_pkBytes.join('');
+    const petitionOwner = sig_pkBytes.join('');
     
     // just check validity of the proof and double spending, we let issuer verify the signature
     // successful verification of the proof assures the coin was supposed to be used in that transaction
-    const isProofValid = CoinSig.verify_proof_credentials_petition(params, aggregatePublicKey, sigma, MPCP_output, merchantStr);
+    const isProofValid = CoinSig.verify_proof_credentials_petition(params, aggregatePublicKey, 
+      sigma, MPCP_output, petitionOwner, petitionID);
     
     if (DEBUG) {
       console.log(`Was credntial proof valid: ${isProofValid}`);
@@ -139,7 +141,11 @@ router.post('/', async (req, res) => {
     // success = isProofValid && !wasCoinAlreadySpent && wasCoinDeposited;
     success = isProofValid;
     if (DEBUG) {
-      console.log(`Was coin successfully spent: ${success}`);
+      console.log(`Was credential successfully shown: ${success}`);
+      if (success) {
+        console.log(`Zeta shown for petitionID: ${petitionID}`);
+        
+      }
     }
   } catch (err) {
     console.warn(err);

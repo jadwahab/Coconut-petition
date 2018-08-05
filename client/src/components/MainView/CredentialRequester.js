@@ -125,16 +125,14 @@ class CredentialRequester extends React.Component {
       this.setState({ coinState: COIN_STATUS.error });
     }
 
-    const randomizedSignature = this.props.handleRandomize(aggregatedSignature);
-
-    this.setState({ randomizedSignature });
+    this.setState({ randomizedSignature: aggregatedSignature });
 
     // pass parameters to other component (VoteDisplayer)
     this.props.handleCoinForSpend(this.state.coin, this.state.sk);
 
     if (this.state.randomizedSignature !== null) {
       if (DEBUG) {
-        console.log('Coin was signed and signatures were aggregated and randomized.');
+        console.log('Coin was signed by each authority and signatures were aggregated');
       }
       this.setState({ isRequesting: false });
       this.setState({ coinState: COIN_STATUS.signed });
@@ -142,6 +140,7 @@ class CredentialRequester extends React.Component {
       if (DEBUG) {
         console.log('There was an error in signing the coin');
       }
+      this.setState({ isRequesting: false });
       this.setState({ coinState: COIN_STATUS.error });
     }
   };
@@ -158,15 +157,14 @@ class CredentialRequester extends React.Component {
 
   render() {
     return (
-        <SubmitButton
-          // isDisabled={this.state.randomizedSignature!=null} EDIT:
-          isDisabled={false}
-          isLoading={this.state.isRequesting}
-          onSubmit={this.handleSubmit}
-          onSign={this.handleCoinSign}
-          onRandomize={this.handleCredentialRandomize}
-          coinState={this.state.coinState}
-        />
+      <SubmitButton
+        isDisabled={this.props.randomizeDisabled}
+        isLoading={this.state.isRequesting}
+        onSubmit={this.handleSubmit}
+        onSign={this.handleCoinSign}
+        onRandomize={this.handleCredentialRandomize}
+        coinState={this.state.coinState}
+      />
     );
   }
 }
@@ -178,6 +176,7 @@ CredentialRequester.propTypes = {
   pk_client: PropTypes.array.isRequired,
   handleRandomize: PropTypes.func.isRequired,
   handleCoinForSpend: PropTypes.func.isRequired,
+  randomizeDisabled: PropTypes.bool.isRequired,
 };
 
 export default CredentialRequester;

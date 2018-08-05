@@ -6,7 +6,7 @@ import { COIN_STATUS, BUTTON_COIN_STATUS } from '../../config';
 const VoteActionButton = (props) => {
   let buttonContent;
   let handleButtonClick;
-  let isDisabled = false;
+  let isDisabled = props.voteDisabled;
 
   switch (props.coinState) {
     case COIN_STATUS.signed: // 'Signed'
@@ -46,6 +46,7 @@ const VoteActionButton = (props) => {
 VoteActionButton.propTypes = {
   onSpend: PropTypes.func.isRequired,
   coinState: PropTypes.string.isRequired,
+  voteDisabled: PropTypes.bool.isRequired,
 };
 
 export default VoteActionButton;

@@ -174,10 +174,13 @@ export async function signCoin(server, signingCoin, ElGamalPK) {
 
 // ... we can't send v because it would link us to issuance, we just send ttl, id, proof of x (on aX3) and sig
 // pkX = aX3^x
-export async function spendCoin(MPCP_output, signature, server) {
+export async function spendCoin(MPCP_output, signature, server, petitionID) {
   const simplifiedMPCP = getSimplifiedMPCP(MPCP_output);
   const simplifiedSignature = getSimplifiedSignature(signature);
 
+  if (DEBUG) {
+    console.log('Sending ShowBlingSign output');
+  }
 
   let success = false;
   try {
@@ -191,6 +194,7 @@ export async function spendCoin(MPCP_output, signature, server) {
         body: JSON.stringify({
           proof: simplifiedMPCP,
           signature: simplifiedSignature,
+          petitionID: petitionID,
         }),
       });
     response = await response.json();
