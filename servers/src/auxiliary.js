@@ -58,11 +58,9 @@ export const getRandomCoinId = () => {
 };
 
 export const prepareProofOfSecret = (params, sk, verifierStr) => {
-  const [G, o, g1, g2, e] = params;
+  const [G, o, g1, g2, e, h1] = params;
   const m = sk.m;
   const o_blind = sk.o;
-  // get h1
-  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
   // create random witnesses
   const wm = ctx.BIG.randomnum(G.order, G.rngGen);
   const wo = ctx.BIG.randomnum(G.order, G.rngGen);
@@ -100,10 +98,8 @@ export const prepareProofOfSecret = (params, sk, verifierStr) => {
 };
 
 export const verifyProofOfSecret = (params, pub, proof, verifierStr) => {
-  const [G, o, g1, g2, e] = params;
+  const [G, o, g1, g2, e, h1] = params;
   const [C, rm, ro] = proof;
-  // get h1
-  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
 
   const W_prove = ctx.PAIR.G1mul(g1, rm);
   const t1 = ctx.PAIR.G1mul(h1, ro);
@@ -119,11 +115,9 @@ export const verifyProofOfSecret = (params, pub, proof, verifierStr) => {
 };
 
 export const prepareProofOfSecret_Auth = (params, h, sks, d, k) => {
-  const [G, o, g1, g2, e] = params;
+  const [G, o, g1, g2, e, h1] = params;
   const m = sks.m;
   const o_blind = sks.o;
-  // get h1
-  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
 
   // create random witnesses
   const wd = ctx.BIG.randomnum(G.order, G.rngGen);
@@ -199,10 +193,8 @@ export const prepareProofOfSecret_Auth = (params, h, sks, d, k) => {
 };
 
 export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk, proof) => {
-  const [G, o, g1, g2, e] = params;
+  const [G, o, g1, g2, e, h1] = params;
   const [C, rd, rm, ro, rk] = proof;
-  // get h1
-  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
 
   const Aw_prove = ctx.PAIR.G1mul(g1, rd);
   const tAw1 = ctx.PAIR.G1mul(elgamal_pk, C);

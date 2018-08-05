@@ -22,12 +22,9 @@ class CredentialRequester extends React.Component {
 
   /* eslint-disable */
   generateCoinSecret = () => {
-    const [G, o, g1, g2, e] = params;
+    const [G, o, g1, g2, e, h1] = params;
     const m = ctx.BIG.randomnum(G.order, G.rngGen);
     const pk = ctx.PAIR.G1mul(g1, m);
-
-    // create h to ge g1^power
-    const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
 
     // random blindling factor o_blind
     const o_blind = ctx.BIG.randomnum(G.order, G.rngGen);
