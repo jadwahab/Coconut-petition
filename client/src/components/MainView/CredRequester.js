@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SubmitButton from './SubmitButton';
-import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG } from '../../config';
+import { params, ctx, CRED_STATUS, signingServers, issuer, DEBUG } from '../../config';
 import { signCred, getCred } from '../../utils/api';
 import CredSig from '../../../lib/CredSig';
 import ElGamal from '../../../lib/ElGamal';
@@ -14,7 +14,7 @@ class CredRequester extends React.Component {
     this.state = {
       cred: null,
       sk: null,
-      credState: COIN_STATUS.uncreated,
+      credState: CRED_STATUS.uncreated,
       randomizedSignature: null,
       isRequesting: false,
     };
@@ -107,7 +107,7 @@ class CredRequester extends React.Component {
     await this.handleCredSubmit();
     this.setState({ isRequesting: false });
 
-    this.setState({ credState: COIN_STATUS.created });
+    this.setState({ credState: CRED_STATUS.created });
   };
 
   handleCredSign = async () => {
@@ -122,7 +122,7 @@ class CredRequester extends React.Component {
       if (DEBUG) {
         console.log('There was an error in aggregating the signatures');
       }
-      this.setState({ credState: COIN_STATUS.error });
+      this.setState({ credState: CRED_STATUS.error });
     }
 
     this.setState({ randomizedSignature: aggregatedSignature });
@@ -135,13 +135,13 @@ class CredRequester extends React.Component {
         console.log('Cred was signed by each authority and signatures were aggregated');
       }
       this.setState({ isRequesting: false });
-      this.setState({ credState: COIN_STATUS.signed });
+      this.setState({ credState: CRED_STATUS.signed });
     } else {
       if (DEBUG) {
         console.log('There was an error in signing the cred');
       }
       this.setState({ isRequesting: false });
-      this.setState({ credState: COIN_STATUS.error });
+      this.setState({ credState: CRED_STATUS.error });
     }
   };
 
@@ -152,7 +152,7 @@ class CredRequester extends React.Component {
     if (DEBUG) {
       console.log('Signature was randomized');
     }
-    this.setState({ credState: COIN_STATUS.signed });
+    this.setState({ credState: CRED_STATUS.signed });
   }
 
   render() {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
-import { COIN_STATUS, BUTTON_COIN_STATUS } from '../../config';
+import { CRED_STATUS, BUTTON_CRED_STATUS } from '../../config';
 
 const SubmitButton = (props) => {
   let buttonContent;
@@ -10,25 +10,25 @@ const SubmitButton = (props) => {
   let buttonIcon = "key"
 
   switch (props.credState) {
-    case COIN_STATUS.uncreated: // 'Ungenerated'
-      buttonContent = BUTTON_COIN_STATUS.get; // 'Get Credential'
+    case CRED_STATUS.uncreated: // 'Ungenerated'
+      buttonContent = BUTTON_CRED_STATUS.get; // 'Get Credential'
       handleButtonClick = props.onSubmit;
       break;
 
-    case COIN_STATUS.created: // 'Generated'
-      buttonContent = BUTTON_COIN_STATUS.sign; // 'Sign Credential'
+    case CRED_STATUS.created: // 'Generated'
+      buttonContent = BUTTON_CRED_STATUS.sign; // 'Sign Credential'
       handleButtonClick = props.onSign;
       break;
 
-    case COIN_STATUS.signed: // 'Signed'
-      buttonContent = BUTTON_COIN_STATUS.ready; // 'Credential Ready'
+    case CRED_STATUS.signed: // 'Signed'
+      buttonContent = BUTTON_CRED_STATUS.ready; // 'Credential Ready'
       handleButtonClick = props.onRandomize;
       buttonIcon = 'check';
       break;
     
-    case COIN_STATUS.error:
+    case CRED_STATUS.error:
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.error; //  'Error'
+      buttonContent = BUTTON_CRED_STATUS.error; //  'Error'
       buttonIcon = 'warning';
       break;
 

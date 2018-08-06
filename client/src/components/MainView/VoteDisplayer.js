@@ -4,7 +4,7 @@ import { Segment } from 'semantic-ui-react';
 import VoteActionButton from './VoteActionButton';
 import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
-import { params, COIN_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
+import { params, CRED_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
 import { spendCred } from '../../utils/api';
 import CredSig from '../../../lib/CredSig';
 import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/auxiliary';
@@ -14,7 +14,7 @@ class VoteDisplayer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      credState: COIN_STATUS.signed,
+      credState: CRED_STATUS.signed,
       petitionID: null,
       // remainingValidityString: '',
     };
@@ -31,12 +31,12 @@ class VoteDisplayer extends React.Component {
   // updateRemainingValidityString = () => {
   //   let remainingValidityString;
   //   switch (this.state.credState) {
-  //     case COIN_STATUS.spent: {
+  //     case CRED_STATUS.spent: {
   //       remainingValidityString = 'Cred was spent';
   //       clearInterval(this.timer);
   //       break;
   //     }
-  //     case COIN_STATUS.error: {
+  //     case CRED_STATUS.error: {
   //       remainingValidityString = 'Error occurred';
   //       clearInterval(this.timer);
   //       break;
@@ -60,7 +60,7 @@ class VoteDisplayer extends React.Component {
   // };
 
   handleCredSpend = async () => {
-    this.setState({ credState: COIN_STATUS.spending });
+    this.setState({ credState: CRED_STATUS.spending });
 
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
       .filter(server => signingServers.includes(server))
@@ -81,13 +81,13 @@ class VoteDisplayer extends React.Component {
       if (DEBUG) {
         console.log('Signature verified');
       }
-      this.setState({ credState: COIN_STATUS.spent }); // EDIT:
+      this.setState({ credState: CRED_STATUS.spent }); // EDIT:
       this.props.handleRandomizeDisabled(false);
     } else {
       if (DEBUG) {
         console.log('There was an error in verifying signature');
       }
-      this.setState({ credState: COIN_STATUS.error });// EDIT:
+      this.setState({ credState: CRED_STATUS.error });// EDIT:
     }
 
   };

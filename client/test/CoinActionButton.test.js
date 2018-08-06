@@ -4,7 +4,7 @@ import { shallow, mount, render } from 'enzyme';
 import { Button } from 'semantic-ui-react';
 import VoteDisplayer from '../src/components/VoteDisplayer';
 import VoteActionButton from '../src/components/VoteActionButton';
-import { COIN_STATUS } from '../src/config';
+import { CRED_STATUS } from '../src/config';
 
 describe('VoteActionButton Component', () => {
   // save time by not generating entire object that we do not need anyway
@@ -41,7 +41,7 @@ describe('VoteActionButton Component', () => {
     expect(wrapper.props().onSpend).to.be.a('Function');
   });
 
-  it('Should have received "credState" string as a prop, which is one of attributes of COIN_STATUS', () => {
+  it('Should have received "credState" string as a prop, which is one of attributes of CRED_STATUS', () => {
     const mainWrapper = mount(<VoteDisplayer
       cred={dummyCoin}
       sk={{ dummy: 'value' }}
@@ -53,11 +53,11 @@ describe('VoteActionButton Component', () => {
     const wrapper = mainWrapper.find(VoteActionButton);
     const { credState } = wrapper.props();
     expect(credState).to.be.a('string');
-    assert.isTrue(credState === COIN_STATUS.created ||
-      credState === COIN_STATUS.signing ||
-      credState === COIN_STATUS.signed ||
-      credState === COIN_STATUS.spent ||
-      credState === COIN_STATUS.error);
+    assert.isTrue(credState === CRED_STATUS.created ||
+      credState === CRED_STATUS.signing ||
+      credState === CRED_STATUS.signed ||
+      credState === CRED_STATUS.spent ||
+      credState === CRED_STATUS.error);
   });
 
   it('Should be disabled if "credState" is either "signing", "spending", "spent" or "error"', () => {
@@ -66,42 +66,42 @@ describe('VoteActionButton Component', () => {
       }}
       onSpend={() => {
       }}
-      credState={COIN_STATUS.created}
+      credState={CRED_STATUS.created}
     />);
     const wrapper2 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      credState={COIN_STATUS.signing}
+      credState={CRED_STATUS.signing}
     />);
     const wrapper3 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      credState={COIN_STATUS.signed}
+      credState={CRED_STATUS.signed}
     />);
     const wrapper4 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      credState={COIN_STATUS.spent}
+      credState={CRED_STATUS.spent}
     />);
     const wrapper5 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      credState={COIN_STATUS.spending}
+      credState={CRED_STATUS.spending}
     />);
     const wrapper6 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      credState={COIN_STATUS.error}
+      credState={CRED_STATUS.error}
     />);
 
     const buttonNode1 = wrapper1.find(Button);

@@ -6,7 +6,7 @@ import { shallow, mount, render } from 'enzyme';
 import VoteDisplayer from '../src/components/VoteDisplayer';
 import VoteActionButton from '../src/components/VoteActionButton';
 import MainView from '../src/components/MainView';
-import { params, COIN_STATUS, signingServers, issuer, ctx } from '../src/config';
+import { params, CRED_STATUS, signingServers, issuer, ctx } from '../src/config';
 import CredSig from '../lib/CredSig';
 import { getSigningAuthorityPublicKey, getCoin } from '../src/utils/api';
 
@@ -53,7 +53,7 @@ describe('VoteDisplayer Component', async () => {
 
     it('If VoteDisplayer has credState "Generated", VoteActionButton will call "handleCoinSign" on click', () => {
       const wrapper = mount(<VoteDisplayer cred={requestedCoin} />);
-      wrapper.setState({ credState: COIN_STATUS.created });
+      wrapper.setState({ credState: CRED_STATUS.created });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSign');
 
       wrapper.instance().forceUpdate();
@@ -64,7 +64,7 @@ describe('VoteDisplayer Component', async () => {
 
     it('If VoteDisplayer has credState "Signed", VoteActionButton will call "handleCoinSpend" on click', () => {
       const wrapper = mount(<VoteDisplayer cred={requestedCoin} />);
-      wrapper.setState({ credState: COIN_STATUS.signed });
+      wrapper.setState({ credState: CRED_STATUS.signed });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSpend');
 
       wrapper.instance().forceUpdate();
