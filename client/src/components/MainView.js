@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
-import CredentialRequester from './MainView/CredentialRequester';
+import CredRequester from './MainView/CredRequester';
 import VoteListDisplayer from './MainView/VoteListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG } from '../config';
 import ElGamal from '../../lib/ElGamal';
@@ -100,7 +100,7 @@ class MainView extends React.Component {
         />
         <Grid>
           <Grid.Row centered={true}>
-            <CredentialRequester
+            <CredRequester
               ElGamalSK={this.state.ElGamalSK}
               ElGamalPK={this.state.ElGamalPK}
               // sk_client will be required to sign requests to SAs, but is NOT sent:

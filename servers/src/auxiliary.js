@@ -1,7 +1,7 @@
 // set of auxiliary functions that don't belong to any existing class/module
 import fetch from 'isomorphic-fetch';
 import * as crypto from 'crypto';
-import { ctx, power } from './globalConfig';
+import { ctx } from './globalConfig';
 
 export const stringToBytes = (s) => {
   const b = [];

@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SubmitButton from './SubmitButton';
-import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG, power } from '../../config';
+import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG } from '../../config';
 import { signCoin, getCoin } from '../../utils/api';
 import CoinSig from '../../../lib/CoinSig';
 import ElGamal from '../../../lib/ElGamal';
 import { getSigningCredential } from '../../../lib/SigningCredential';
 import { publicKeys } from '../../cache';
 
-class CredentialRequester extends React.Component {
+class CredRequester extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -169,7 +169,7 @@ class CredentialRequester extends React.Component {
   }
 }
 
-CredentialRequester.propTypes = {
+CredRequester.propTypes = {
   ElGamalSK: PropTypes.object.isRequired,
   ElGamalPK: PropTypes.object.isRequired,
   sk_client: PropTypes.array.isRequired,
@@ -179,4 +179,4 @@ CredentialRequester.propTypes = {
   randomizeDisabled: PropTypes.bool.isRequired,
 };
 
-export default CredentialRequester;
+export default CredRequester;
