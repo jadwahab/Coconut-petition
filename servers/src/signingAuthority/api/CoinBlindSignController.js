@@ -1,10 +1,10 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import CoinSig from '../../CoinSig';
-import { params, sk } from '../config/CoinSigSetup';
+import CredSig from '../../CredSig';
+import { params, sk } from '../config/CredSigSetup';
 import { DEBUG } from '../config/appConfig';
 import ElGamal from '../../ElGamal';
-import { verifySignRequest } from '../../SigningCoin';
+import { verifySignRequest } from '../../SigningCred';
 import { sessionSignatures, publicKeys } from '../cache';
 import { issuer, ctx } from '../../globalConfig';
 import { getPublicKey, hashToPointOnCurve, fromBytesProof_Auth, verifyProofOfSecret_Auth } from '../../auxiliary';
@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
       console.log(`Was credntial proof valid: ${isProofValid}`);
     }
 
-    const [h, enc_sig] = CoinSig.mixedSignCoin(params, sk, signingCoin);
+    const [h, enc_sig] = CredSig.mixedSignCoin(params, sk, signingCoin);
     const hBytes = [];
     const enc_sig_a_Bytes = [];
     const enc_sig_b_Bytes = [];

@@ -4,7 +4,7 @@ import CredRequester from './MainView/CredRequester';
 import VoteListDisplayer from './MainView/VoteListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG } from '../config';
 import ElGamal from '../../lib/ElGamal';
-import CoinSig from '../../lib/CoinSig';
+import CredSig from '../../lib/CredSig';
 
 class MainView extends React.Component {
   constructor(props) {
@@ -56,7 +56,7 @@ class MainView extends React.Component {
 
 
   handleRandomize = (sig) => {
-    const randomizedSignature = CoinSig.randomize(params, sig);
+    const randomizedSignature = CredSig.randomize(params, sig);
 
     // // Not working right for some reason: (consider fixing in future)
     // this.setState(prevState => ({

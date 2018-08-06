@@ -6,7 +6,7 @@ import { ctx } from '../src/config';
 import { hashToBIG, hashG2ElemToBIG, hashToPointOnCurve, hashMessage } from './auxiliary';
 import ElGamal from './ElGamal';
 
-export default class CoinSig {
+export default class CredSig {
   static setup() {
     const G = new BpGroup();
 
@@ -97,8 +97,8 @@ export default class CoinSig {
   }
 
   static verifyAggregation(params, pks, coin, aggregateSignature) {
-    const aPk = CoinSig.aggregatePublicKeys(params, pks);
-    return CoinSig.verify(params, aPk, coin, aggregateSignature);
+    const aPk = CredSig.aggregatePublicKeys(params, pks);
+    return CredSig.verify(params, aPk, coin, aggregateSignature);
   }
 
   // no need to pass h - encryption is already using it EDIT: make sure!
@@ -149,7 +149,7 @@ export default class CoinSig {
 
   static make_proof_credentials_petition(params, agg_vk, sigma, m, petitionOwner, petitionID) {
     const [G, o, g1, g2, e] = params;
-    // const agg_vk = CoinSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
+    // const agg_vk = CredSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
 
     // MATERIALS: rand t, kappa, nu, zeta
     const t = ctx.BIG.randomnum(G.order, G.rngGen);

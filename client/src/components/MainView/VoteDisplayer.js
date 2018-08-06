@@ -6,7 +6,7 @@ import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
 import { params, COIN_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
 import { spendCoin } from '../../utils/api';
-import CoinSig from '../../../lib/CoinSig';
+import CredSig from '../../../lib/CredSig';
 import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/auxiliary';
 import { publicKeys } from '../../cache';
 
@@ -69,11 +69,11 @@ class VoteDisplayer extends React.Component {
         return obj;
       }, {});
 
-    const aggregatePublicKey = CoinSig.aggregatePublicKeys_obj(params, signingAuthoritiesPublicKeys);
+    const aggregatePublicKey = CredSig.aggregatePublicKeys_obj(params, signingAuthoritiesPublicKeys);
 
     const petitionOwnerStr = publicKeys[petitionOwner].join('');
 
-    const MPCP_output = CoinSig.make_proof_credentials_petition(params, aggregatePublicKey,
+    const MPCP_output = CredSig.make_proof_credentials_petition(params, aggregatePublicKey,
       this.props.randomizedSignature, this.props.coin_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
     const success = await spendCoin(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);

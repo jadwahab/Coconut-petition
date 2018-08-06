@@ -2,7 +2,7 @@ import fetch from 'isomorphic-fetch';
 import { ctx, DEBUG, ISSUE_STATUS, params } from '../config';
 import { getSimplifiedProof, getSimplifiedSignature, getRandomNumber, getSimplifiedMPCP } from './helpers';
 import ElGamal from '../../lib/ElGamal';
-import { getCoinRequestObject } from '../../lib/CoinRequest';
+import { getCoinRequestObject } from '../../lib/CredRequest';
 import { publicKeys } from '../cache';
 
 // auxiliary, mostly for testing purposes to simulate delays

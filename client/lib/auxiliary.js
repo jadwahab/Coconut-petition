@@ -1,7 +1,7 @@
 // set of auxiliary functions that don't belong to any existing class/module
 
 import { ctx } from '../src/config';
-import CoinSig from './CoinSig';
+import CredSig from './CredSig';
 
 export const stringToBytes = (s) => {
   const b = [];
@@ -227,7 +227,7 @@ export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk,
 
 export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petitionID) => {
   const [G, o, g1, g2, e] = params;
-  // const agg_vk = CoinSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
+  // const agg_vk = CredSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
 
   // MATERIALS: rand t, kappa, nu, zeta
   const t = ctx.BIG.randomnum(G.order, G.rngGen);

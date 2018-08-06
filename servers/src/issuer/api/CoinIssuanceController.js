@@ -4,8 +4,8 @@ import { getBalance, changeBalance } from '../utils/DatabaseManager';
 import { DEBUG, FAKE_BALANCE } from '../config/appConfig';
 import { ISSUE_STATUS } from '../config/constants';
 import { sig_skBytes, sig_pkBytes } from '../config/KeySetup';
-import { verifyRequestSignature, verifyRequestProofOfCoinSecret } from '../../CoinRequest';
-import { getIssuedCoin } from '../../IssuedCoin';
+import { verifyRequestSignature, verifyRequestProofOfCoinSecret } from '../../CredRequest';
+import { getIssuedCoin } from '../../IssuedCred';
 
 const router = express.Router();
 

@@ -5,7 +5,7 @@
 // import { before } from 'mocha';
 // import * as crypto from 'crypto';
 // import Coin from '../lib/Coin';
-// import CoinSig from '../lib/CoinSig'; // for params
+// import CredSig from '../lib/CredSig'; // for params
 // import { ctx } from '../src/config';
 // import { getRandomCoinId } from '../src/utils/coinGenerator';
 // import ElGamal from '../lib/ElGamal';
@@ -64,7 +64,7 @@
 //     let id;
 //     before(() => {
 //       const properCoinValue = 42;
-//       params = CoinSig.setup();
+//       params = CredSig.setup();
 //       [coin_sk, coin_pk] = Coin.keygen(params);
 //       id = getRandomCoinId();
 //       properCoin = new Coin(coin_pk, id, properCoinValue);

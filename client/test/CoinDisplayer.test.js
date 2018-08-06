@@ -7,7 +7,7 @@ import VoteDisplayer from '../src/components/VoteDisplayer';
 import VoteActionButton from '../src/components/VoteActionButton';
 import MainView from '../src/components/MainView';
 import { params, COIN_STATUS, signingServers, issuer, ctx } from '../src/config';
-import CoinSig from '../lib/CoinSig';
+import CredSig from '../lib/CredSig';
 import { getSigningAuthorityPublicKey, getCoin } from '../src/utils/api';
 
 import CredentialRequester from '../src/components/CredentialRequester';
@@ -111,7 +111,7 @@ describe('VoteDisplayer Component', async () => {
 
       for (let i = 0; i < signatures.length; i++) {
         const pkX = ctx.PAIR.G2mul(publicKeys[i][4], coin_sk);
-        expect(CoinSig.verifyMixedBlindSign(params, publicKeys[i], coin, signatures[i], id, pkX)).to.equal(true);
+        expect(CredSig.verifyMixedBlindSign(params, publicKeys[i], coin, signatures[i], id, pkX)).to.equal(true);
       }
     });
 
@@ -190,13 +190,13 @@ describe('VoteDisplayer Component', async () => {
       const signatures = await wrapper.instance().getSignatures(signingServers);
       const publicKeys = await Promise.all(signingServers.map(async server => getSigningAuthorityPublicKey(server)));
 
-      const aggregatePublicKey = CoinSig.aggregatePublicKeys(params, publicKeys);
+      const aggregatePublicKey = CredSig.aggregatePublicKeys(params, publicKeys);
 
       wrapper.instance().aggregateAndRandomizeSignatures(signatures);
       assert.isNotNull(wrapper.state('randomizedSignature'));
 
       const pkX = ctx.PAIR.G2mul(aggregatePublicKey[4], coin_sk);
-      expect(CoinSig.verifyMixedBlindSign(params, aggregatePublicKey, coin, wrapper.state('randomizedSignature'), id, pkX)).to.equal(true);
+      expect(CredSig.verifyMixedBlindSign(params, aggregatePublicKey, coin, wrapper.state('randomizedSignature'), id, pkX)).to.equal(true);
     });
 
     it("If one of signatures was null, aggregate won't be created and state will be set appropriately", async () => {

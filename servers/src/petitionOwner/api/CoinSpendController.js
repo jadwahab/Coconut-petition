@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import fetch from 'isomorphic-fetch';
 import { ctx, params, signingServers, issuer } from '../../globalConfig';
-import CoinSig from '../../CoinSig';
+import CredSig from '../../CredSig';
 import { DEBUG } from '../config/appConfig';
 import { fromBytesMPCP, getSigningAuthorityPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
 import { sig_pkBytes } from '../config/KeySetup';
@@ -102,7 +102,7 @@ router.post('/', async (req, res) => {
         }
       }));
       // aggregatePublicKey is [ag, aX, aY];
-      aggregatePublicKey = CoinSig.aggregatePublicKeys_array(params, signingAuthoritiesPublicKeys);
+      aggregatePublicKey = CredSig.aggregatePublicKeys_array(params, signingAuthoritiesPublicKeys);
 
       publicKeys['Aggregate'] = aggregatePublicKey;
     } else {
@@ -113,7 +113,7 @@ router.post('/', async (req, res) => {
     
     // just check validity of the proof and double spending, we let issuer verify the signature
     // successful verification of the proof assures the coin was supposed to be used in that transaction
-    const isProofValid = CoinSig.verify_proof_credentials_petition(params, aggregatePublicKey, 
+    const isProofValid = CredSig.verify_proof_credentials_petition(params, aggregatePublicKey, 
       sigma, MPCP_output, petitionOwner, petitionID);
     
     if (DEBUG) {

@@ -33,7 +33,7 @@ export const getIssuedCoin = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) =
 
   // const ttl = getTimeToLive();
 
-  // same reasoning as with CoinRequest
+  // same reasoning as with CredRequest
   const reducer = (acc, cur) => acc + cur;
 
   const coinStr =

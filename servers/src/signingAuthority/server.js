@@ -1,6 +1,6 @@
 import 'babel-polyfill';
 import app from './app';
-import { setupCoinSigKeys } from './config/CoinSigSetup';
+import { setupCoinSigKeys } from './config/CredSigSetup';
 
 if (process.argv.length < 3) {
   throw new Error('No port number provided');

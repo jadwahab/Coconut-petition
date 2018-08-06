@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import SubmitButton from './SubmitButton';
 import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG } from '../../config';
 import { signCoin, getCoin } from '../../utils/api';
-import CoinSig from '../../../lib/CoinSig';
+import CredSig from '../../../lib/CredSig';
 import ElGamal from '../../../lib/ElGamal';
-import { getSigningCoin } from '../../../lib/SigningCoin';
+import { getSigningCoin } from '../../../lib/SigningCred';
 import { publicKeys } from '../../cache';
 
 class CredRequester extends React.Component {
@@ -93,7 +93,7 @@ class CredRequester extends React.Component {
         return;
       }
     }
-    return CoinSig.aggregateSignatures(params, signatures);
+    return CredSig.aggregateSignatures(params, signatures);
   }
 
 

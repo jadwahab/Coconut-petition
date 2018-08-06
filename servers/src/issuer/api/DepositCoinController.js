@@ -5,7 +5,7 @@ import { ctx, petitionOwner, params, signingServers } from '../../globalConfig';
 import { DEBUG } from '../config/appConfig';
 import { fromBytesMPCP, verifyProofOfSecret, getSigningAuthorityPublicKey,
   getPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
-import CoinSig from '../../CoinSig';
+import CredSig from '../../CredSig';
 import { publicKeys } from '../cache';
 
 const router = express.Router();
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
         console.warn(err);
       }
     }));
-    aggregatePublicKey = CoinSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys);
+    aggregatePublicKey = CredSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys);
 
     publicKeys['Aggregate'] = aggregatePublicKey;
   } else {
