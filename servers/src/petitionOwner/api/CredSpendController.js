@@ -37,7 +37,7 @@ router.use(bodyParser.json());
 //   }
 // };
 
-// const depositCoin = async (coinAttributes, simplifiedProof, sigBytes, pkXBytes, server) => {
+// const depositCred = async (coinAttributes, simplifiedProof, sigBytes, pkXBytes, server) => {
 //   try {
 //     let response = await
 //       fetch(`http://${server}/depositcoin`, {
@@ -129,16 +129,16 @@ router.post('/', async (req, res) => {
     }
     
     // // now finally check if the coin wasn't already spent
-    // const wasCoinAlreadySpent = await checkDoubleSpend(id, issuer);
+    // const wasCredAlreadySpent = await checkDoubleSpend(id, issuer);
     // if (DEBUG) {
-    //   console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
+    //   console.log(`Was coin already spent: ${wasCredAlreadySpent}`);
     // }
     //
     // // we don't need to create byte representations of all objects because we already have them
-    // const wasCoinDeposited = await depositCoin(coinAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
+    // const wasCredDeposited = await depositCred(coinAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
     
     responseStatus = 200;
-    // success = isProofValid && !wasCoinAlreadySpent && wasCoinDeposited;
+    // success = isProofValid && !wasCredAlreadySpent && wasCredDeposited;
     success = isProofValid;
     if (DEBUG) {
       console.log(`Was credential successfully shown: ${success}`);

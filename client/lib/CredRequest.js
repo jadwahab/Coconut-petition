@@ -29,7 +29,7 @@ export const getBytesProof_Auth = (proof) => {
   return [bytesC, bytesRd, bytesRm, bytesRo, bytesRk];
 };
 
-export const getCoinRequestObject = (
+export const getCredRequestObject = (
   sk_coin, // to generate proof of secret
   pk_coin, // part of the coin
   pk_client_bytes, // part of the coin
@@ -101,7 +101,7 @@ export const fromBytesProof = (bytesProof) => {
   return [W, cm, r];
 };
 
-export const verifyRequestProofOfCoinSecret = (proof_bytes, pk_coin_bytes, issuer) => {
+export const verifyRequestProofOfCredSecret = (proof_bytes, pk_coin_bytes, issuer) => {
   const proof = fromBytesProof(proof_bytes);
   const pk_coin = ctx.ECP.fromBytes(pk_coin_bytes);
   return verifyProofOfSecret(params, pk_coin, proof, issuer);

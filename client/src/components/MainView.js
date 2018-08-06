@@ -80,7 +80,7 @@ class MainView extends React.Component {
   };
 
 
-  handleCoinForSpend = (coin, sk) => {
+  handleCredForSpend = (coin, sk) => {
     const coin_params = { coin: coin, sk: sk };
     this.setState({ coin_params });
   }
@@ -107,7 +107,7 @@ class MainView extends React.Component {
               sk_client={this.state.sk_client}
               pk_client={this.state.pk_client}
               handleRandomize={this.handleRandomize}
-              handleCoinForSpend={this.handleCoinForSpend}
+              handleCredForSpend={this.handleCredForSpend}
               randomizeDisabled={this.state.randomizeDisabled}
             />
           </Grid.Row>

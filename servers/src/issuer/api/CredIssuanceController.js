@@ -4,8 +4,8 @@ import { getBalance, changeBalance } from '../utils/DatabaseManager';
 import { DEBUG, FAKE_BALANCE } from '../config/appConfig';
 import { ISSUE_STATUS } from '../config/constants';
 import { sig_skBytes, sig_pkBytes } from '../config/KeySetup';
-import { verifyRequestSignature, verifyRequestProofOfCoinSecret } from '../../CredRequest';
-import { getIssuedCoin } from '../../IssuedCred';
+import { verifyRequestSignature, verifyRequestProofOfCredSecret } from '../../CredRequest';
+import { getIssuedCred } from '../../IssuedCred';
 
 const router = express.Router();
 
@@ -43,7 +43,7 @@ router.post('/', async (req, res) => {
   const issuerStr = sig_pkBytes.join('');
 
   // Verify whether request proof of knowledge is legit:
-  const isProofValid = verifyRequestProofOfCoinSecret(
+  const isProofValid = verifyRequestProofOfCredSecret(
     coin_request.proof_bytes,
     coin_request.pk_coin_bytes,
     issuerStr,
@@ -62,9 +62,8 @@ router.post('/', async (req, res) => {
   }
 
 // Issuer finally signs the credential
-  const issuedCoin = getIssuedCoin(
+  const issuedCred = getIssuedCred(
     coin_request.pk_coin_bytes,
-
     coin_request.pk_client_bytes,
     sig_skBytes,
   );
@@ -76,7 +75,7 @@ router.post('/', async (req, res) => {
   console.log('Issueance request took: ', t1 - t0);
   res.status(200)
     .json({
-      coin: issuedCoin,
+      coin: issuedCred,
       status: ISSUE_STATUS.success,
     });
 });

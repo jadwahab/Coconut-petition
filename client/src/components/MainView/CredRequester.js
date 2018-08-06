@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import SubmitButton from './SubmitButton';
 import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG } from '../../config';
-import { signCoin, getCoin } from '../../utils/api';
+import { signCred, getCred } from '../../utils/api';
 import CredSig from '../../../lib/CredSig';
 import ElGamal from '../../../lib/ElGamal';
-import { getSigningCoin } from '../../../lib/SigningCred';
+import { getSigningCred } from '../../../lib/SigningCred';
 import { publicKeys } from '../../cache';
 
 class CredRequester extends React.Component {
@@ -21,7 +21,7 @@ class CredRequester extends React.Component {
   }
 
   /* eslint-disable */
-  generateCoinSecret = () => {
+  generateCredSecret = () => {
     const [G, o, g1, g2, e, h1] = params;
     const m = ctx.BIG.randomnum(G.order, G.rngGen);
     const pk = ctx.PAIR.G1mul(g1, m);
@@ -42,9 +42,9 @@ class CredRequester extends React.Component {
   };
   /* eslint-enable */
 
-  handleCoinSubmit = async () => {
-    const [sk_coin, pk_coin] = this.generateCoinSecret();
-    const coin = await getCoin(
+  handleCredSubmit = async () => {
+    const [sk_coin, pk_coin] = this.generateCredSecret();
+    const coin = await getCred(
       sk_coin,
       pk_coin,
       this.props.pk_client,
@@ -62,7 +62,7 @@ class CredRequester extends React.Component {
   };
 
   getSignatures = async (serversArg) => {
-    const signingCoin = getSigningCoin(this.state.coin, this.props.ElGamalSK, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
+    const signingCred = getSigningCred(this.state.coin, this.props.ElGamalSK, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
 
     const signatures = await Promise.all(serversArg.map(async (server) => {
       try {
@@ -70,7 +70,7 @@ class CredRequester extends React.Component {
           console.log(`Sending request to ${server}...`);
         }
 
-        const [h, enc_sig] = await signCoin(server, signingCoin, this.props.ElGamalPK);
+        const [h, enc_sig] = await signCred(server, signingCred, this.props.ElGamalPK);
         const sig = ElGamal.decrypt(params, this.props.ElGamalSK, enc_sig);
 
         if (DEBUG) {
@@ -104,16 +104,16 @@ class CredRequester extends React.Component {
 // BUTTON HANDLER FUNTIONS
   handleSubmit = async (event) => {
     this.setState({ isRequesting: true });
-    await this.handleCoinSubmit();
+    await this.handleCredSubmit();
     this.setState({ isRequesting: false });
 
     this.setState({ coinState: COIN_STATUS.created });
   };
 
-  handleCoinSign = async () => {
+  handleCredSign = async () => {
     this.setState({ isRequesting: true });
     if (DEBUG) {
-      console.log('Coin sign request(s) were sent');
+      console.log('Cred sign request(s) were sent');
     }
     const signatures = await this.getSignatures(signingServers);
 
@@ -128,11 +128,11 @@ class CredRequester extends React.Component {
     this.setState({ randomizedSignature: aggregatedSignature });
 
     // pass parameters to other component (VoteDisplayer)
-    this.props.handleCoinForSpend(this.state.coin, this.state.sk);
+    this.props.handleCredForSpend(this.state.coin, this.state.sk);
 
     if (this.state.randomizedSignature !== null) {
       if (DEBUG) {
-        console.log('Coin was signed by each authority and signatures were aggregated');
+        console.log('Cred was signed by each authority and signatures were aggregated');
       }
       this.setState({ isRequesting: false });
       this.setState({ coinState: COIN_STATUS.signed });
@@ -161,7 +161,7 @@ class CredRequester extends React.Component {
         isDisabled={this.props.randomizeDisabled}
         isLoading={this.state.isRequesting}
         onSubmit={this.handleSubmit}
-        onSign={this.handleCoinSign}
+        onSign={this.handleCredSign}
         onRandomize={this.handleCredentialRandomize}
         coinState={this.state.coinState}
       />
@@ -175,7 +175,7 @@ CredRequester.propTypes = {
   sk_client: PropTypes.array.isRequired,
   pk_client: PropTypes.array.isRequired,
   handleRandomize: PropTypes.func.isRequired,
-  handleCoinForSpend: PropTypes.func.isRequired,
+  handleCredForSpend: PropTypes.func.isRequired,
   randomizeDisabled: PropTypes.bool.isRequired,
 };
 

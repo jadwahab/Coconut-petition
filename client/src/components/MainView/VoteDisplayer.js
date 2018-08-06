@@ -5,7 +5,7 @@ import VoteActionButton from './VoteActionButton';
 import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
 import { params, COIN_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
-import { spendCoin } from '../../utils/api';
+import { spendCred } from '../../utils/api';
 import CredSig from '../../../lib/CredSig';
 import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/auxiliary';
 import { publicKeys } from '../../cache';
@@ -32,7 +32,7 @@ class VoteDisplayer extends React.Component {
   //   let remainingValidityString;
   //   switch (this.state.coinState) {
   //     case COIN_STATUS.spent: {
-  //       remainingValidityString = 'Coin was spent';
+  //       remainingValidityString = 'Cred was spent';
   //       clearInterval(this.timer);
   //       break;
   //     }
@@ -59,7 +59,7 @@ class VoteDisplayer extends React.Component {
   //   this.setState({ remainingValidityString: remainingValidityString });
   // };
 
-  handleCoinSpend = async () => {
+  handleCredSpend = async () => {
     this.setState({ coinState: COIN_STATUS.spending });
 
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
@@ -76,7 +76,7 @@ class VoteDisplayer extends React.Component {
     const MPCP_output = CredSig.make_proof_credentials_petition(params, aggregatePublicKey,
       this.props.randomizedSignature, this.props.coin_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
-    const success = await spendCoin(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
+    const success = await spendCred(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
     if (success) {
       if (DEBUG) {
         console.log('Signature verified');
@@ -102,7 +102,7 @@ class VoteDisplayer extends React.Component {
         <Segment style={styles.segmentStyle}>
           <InputPetitionID onInputChange={this.handleInputChange}>
             <VoteActionButton
-              onSpend={this.handleCoinSpend}
+              onSpend={this.handleCredSpend}
               coinState={this.state.coinState}
               voteDisabled={this.state.petitionID == null}
             />

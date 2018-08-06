@@ -6,7 +6,7 @@ export const pk = [];
 export const pkBytes = [];
 export const sk = [];
 
-export const setupCoinSigKeys = () => {
+export const setupCredSigKeys = () => {
   const params_gen = CredSig.setup();
   const [sk_gen, pk_gen] = CredSig.keygen(params_gen);
   for (let i = 0; i < params_gen.length; i++) { params[i] = params_gen[i]; }

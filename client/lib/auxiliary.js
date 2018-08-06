@@ -244,7 +244,7 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   const [h, sig] = sigma;
 
   // nu = t*h
-  // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCoinSecret of CredentialRequester.js
+  // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCredSecret of CredentialRequester.js
   const nu = ctx.PAIR.G1mul(h, t); 
 
   const gs = hashToPointOnCurve(petitionID);

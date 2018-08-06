@@ -10,13 +10,13 @@ const VoteActionButton = (props) => {
 
   switch (props.coinState) {
     case COIN_STATUS.signed: // 'Signed'
-      buttonContent = BUTTON_COIN_STATUS.spend; // 'Spend Coin'
+      buttonContent = BUTTON_COIN_STATUS.spend; // 'Spend Cred'
       handleButtonClick = props.onSpend;
       break;
 
     case COIN_STATUS.spent: // 'Spent'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.spent; // 'Coin was Spent'
+      buttonContent = BUTTON_COIN_STATUS.spent; // 'Cred was Spent'
       break;
 
     case COIN_STATUS.spending: // 'Spending'

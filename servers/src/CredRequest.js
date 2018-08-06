@@ -52,7 +52,7 @@ export const getBytesMPVP = (proof) => {
   return [bytesA, bytesB, bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2];
 };
 
-export const getCoinRequestObject = (
+export const getCredRequestObject = (
   sk_coin, // to generate proof of secret
   pk_coin, // part of the coin
   // value, // part of the coin
@@ -119,7 +119,7 @@ export const verifyRequestSignature = (coin_request) => {
   return ctx.ECDH.ECPVP_DSA(sha, pk_client_bytes, requestStr, C, D) === 0;
 };
 
-export const verifyRequestProofOfCoinSecret = (proof_bytes, pk_coin_bytes, issuer) => {
+export const verifyRequestProofOfCredSecret = (proof_bytes, pk_coin_bytes, issuer) => {
   const proof = fromBytesProof(proof_bytes);
   const pk_coin = ctx.ECP.fromBytes(pk_coin_bytes);
   pk_coin.affine();

@@ -1,5 +1,5 @@
 import express from 'express';
-import CoinSpendController from './api/CoinSpendController';
+import CredSpendController from './api/CredSpendController';
 import ServerStatusController from './api/ServerStatusController';
 import PublicKeyController from './api/PublicKeyController';
 
@@ -13,7 +13,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/pk', PublicKeyController);
-app.use('/spend', CoinSpendController);
+app.use('/spend', CredSpendController);
 app.use('/status', ServerStatusController);
 
 

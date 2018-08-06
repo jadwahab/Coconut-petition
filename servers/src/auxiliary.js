@@ -45,7 +45,7 @@ export const hashToPointOnCurve = (m) => {
 export const hashG2ElemToBIG = G2elem => hashToBIG(G2elem.toString());
 
 // the below are in coinGenerator of client
-export const getRandomCoinId = () => {
+export const getRandomCredId = () => {
   const RAW = crypto.randomBytes(128);
 
   const rng = new ctx.RAND();

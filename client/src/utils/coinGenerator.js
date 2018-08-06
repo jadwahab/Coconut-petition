@@ -2,8 +2,8 @@ import * as crypto from 'crypto';
 import { ctx } from '../config';
 
 // uses same RNG generator as the one used for key generation
-// it is exported to be used in Coin tests
-export const getRandomCoinId = () => {
+// it is exported to be used in Cred tests
+export const getRandomCredId = () => {
   const RAW = crypto.randomBytes(128);
 
   const rng = new ctx.RAND();

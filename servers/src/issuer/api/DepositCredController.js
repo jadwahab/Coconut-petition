@@ -74,12 +74,12 @@ router.post('/', async (req, res) => {
   }
 
   // // now finally check if the coin wasn't already spent
-  // const wasCoinAlreadySpent = await checkUsedId(id);
+  // const wasCredAlreadySpent = await checkUsedId(id);
   // if (DEBUG) {
-  //   console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
+  //   console.log(`Was coin already spent: ${wasCredAlreadySpent}`);
   // }
   //
-  // if (isProofValid && !wasCoinAlreadySpent && isSignatureValid) {
+  // if (isProofValid && !wasCredAlreadySpent && isSignatureValid) {
   //   await insertUsedId(id);
   //   // await changeBalance(publicKeys[petitionOwner], coinAttributes.value);
   // }

@@ -202,23 +202,23 @@ export default class CredSig {
     return [sig_a, sig_b];
   }
 
-  static mixedSignCoin(params, sk, signingCoin) {
+  static mixedSignCred(params, sk, signingCred) {
     const [G, o, g1, g2, e] = params;
     const [x, y] = sk;
 
     const reducer = (acc, cur) => acc + cur;
 
     const coinStr =
-      signingCoin.pk_client_bytes.reduce(reducer) + // 1- client's key
-      signingCoin.pk_coin_bytes.reduce(reducer) + // 2- coin's pk
-      signingCoin.issuedCoinSig[0].reduce(reducer) + // 3- (1 & 2) signed by issuer
-      signingCoin.issuedCoinSig[1].reduce(reducer); // (1 & 2 & 3 & enc_sk) signed by client
+      signingCred.pk_client_bytes.reduce(reducer) + // 1- client's key
+      signingCred.pk_coin_bytes.reduce(reducer) + // 2- coin's pk
+      signingCred.issuedCredSig[0].reduce(reducer) + // 3- (1 & 2) signed by issuer
+      signingCred.issuedCredSig[1].reduce(reducer); // (1 & 2 & 3 & enc_sk) signed by client
 
     const h = hashToPointOnCurve(coinStr);
 
     // EDIT: change enc_sk to enc_commitment or something
     // c = (a, b)
-    const enc_sk = [ctx.ECP.fromBytes(signingCoin.enc_sk_bytes[0]), ctx.ECP.fromBytes(signingCoin.enc_sk_bytes[1])];
+    const enc_sk = [ctx.ECP.fromBytes(signingCred.enc_sk_bytes[0]), ctx.ECP.fromBytes(signingCred.enc_sk_bytes[1])];
 
     const [enc_param_a, enc_param_b] = enc_sk;
     // a' = y * a
@@ -258,7 +258,7 @@ export default class CredSig {
     const [h, sig] = sigma;
 
     // nu = t*h
-    // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCoinSecret of CredentialRequester.js
+    // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCredSecret of CredentialRequester.js
     const nu = ctx.PAIR.G1mul(h, t);
 
     const gs = hashToPointOnCurve(petitionID);
