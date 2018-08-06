@@ -16,8 +16,8 @@ app.use((req, res, next) => {
 
 app.use('/pk', PublicKeyController);
 app.use('/status', ServerStatusController);
-app.use('/getcoin', CredIssuanceController);
+app.use('/getcred', CredIssuanceController);
 app.use('/checkid', UsedIdController);
-app.use('/depositcoin', DepositCredController);
+app.use('/depositcred', DepositCredController);
 
 export default app;

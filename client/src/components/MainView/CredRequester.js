@@ -12,9 +12,9 @@ class CredRequester extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      coin: null,
+      cred: null,
       sk: null,
-      coinState: COIN_STATUS.uncreated,
+      credState: COIN_STATUS.uncreated,
       randomizedSignature: null,
       isRequesting: false,
     };
@@ -43,18 +43,18 @@ class CredRequester extends React.Component {
   /* eslint-enable */
 
   handleCredSubmit = async () => {
-    const [sk_coin, pk_coin] = this.generateCredSecret();
-    const coin = await getCred(
-      sk_coin,
-      pk_coin,
+    const [sk_cred, pk_cred] = this.generateCredSecret();
+    const cred = await getCred(
+      sk_cred,
+      pk_cred,
       this.props.pk_client,
       this.props.sk_client,
       issuer,
     );
 
-    if (coin != null) {
-      this.setState({ coin });
-      this.setState({ sk: sk_coin });
+    if (cred != null) {
+      this.setState({ cred });
+      this.setState({ sk: sk_cred });
       if (DEBUG) {
         console.log(`Got credential signed by the issuer @${issuer}`);
       }
@@ -62,7 +62,7 @@ class CredRequester extends React.Component {
   };
 
   getSignatures = async (serversArg) => {
-    const signingCred = getSigningCred(this.state.coin, this.props.ElGamalSK, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
+    const signingCred = getSigningCred(this.state.cred, this.props.ElGamalSK, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
 
     const signatures = await Promise.all(serversArg.map(async (server) => {
       try {
@@ -87,7 +87,7 @@ class CredRequester extends React.Component {
   };
 
   aggregateSignatures = (signatures) => {
-    // checks if all authorities signed the coin, if not, return error
+    // checks if all authorities signed the cred, if not, return error
     for (let i = 0; i < signatures.length; i++) {
       if (signatures[i] === null) {
         return;
@@ -107,7 +107,7 @@ class CredRequester extends React.Component {
     await this.handleCredSubmit();
     this.setState({ isRequesting: false });
 
-    this.setState({ coinState: COIN_STATUS.created });
+    this.setState({ credState: COIN_STATUS.created });
   };
 
   handleCredSign = async () => {
@@ -122,26 +122,26 @@ class CredRequester extends React.Component {
       if (DEBUG) {
         console.log('There was an error in aggregating the signatures');
       }
-      this.setState({ coinState: COIN_STATUS.error });
+      this.setState({ credState: COIN_STATUS.error });
     }
 
     this.setState({ randomizedSignature: aggregatedSignature });
 
     // pass parameters to other component (VoteDisplayer)
-    this.props.handleCredForSpend(this.state.coin, this.state.sk);
+    this.props.handleCredForSpend(this.state.cred, this.state.sk);
 
     if (this.state.randomizedSignature !== null) {
       if (DEBUG) {
         console.log('Cred was signed by each authority and signatures were aggregated');
       }
       this.setState({ isRequesting: false });
-      this.setState({ coinState: COIN_STATUS.signed });
+      this.setState({ credState: COIN_STATUS.signed });
     } else {
       if (DEBUG) {
-        console.log('There was an error in signing the coin');
+        console.log('There was an error in signing the cred');
       }
       this.setState({ isRequesting: false });
-      this.setState({ coinState: COIN_STATUS.error });
+      this.setState({ credState: COIN_STATUS.error });
     }
   };
 
@@ -152,7 +152,7 @@ class CredRequester extends React.Component {
     if (DEBUG) {
       console.log('Signature was randomized');
     }
-    this.setState({ coinState: COIN_STATUS.signed });
+    this.setState({ credState: COIN_STATUS.signed });
   }
 
   render() {
@@ -163,7 +163,7 @@ class CredRequester extends React.Component {
         onSubmit={this.handleSubmit}
         onSign={this.handleCredSign}
         onRandomize={this.handleCredentialRandomize}
-        coinState={this.state.coinState}
+        credState={this.state.credState}
       />
     );
   }

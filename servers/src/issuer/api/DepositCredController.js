@@ -18,7 +18,7 @@ router.use(bodyParser.json());
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('Deposit coin post');
+    console.log('Deposit cred post');
   }
 
   const [hBytes, sigBytes] = req.body.signature;
@@ -73,15 +73,15 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  // // now finally check if the coin wasn't already spent
+  // // now finally check if the cred wasn't already spent
   // const wasCredAlreadySpent = await checkUsedId(id);
   // if (DEBUG) {
-  //   console.log(`Was coin already spent: ${wasCredAlreadySpent}`);
+  //   console.log(`Was cred already spent: ${wasCredAlreadySpent}`);
   // }
   //
   // if (isProofValid && !wasCredAlreadySpent && isSignatureValid) {
   //   await insertUsedId(id);
-  //   // await changeBalance(publicKeys[petitionOwner], coinAttributes.value);
+  //   // await changeBalance(publicKeys[petitionOwner], credAttributes.value);
   // }
 
 

@@ -48,7 +48,7 @@ export async function getSigningAuthorityPublicKey(server) {
   return publicKey;
 }
 
-export async function getCred(sk_coin, pk_coin, pk_client, sk_client, issuingServer) {
+export async function getCred(sk_cred, pk_cred, pk_client, sk_client, issuingServer) {
   const [G, o, g1, g2, e] = params;
 
   // for some reason we have no cached pk, lets try to get it
@@ -65,29 +65,29 @@ export async function getCred(sk_coin, pk_coin, pk_client, sk_client, issuingSer
 
   const issuingServerStr = publicKeys[issuingServer].join('');
 
-  const coinRequestObject =
-    getCredRequestObject(sk_coin, pk_coin, pk_client, sk_client, issuingServerStr);
+  const credRequestObject =
+    getCredRequestObject(sk_cred, pk_cred, pk_client, sk_client, issuingServerStr);
 
   let issuedCred;
   let issuance_status;
 
   if (DEBUG) {
-    console.log(`Calling ${issuingServer} to get a coin`);
+    console.log(`Calling ${issuingServer} to get a cred`);
   }
   try {
     let response = await
-      fetch(`http://${issuingServer}/getcoin`, {
+      fetch(`http://${issuingServer}/getcred`, {
         method: 'POST',
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          coin_request: coinRequestObject,
+          cred_request: credRequestObject,
         }),
       });
     response = await response.json();
-    issuedCred = response.coin;
+    issuedCred = response.cred;
     issuance_status = response.status;
   } catch (err) {
     console.log(err);
@@ -95,7 +95,7 @@ export async function getCred(sk_coin, pk_coin, pk_client, sk_client, issuingSer
   }
 
   if (issuance_status === ISSUE_STATUS.success) {
-    // return [issuedCred, coin_id];
+    // return [issuedCred, cred_id];
     return issuedCred;
   } else if (issuance_status != null) {
     console.warn(issuance_status);
@@ -124,7 +124,7 @@ export async function checkIfAlive(server) {
 export async function signCred(server, signingCred, ElGamalPK) {
   let signature = null;
   if (DEBUG) {
-    console.log('Compressed coin to sign: ', signingCred);
+    console.log('Compressed cred to sign: ', signingCred);
   }
 
   if (publicKeys[server] == null || publicKeys[server].length <= 0) {
@@ -150,7 +150,7 @@ export async function signCred(server, signingCred, ElGamalPK) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          coin: signingCred,
+          cred: signingCred,
           ElGamalPKBytes: ElGamal.getPKBytes(ElGamalPK),
         }),
       });

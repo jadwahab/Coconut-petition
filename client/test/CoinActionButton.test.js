@@ -9,7 +9,7 @@ import { COIN_STATUS } from '../src/config';
 describe('VoteActionButton Component', () => {
   // save time by not generating entire object that we do not need anyway
   const dummyCoin = {
-    coin: {
+    cred: {
       ttl: new Date().getTime(),
       value: 42,
     },
@@ -17,7 +17,7 @@ describe('VoteActionButton Component', () => {
 
   it('Should have received "onSign" function as a prop', () => {
     const mainWrapper = mount(<VoteDisplayer
-      coin={dummyCoin}
+      cred={dummyCoin}
       sk={{ dummy: 'value' }}
       id={{ dummy: 'value' }}
       ElGamalPK={{ dummy: 'value' }}
@@ -30,7 +30,7 @@ describe('VoteActionButton Component', () => {
 
   it('Should have received "onSpend" function as a prop', () => {
     const mainWrapper = mount(<VoteDisplayer
-      coin={dummyCoin}
+      cred={dummyCoin}
       sk={{ dummy: 'value' }}
       id={{ dummy: 'value' }}
       ElGamalPK={{ dummy: 'value' }}
@@ -41,9 +41,9 @@ describe('VoteActionButton Component', () => {
     expect(wrapper.props().onSpend).to.be.a('Function');
   });
 
-  it('Should have received "coinState" string as a prop, which is one of attributes of COIN_STATUS', () => {
+  it('Should have received "credState" string as a prop, which is one of attributes of COIN_STATUS', () => {
     const mainWrapper = mount(<VoteDisplayer
-      coin={dummyCoin}
+      cred={dummyCoin}
       sk={{ dummy: 'value' }}
       id={{ dummy: 'value' }}
       ElGamalPK={{ dummy: 'value' }}
@@ -51,57 +51,57 @@ describe('VoteActionButton Component', () => {
       sk_client={[]}
     />);
     const wrapper = mainWrapper.find(VoteActionButton);
-    const { coinState } = wrapper.props();
-    expect(coinState).to.be.a('string');
-    assert.isTrue(coinState === COIN_STATUS.created ||
-      coinState === COIN_STATUS.signing ||
-      coinState === COIN_STATUS.signed ||
-      coinState === COIN_STATUS.spent ||
-      coinState === COIN_STATUS.error);
+    const { credState } = wrapper.props();
+    expect(credState).to.be.a('string');
+    assert.isTrue(credState === COIN_STATUS.created ||
+      credState === COIN_STATUS.signing ||
+      credState === COIN_STATUS.signed ||
+      credState === COIN_STATUS.spent ||
+      credState === COIN_STATUS.error);
   });
 
-  it('Should be disabled if "coinState" is either "signing", "spending", "spent" or "error"', () => {
+  it('Should be disabled if "credState" is either "signing", "spending", "spent" or "error"', () => {
     const wrapper1 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      coinState={COIN_STATUS.created}
+      credState={COIN_STATUS.created}
     />);
     const wrapper2 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      coinState={COIN_STATUS.signing}
+      credState={COIN_STATUS.signing}
     />);
     const wrapper3 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      coinState={COIN_STATUS.signed}
+      credState={COIN_STATUS.signed}
     />);
     const wrapper4 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      coinState={COIN_STATUS.spent}
+      credState={COIN_STATUS.spent}
     />);
     const wrapper5 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      coinState={COIN_STATUS.spending}
+      credState={COIN_STATUS.spending}
     />);
     const wrapper6 = shallow(<VoteActionButton
       onSign={() => {
       }}
       onSpend={() => {
       }}
-      coinState={COIN_STATUS.error}
+      credState={COIN_STATUS.error}
     />);
 
     const buttonNode1 = wrapper1.find(Button);

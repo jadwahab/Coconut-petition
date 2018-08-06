@@ -14,7 +14,7 @@ class VoteDisplayer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      coinState: COIN_STATUS.signed,
+      credState: COIN_STATUS.signed,
       petitionID: null,
       // remainingValidityString: '',
     };
@@ -30,7 +30,7 @@ class VoteDisplayer extends React.Component {
 
   // updateRemainingValidityString = () => {
   //   let remainingValidityString;
-  //   switch (this.state.coinState) {
+  //   switch (this.state.credState) {
   //     case COIN_STATUS.spent: {
   //       remainingValidityString = 'Cred was spent';
   //       clearInterval(this.timer);
@@ -43,7 +43,7 @@ class VoteDisplayer extends React.Component {
   //     }
   //     default: {
   //       const currentTime = new Date().getTime();
-  //       const td = this.props.coin.ttl - currentTime;
+  //       const td = this.props.cred.ttl - currentTime;
   //       const seconds = Math.floor((td / 1000) % 60);
   //       const minutes = Math.floor((td / 1000 / 60) % 60);
   //       const hours = Math.floor((td / (1000 * 60 * 60)));
@@ -60,7 +60,7 @@ class VoteDisplayer extends React.Component {
   // };
 
   handleCredSpend = async () => {
-    this.setState({ coinState: COIN_STATUS.spending });
+    this.setState({ credState: COIN_STATUS.spending });
 
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
       .filter(server => signingServers.includes(server))
@@ -74,20 +74,20 @@ class VoteDisplayer extends React.Component {
     const petitionOwnerStr = publicKeys[petitionOwner].join('');
 
     const MPCP_output = CredSig.make_proof_credentials_petition(params, aggregatePublicKey,
-      this.props.randomizedSignature, this.props.coin_params.sk.m, petitionOwnerStr, this.state.petitionID);
+      this.props.randomizedSignature, this.props.cred_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
     const success = await spendCred(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
     if (success) {
       if (DEBUG) {
         console.log('Signature verified');
       }
-      this.setState({ coinState: COIN_STATUS.spent }); // EDIT:
+      this.setState({ credState: COIN_STATUS.spent }); // EDIT:
       this.props.handleRandomizeDisabled(false);
     } else {
       if (DEBUG) {
         console.log('There was an error in verifying signature');
       }
-      this.setState({ coinState: COIN_STATUS.error });// EDIT:
+      this.setState({ credState: COIN_STATUS.error });// EDIT:
     }
 
   };
@@ -103,7 +103,7 @@ class VoteDisplayer extends React.Component {
           <InputPetitionID onInputChange={this.handleInputChange}>
             <VoteActionButton
               onSpend={this.handleCredSpend}
-              coinState={this.state.coinState}
+              credState={this.state.credState}
               voteDisabled={this.state.petitionID == null}
             />
           </InputPetitionID>
@@ -118,7 +118,7 @@ class VoteDisplayer extends React.Component {
 
 VoteDisplayer.propTypes = {
   randomizedSignature: PropTypes.array.isRequired,
-  coin_params: PropTypes.object,
+  cred_params: PropTypes.object,
   handleRandomizeDisabled: PropTypes.func.isRequired,
 };
 

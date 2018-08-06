@@ -96,9 +96,9 @@ export default class CredSig {
     return [g2, aX, aY];
   }
 
-  static verifyAggregation(params, pks, coin, aggregateSignature) {
+  static verifyAggregation(params, pks, cred, aggregateSignature) {
     const aPk = CredSig.aggregatePublicKeys(params, pks);
-    return CredSig.verify(params, aPk, coin, aggregateSignature);
+    return CredSig.verify(params, aPk, cred, aggregateSignature);
   }
 
   // no need to pass h - encryption is already using it EDIT: make sure!
@@ -116,13 +116,13 @@ export default class CredSig {
 
     const reducer = (acc, cur) => acc + cur;
 
-    const coinStr =
+    const credStr =
       signingCred.pk_client_bytes.reduce(reducer) + // 1- client's key
-      signingCred.pk_coin_bytes.reduce(reducer) + // 2- coin's pk
+      signingCred.pk_cred_bytes.reduce(reducer) + // 2- cred's pk
       signingCred.issuedCredSig[0].reduce(reducer) + // 3- (1 & 2) signed by issuer
       signingCred.issuedCredSig[1].reduce(reducer); // (1 & 2 & 3 & enc_sk) signed by client
 
-    const h = hashToPointOnCurve(coinStr);
+    const h = hashToPointOnCurve(credStr);
 
     // EDIT: change enc_sk to enc_commitment or something
     // c = (a, b)

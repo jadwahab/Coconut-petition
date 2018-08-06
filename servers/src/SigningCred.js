@@ -2,20 +2,20 @@ import { hashToPointOnCurve } from './auxiliary';
 import { ctx, params } from './globalConfig';
 import ElGamal from './ElGamal';
 
-export const getSigningCred = (issuedCred, ElGamalPK, coin_sk, sk_client_bytes) => {
+export const getSigningCred = (issuedCred, ElGamalPK, cred_sk, sk_client_bytes) => {
   const [G, o, g1, g2, e] = params;
 
   const reducer = (acc, cur) => acc + cur;
 
-  const coinStr =
+  const credStr =
     issuedCred.pk_client_bytes.reduce(reducer) + // client's key
-    issuedCred.pk_coin_bytes.reduce(reducer) + // coin's pk
+    issuedCred.pk_cred_bytes.reduce(reducer) + // cred's pk
     issuedCred.issuedCredSig[0].reduce(reducer) +
     issuedCred.issuedCredSig[1].reduce(reducer);
 
-  const h = hashToPointOnCurve(coinStr);
+  const h = hashToPointOnCurve(credStr);
 
-  const [a, b, k] = ElGamal.encrypt(params, ElGamalPK, coin_sk, h);
+  const [a, b, k] = ElGamal.encrypt(params, ElGamalPK, cred_sk, h);
 
   const enc_sk = [a, b];
 
@@ -28,7 +28,7 @@ export const getSigningCred = (issuedCred, ElGamalPK, coin_sk, sk_client_bytes) 
   const enc_sk_bytes = [sk_a_bytes, sk_b_bytes];
 
   // beginning of the string will be identical so just append our ciphertext
-  const requestStr = coinStr +
+  const requestStr = credStr +
     enc_sk_bytes[0].reduce(reducer) +
     enc_sk_bytes[1].reduce(reducer);
 
@@ -40,7 +40,7 @@ export const getSigningCred = (issuedCred, ElGamalPK, coin_sk, sk_client_bytes) 
   const requestSig = [C, D];
 
   return {
-    pk_coin_bytes: issuedCred.pk_coin_bytes,
+    pk_cred_bytes: issuedCred.pk_cred_bytes,
     pk_client_bytes: issuedCred.pk_client_bytes,
     issuedCredSig: issuedCred.issuedCredSig,
     enc_sk_bytes: enc_sk_bytes,
@@ -62,21 +62,21 @@ export const verifySignRequest = (signingCred, issuerPK) => {
     return false;
   }
 
-  // first verify 'internal' signature of the issuer that such coin was issued and wasn't modified
+  // first verify 'internal' signature of the issuer that such cred was issued and wasn't modified
   const sha = ctx.ECDH.HASH_TYPE;
   const [C1, D1] = signingCred.issuedCredSig;
 
   const reducer = (acc, cur) => acc + cur;
 
-  const coinStr =
+  const credStr =
     signingCred.pk_client_bytes.reduce(reducer) + // client's key
-    signingCred.pk_coin_bytes.reduce(reducer); // coin's pk
+    signingCred.pk_cred_bytes.reduce(reducer); // cred's pk
 
-  if (ctx.ECDH.ECPVP_DSA(sha, issuerPK, coinStr, C1, D1) !== 0) {
+  if (ctx.ECDH.ECPVP_DSA(sha, issuerPK, credStr, C1, D1) !== 0) {
     return false;
   }
 
-  const requestStr = coinStr +
+  const requestStr = credStr +
     C1.reduce(reducer) +
     D1.reduce(reducer) +
     signingCred.enc_sk_bytes[0].reduce(reducer) +

@@ -37,13 +37,13 @@ export default class CredSig {
   }
 
   // sig = (x + m*y) * h
-  static sign(params, sk, coin_sk, coin_pk) {
+  static sign(params, sk, cred_sk, cred_pk) {
     const [G, o, g1, g2, e] = params;
     const [x, y] = sk;
 
-    const h = hashToPointOnCurve(coin_pk.toString());
+    const h = hashToPointOnCurve(cred_pk.toString());
 
-    const m = new G.ctx.BIG(coin_sk);
+    const m = new G.ctx.BIG(cred_sk);
 
     // calculate t1 = (y * m) mod p
     const t1 = G.ctx.BIG.mul(y, m);
@@ -60,7 +60,7 @@ export default class CredSig {
   }
 
   //  e(h, X + m*Y) == e(sig, g)
-  static verify(params, pk, coin_sk, sigma) {
+  static verify(params, pk, cred_sk, sigma) {
     // aggregation failed because h differed
     if (!sigma) {
       return false;
@@ -69,7 +69,7 @@ export default class CredSig {
     const [g, X, Y] = pk;
     const [h, sig] = sigma;
 
-    const expr = G.ctx.PAIR.G2mul(Y, coin_sk);
+    const expr = G.ctx.PAIR.G2mul(Y, cred_sk);
     expr.add(X);
     expr.affine();
 
@@ -188,9 +188,9 @@ export default class CredSig {
     return [g2, aX, aY];
   }
 
-  static verifyAggregation(params, pks, coin, aggregateSignature) {
+  static verifyAggregation(params, pks, cred, aggregateSignature) {
     const aPk = CredSig.aggregatePublicKeys_array(params, pks);
-    return CredSig.verify(params, aPk, coin, aggregateSignature);
+    return CredSig.verify(params, aPk, cred, aggregateSignature);
   }
 
   // no need to pass h - encryption is already using it EDIT: make sure!
@@ -208,13 +208,13 @@ export default class CredSig {
 
     const reducer = (acc, cur) => acc + cur;
 
-    const coinStr =
+    const credStr =
       signingCred.pk_client_bytes.reduce(reducer) + // 1- client's key
-      signingCred.pk_coin_bytes.reduce(reducer) + // 2- coin's pk
+      signingCred.pk_cred_bytes.reduce(reducer) + // 2- cred's pk
       signingCred.issuedCredSig[0].reduce(reducer) + // 3- (1 & 2) signed by issuer
       signingCred.issuedCredSig[1].reduce(reducer); // (1 & 2 & 3 & enc_sk) signed by client
 
-    const h = hashToPointOnCurve(coinStr);
+    const h = hashToPointOnCurve(credStr);
 
     // EDIT: change enc_sk to enc_commitment or something
     // c = (a, b)

@@ -28,27 +28,27 @@ import { ctx, params } from './globalConfig';
 //   return timeToLive;
 // };
 
-export const getIssuedCred = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) => {
+export const getIssuedCred = (pk_cred_bytes, pk_client_bytes, issuer_sk_Bytes) => {
   const [G, o, g1, g2, e] = params;
 
   // same reasoning as with CredRequest
   const reducer = (acc, cur) => acc + cur;
 
-  const coinStr =
+  const credStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    pk_coin_bytes.reduce(reducer); // coin's pk
+    pk_cred_bytes.reduce(reducer); // cred's pk
 
   const sha = ctx.ECDH.HASH_TYPE;
 
   const C = [];
   const D = [];
 
-  ctx.ECDH.ECPSP_DSA(sha, G.rngGen, issuer_sk_Bytes, coinStr, C, D);
+  ctx.ECDH.ECPSP_DSA(sha, G.rngGen, issuer_sk_Bytes, credStr, C, D);
   const issuedCredSig = [C, D];
 
 
   return {
-    pk_coin_bytes: pk_coin_bytes,
+    pk_cred_bytes: pk_cred_bytes,
     pk_client_bytes: pk_client_bytes,
     issuedCredSig: issuedCredSig,
   };
@@ -56,18 +56,18 @@ export const getIssuedCred = (pk_coin_bytes, pk_client_bytes, issuer_sk_Bytes) =
 
 export const verifyCredSignature = (issuedCred, pk_issuer_bytes) => {
   const {
-    pk_coin_bytes, pk_client_bytes, issuedCredSig,
+    pk_cred_bytes, pk_client_bytes, issuedCredSig,
   } = issuedCred; // object destructuring
 
   const reducer = (acc, cur) => acc + cur;
 
-  const coinStr =
+  const credStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    pk_coin_bytes.reduce(reducer); // coin's pk
+    pk_cred_bytes.reduce(reducer); // cred's pk
 
   const sha = ctx.ECDH.HASH_TYPE;
 
   const [C, D] = issuedCredSig;
 
-  return ctx.ECDH.ECPVP_DSA(sha, pk_issuer_bytes, coinStr, C, D) === 0;
+  return ctx.ECDH.ECPVP_DSA(sha, pk_issuer_bytes, credStr, C, D) === 0;
 };

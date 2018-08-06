@@ -1,5 +1,5 @@
 //
-// After the Coin class was split into multiple files depending on coin's state, this tests are no longer applicable
+// After the Coin class was split into multiple files depending on cred's state, this tests are no longer applicable
 //
 // import { expect, assert } from 'chai';
 // import { before } from 'mocha';
@@ -7,17 +7,17 @@
 // import Coin from '../lib/Coin';
 // import CredSig from '../lib/CredSig'; // for params
 // import { ctx } from '../src/config';
-// import { getRandomCoinId } from '../src/utils/coinGenerator';
+// import { getRandomCoinId } from '../src/utils/credGenerator';
 // import ElGamal from '../lib/ElGamal';
 //
 // describe('Coin object', () => {
-//   let coinValue;
+//   let credValue;
 //   let v;
-//   let coin;
+//   let cred;
 //   let ide;
 //   let g1;
 //   before(() => {
-//     coinValue = 42;
+//     credValue = 42;
 //     v = { Dummy: 'object' };
 //
 //     g1 = new ctx.ECP();
@@ -38,41 +38,41 @@
 //
 //     ide = ctx.BIG.randomnum(groupOrder, rng);
 //
-//     coin = new Coin(v, ide, coinValue);
+//     cred = new Coin(v, ide, credValue);
 //   });
 //
 //   describe('Construction', () => {
 //     it('Coin ID equals to g1 to power of the random exponent', () => {
-//       assert.isTrue(coin.ID.equals(ctx.PAIR.G1mul(g1, ide)));
+//       assert.isTrue(cred.ID.equals(ctx.PAIR.G1mul(g1, ide)));
 //     });
 //   });
 //
 //   it('The alias for getting public key works correctly', () => {
-//     expect(coin.publicKey).to.equal(coin.v);
+//     expect(cred.publicKey).to.equal(cred.v);
 //   });
 //
 //   it('The alias for getting time to live works correctly', () => {
-//     expect(coin.timeToLive).to.equal(coin.ttl);
+//     expect(cred.timeToLive).to.equal(cred.ttl);
 //   });
 //
 //   // assumes previous tests would have detected errors so normal key generation could be used
-//   describe('Prepare coin for signing', () => {
+//   describe('Prepare cred for signing', () => {
 //     let properCoin;
 //     let params;
-//     let coin_sk;
-//     let coin_pk;
+//     let cred_sk;
+//     let cred_pk;
 //     let id;
 //     before(() => {
 //       const properCoinValue = 42;
 //       params = CredSig.setup();
-//       [coin_sk, coin_pk] = Coin.keygen(params);
+//       [cred_sk, cred_pk] = Coin.keygen(params);
 //       id = getRandomCoinId();
-//       properCoin = new Coin(coin_pk, id, properCoinValue);
+//       properCoin = new Coin(cred_pk, id, properCoinValue);
 //     });
 //
-//     it('Can prepare a coin', () => {
+//     it('Can prepare a cred', () => {
 //       const [ElGamalSK, ElGamalPK] = ElGamal.keygen(params);
-//       const signingCoin = properCoin.prepareCoinForSigning(ElGamalPK, params, id, coin_sk);
+//       const signingCoin = properCoin.prepareCoinForSigning(ElGamalPK, params, id, cred_sk);
 //
 //       expect(signingCoin).to.have.property('bytesV').that.is.an('array');
 //       expect(signingCoin).to.have.property('value').that.is.an('number');

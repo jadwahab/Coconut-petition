@@ -19,21 +19,21 @@ describe('VoteListDisplayer Component', () => {
     VoteListDisplayerNode = wrapper.find(VoteListDisplayer);
   });
 
-  it('Should have received array of coin objects', () => {
-    expect(VoteListDisplayerNode.props().coins).to.be.an('Array').to.not.be.empty;
-    expect(VoteListDisplayerNode.props().coins[0]).to.be.an('object').to.not.be.empty;
-    expect(VoteListDisplayerNode.props().coins[1]).to.be.an('object').to.not.be.empty;
+  it('Should have received array of cred objects', () => {
+    expect(VoteListDisplayerNode.props().creds).to.be.an('Array').to.not.be.empty;
+    expect(VoteListDisplayerNode.props().creds[0]).to.be.an('object').to.not.be.empty;
+    expect(VoteListDisplayerNode.props().creds[1]).to.be.an('object').to.not.be.empty;
   });
 
-  it('Contains as many VoteDisplayer children as it got coin objects in props', () => {
+  it('Contains as many VoteDisplayer children as it got cred objects in props', () => {
     const VoteDisplayerNodes = wrapper.find(VoteDisplayer);
     expect(VoteDisplayerNodes).to.have.length(2);
 
-    const wrapper2 = mount(<VoteListDisplayer coins={[]} />);
+    const wrapper2 = mount(<VoteListDisplayer creds={[]} />);
     const VoteDisplayerNodes2 = wrapper2.find(VoteDisplayer);
     expect(VoteDisplayerNodes2).to.have.length(0);
 
-    const wrapper3 = mount(<VoteListDisplayer coins={[{ sk: {}, coin: {} }]} />);
+    const wrapper3 = mount(<VoteListDisplayer creds={[{ sk: {}, cred: {} }]} />);
     const VoteDisplayerNodes3 = wrapper3.find(VoteDisplayer);
     expect(VoteDisplayerNodes3).to.have.length(1);
   });

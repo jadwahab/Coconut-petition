@@ -17,24 +17,24 @@ router.use(bodyParser.json());
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('POST Call to getcoin');
+    console.log('POST Call to getcred');
   }
   const sourceIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // just for purpose of debugging
   if (DEBUG) {
     console.log('Request came from', sourceIp);
   }
 
-  const coin_request = req.body.coin_request;
+  const cred_request = req.body.cred_request;
 
   // Verify whether request signature is legit:
-  const isSignatureValid = verifyRequestSignature(coin_request);
+  const isSignatureValid = verifyRequestSignature(cred_request);
   if (!isSignatureValid) {
     if (DEBUG) {
-      console.log('Error in issuing coin', ISSUE_STATUS.error_signature);
+      console.log('Error in issuing cred', ISSUE_STATUS.error_signature);
     }
     res.status(200)
       .json({
-        coin: null,
+        cred: null,
         status: ISSUE_STATUS.error_signature,
       });
     return;
@@ -44,18 +44,18 @@ router.post('/', async (req, res) => {
 
   // Verify whether request proof of knowledge is legit:
   const isProofValid = verifyRequestProofOfCredSecret(
-    coin_request.proof_bytes,
-    coin_request.pk_coin_bytes,
+    cred_request.proof_bytes,
+    cred_request.pk_cred_bytes,
     issuerStr,
   );
 
   if (!isProofValid) {
     if (DEBUG) {
-      console.log('Error in issuing coin', ISSUE_STATUS.error_proof);
+      console.log('Error in issuing cred', ISSUE_STATUS.error_proof);
     }
     res.status(200)
       .json({
-        coin: null,
+        cred: null,
         status: ISSUE_STATUS.error_proof,
       });
     return;
@@ -63,8 +63,8 @@ router.post('/', async (req, res) => {
 
 // Issuer finally signs the credential
   const issuedCred = getIssuedCred(
-    coin_request.pk_coin_bytes,
-    coin_request.pk_client_bytes,
+    cred_request.pk_cred_bytes,
+    cred_request.pk_client_bytes,
     sig_skBytes,
   );
 
@@ -75,7 +75,7 @@ router.post('/', async (req, res) => {
   console.log('Issueance request took: ', t1 - t0);
   res.status(200)
     .json({
-      coin: issuedCred,
+      cred: issuedCred,
       status: ISSUE_STATUS.success,
     });
 });

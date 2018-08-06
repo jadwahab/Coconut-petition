@@ -9,7 +9,7 @@ const SubmitButton = (props) => {
   let isDisabled = false;
   let buttonIcon = "key"
 
-  switch (props.coinState) {
+  switch (props.credState) {
     case COIN_STATUS.uncreated: // 'Ungenerated'
       buttonContent = BUTTON_COIN_STATUS.get; // 'Get Credential'
       handleButtonClick = props.onSubmit;
@@ -57,7 +57,7 @@ SubmitButton.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onSign: PropTypes.func.isRequired,
   onRandomize: PropTypes.func.isRequired,
-  coinState: PropTypes.string.isRequired,
+  credState: PropTypes.string.isRequired,
 };
 
 export default SubmitButton;

@@ -8,7 +8,7 @@ const VoteActionButton = (props) => {
   let handleButtonClick;
   let isDisabled = props.voteDisabled;
 
-  switch (props.coinState) {
+  switch (props.credState) {
     case COIN_STATUS.signed: // 'Signed'
       buttonContent = BUTTON_COIN_STATUS.spend; // 'Spend Cred'
       handleButtonClick = props.onSpend;
@@ -45,7 +45,7 @@ const VoteActionButton = (props) => {
 
 VoteActionButton.propTypes = {
   onSpend: PropTypes.func.isRequired,
-  coinState: PropTypes.string.isRequired,
+  credState: PropTypes.string.isRequired,
   voteDisabled: PropTypes.bool.isRequired,
 };
 

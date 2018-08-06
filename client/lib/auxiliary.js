@@ -188,7 +188,7 @@ export const prepareProofOfSecret_Auth = (params, h, sks, d, k) => {
   return [C, rd, rm, ro, rk];
 };
 
-export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk, proof) => {
+export const verifyProofOfSecret_Auth = (params, h, cred_pk, elgamal_pk, enc_sk, proof) => {
   const [G, o, g1, g2, e, h1] = params;
   const [C, rd, rm, ro, rk] = proof;
 
@@ -199,7 +199,7 @@ export const verifyProofOfSecret_Auth = (params, h, coin_pk, elgamal_pk, enc_sk,
 
   const Bw_prove = ctx.PAIR.G1mul(g1, rm);
   const tBw1 = ctx.PAIR.G1mul(h1, ro);
-  const tBw2 = ctx.PAIR.G1mul(coin_pk, C);
+  const tBw2 = ctx.PAIR.G1mul(cred_pk, C);
   Bw_prove.add(tBw1);
   Bw_prove.add(tBw2);
   Bw_prove.affine();

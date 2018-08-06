@@ -24,36 +24,36 @@ const generateCoinSecret = () => {
 };
 
 describe('VoteDisplayer Component', async () => {
-  const coinValue = 42;
+  const credValue = 42;
   before(async () => {
     const wrapper = mount(<MainView />);
-    wrapper.find('input').simulate('change', { target: { value: coinValue } });
-    await wrapper.find(CredentialRequester).at(0).props().handleCoinSubmit(coinValue);
+    wrapper.find('input').simulate('change', { target: { value: credValue } });
+    await wrapper.find(CredentialRequester).at(0).props().handleCoinSubmit(credValue);
 
     wrapper.update();
     VoteDisplayerNode = wrapper.find(VoteDisplayer);
-    requestedCoin = VoteDisplayerNode.props().coin;
+    requestedCoin = VoteDisplayerNode.props().cred;
   });
   describe('Should have received Coin as a prop', () => {
     it('That has TTL in a future', () => {
-      expect(VoteDisplayerNode.props().coin.ttl > new Date().getTime()).to.equal(true);
+      expect(VoteDisplayerNode.props().cred.ttl > new Date().getTime()).to.equal(true);
     });
 
     it('That has the same value as from the input', () => {
-      expect(VoteDisplayerNode.props().coin.value).to.equal(coinValue);
+      expect(VoteDisplayerNode.props().cred.value).to.equal(credValue);
     });
   });
 
   describe('VoteActionButton child behaviour', () => {
     it('Has VoteActionButton child component', () => {
-      const wrapper = mount(<VoteDisplayer coin={requestedCoin} sk={null} id={null} ElGamalPK={null} ElGamalSK={null} sk_client={null} />);
+      const wrapper = mount(<VoteDisplayer cred={requestedCoin} sk={null} id={null} ElGamalPK={null} ElGamalSK={null} sk_client={null} />);
 
       expect(VoteDisplayerNode.find(VoteActionButton)).to.have.length(1);
     });
 
-    it('If VoteDisplayer has coinState "Generated", VoteActionButton will call "handleCoinSign" on click', () => {
-      const wrapper = mount(<VoteDisplayer coin={requestedCoin} />);
-      wrapper.setState({ coinState: COIN_STATUS.created });
+    it('If VoteDisplayer has credState "Generated", VoteActionButton will call "handleCoinSign" on click', () => {
+      const wrapper = mount(<VoteDisplayer cred={requestedCoin} />);
+      wrapper.setState({ credState: COIN_STATUS.created });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSign');
 
       wrapper.instance().forceUpdate();
@@ -62,9 +62,9 @@ describe('VoteDisplayer Component', async () => {
       expect(spy.calledOnce).to.equal(true);
     });
 
-    it('If VoteDisplayer has coinState "Signed", VoteActionButton will call "handleCoinSpend" on click', () => {
-      const wrapper = mount(<VoteDisplayer coin={requestedCoin} />);
-      wrapper.setState({ coinState: COIN_STATUS.signed });
+    it('If VoteDisplayer has credState "Signed", VoteActionButton will call "handleCoinSpend" on click', () => {
+      const wrapper = mount(<VoteDisplayer cred={requestedCoin} />);
+      wrapper.setState({ credState: COIN_STATUS.signed });
       const spy = sinon.spy(wrapper.instance(), 'handleCoinSpend');
 
       wrapper.instance().forceUpdate();
@@ -86,10 +86,10 @@ describe('VoteDisplayer Component', async () => {
       const pk_client = g1.mul(sk_client);
       pk_client.toBytes(pkBytes_client);
 
-      const [coin_sk, coin_pk] = generateCoinSecret();
-      const [coin, id] = await getCoin(
-        coin_sk,
-        coin_pk,
+      const [cred_sk, cred_pk] = generateCoinSecret();
+      const [cred, id] = await getCoin(
+        cred_sk,
+        cred_pk,
         42,
         pkBytes_client,
         skBytes_client,
@@ -98,8 +98,8 @@ describe('VoteDisplayer Component', async () => {
 
       const wrapper = mount(<VoteDisplayer
         key={id}
-        coin={coin}
-        sk={coin_sk}
+        cred={cred}
+        sk={cred_sk}
         id={id}
         ElGamalSK={sk_elgamal}
         ElGamalPK={pk_elgamal}
@@ -110,8 +110,8 @@ describe('VoteDisplayer Component', async () => {
       const publicKeys = await Promise.all(signingServers.map(async server => getSigningAuthorityPublicKey(server)));
 
       for (let i = 0; i < signatures.length; i++) {
-        const pkX = ctx.PAIR.G2mul(publicKeys[i][4], coin_sk);
-        expect(CredSig.verifyMixedBlindSign(params, publicKeys[i], coin, signatures[i], id, pkX)).to.equal(true);
+        const pkX = ctx.PAIR.G2mul(publicKeys[i][4], cred_sk);
+        expect(CredSig.verifyMixedBlindSign(params, publicKeys[i], cred, signatures[i], id, pkX)).to.equal(true);
       }
     });
 
@@ -129,10 +129,10 @@ describe('VoteDisplayer Component', async () => {
       const pk_client = g1.mul(sk_client);
       pk_client.toBytes(pkBytes_client);
 
-      const [coin_sk, coin_pk] = generateCoinSecret();
-      const [coin, id] = await getCoin(
-        coin_sk,
-        coin_pk,
+      const [cred_sk, cred_pk] = generateCoinSecret();
+      const [cred, id] = await getCoin(
+        cred_sk,
+        cred_pk,
         42,
         pkBytes_client,
         skBytes_client,
@@ -141,8 +141,8 @@ describe('VoteDisplayer Component', async () => {
 
       const wrapper = mount(<VoteDisplayer
         key={id}
-        coin={coin}
-        sk={coin_sk}
+        cred={cred}
+        sk={cred_sk}
         id={id}
         ElGamalSK={sk_elgamal}
         ElGamalPK={pk_elgamal}
@@ -167,10 +167,10 @@ describe('VoteDisplayer Component', async () => {
       const pk_client = g1.mul(sk_client);
       pk_client.toBytes(pkBytes_client);
 
-      const [coin_sk, coin_pk] = generateCoinSecret();
-      const [coin, id] = await getCoin(
-        coin_sk,
-        coin_pk,
+      const [cred_sk, cred_pk] = generateCoinSecret();
+      const [cred, id] = await getCoin(
+        cred_sk,
+        cred_pk,
         42,
         pkBytes_client,
         skBytes_client,
@@ -179,8 +179,8 @@ describe('VoteDisplayer Component', async () => {
 
       const wrapper = mount(<VoteDisplayer
         key={id}
-        coin={coin}
-        sk={coin_sk}
+        cred={cred}
+        sk={cred_sk}
         id={id}
         ElGamalSK={sk_elgamal}
         ElGamalPK={pk_elgamal}
@@ -195,8 +195,8 @@ describe('VoteDisplayer Component', async () => {
       wrapper.instance().aggregateAndRandomizeSignatures(signatures);
       assert.isNotNull(wrapper.state('randomizedSignature'));
 
-      const pkX = ctx.PAIR.G2mul(aggregatePublicKey[4], coin_sk);
-      expect(CredSig.verifyMixedBlindSign(params, aggregatePublicKey, coin, wrapper.state('randomizedSignature'), id, pkX)).to.equal(true);
+      const pkX = ctx.PAIR.G2mul(aggregatePublicKey[4], cred_sk);
+      expect(CredSig.verifyMixedBlindSign(params, aggregatePublicKey, cred, wrapper.state('randomizedSignature'), id, pkX)).to.equal(true);
     });
 
     it("If one of signatures was null, aggregate won't be created and state will be set appropriately", async () => {
@@ -212,10 +212,10 @@ describe('VoteDisplayer Component', async () => {
       const pk_client = g1.mul(sk_client);
       pk_client.toBytes(pkBytes_client);
 
-      const [coin_sk, coin_pk] = generateCoinSecret();
-      const [coin, id] = await getCoin(
-        coin_sk,
-        coin_pk,
+      const [cred_sk, cred_pk] = generateCoinSecret();
+      const [cred, id] = await getCoin(
+        cred_sk,
+        cred_pk,
         42,
         pkBytes_client,
         skBytes_client,
@@ -224,8 +224,8 @@ describe('VoteDisplayer Component', async () => {
 
       const wrapper = mount(<VoteDisplayer
         key={id}
-        coin={coin}
-        sk={coin_sk}
+        cred={cred}
+        sk={cred_sk}
         id={id}
         ElGamalSK={sk_elgamal}
         ElGamalPK={pk_elgamal}

@@ -94,14 +94,14 @@ describe('Coconut Scheme:', () => {
     it('Verified proofOfSecret_Issuer', () => {
       const params = CredSig.setup();
       const [G, o, g1, g2, e] = params;
-      const [coin_sks, coin_pk] = generateCredSecret(params);
+      const [cred_sks, cred_pk] = generateCredSecret(params);
 
       const issuingServerStr = 'issuer';
-      const secretProof = prepareProofOfSecret(params, coin_sks, issuingServerStr);
+      const secretProof = prepareProofOfSecret(params, cred_sks, issuingServerStr);
       const proof_bytes = getBytesProof(secretProof); // EDIT: FIX to c rm ro
 
       const proof = fromBytesProof(proof_bytes);
-      assert.isTrue(verifyProofOfSecret(params, coin_pk, proof, issuingServerStr));
+      assert.isTrue(verifyProofOfSecret(params, cred_pk, proof, issuingServerStr));
     });
   });
 
@@ -109,25 +109,25 @@ describe('Coconut Scheme:', () => {
     it('Verified proofOfSecret_Auth', () => {
       const params = CredSig.setup();
       const [G, o, g1, g2, e] = params;
-      const [coin_sks, coin_pk] = generateCredSecret(params);
+      const [cred_sks, cred_pk] = generateCredSecret(params);
       const [sk_elgamal, pk_elgamal] = ElGamal.keygen(params);
 
-      const coinStr = coin_pk.toString() + pk_elgamal.toString();
+      const credStr = cred_pk.toString() + pk_elgamal.toString();
   
-      const h = hashToPointOnCurve(coinStr);
+      const h = hashToPointOnCurve(credStr);
     
-      const [a, b, k] = ElGamal.encrypt(params, pk_elgamal, coin_sks.m, h);
+      const [a, b, k] = ElGamal.encrypt(params, pk_elgamal, cred_sks.m, h);
     
       const enc_sk = [a, b];
 
       // const signingAuthStr = 'signing authority';
-      // const secretProof = prepareProofOfSecret_Auth(params, h, coin_sks, sk_elgamal, k, signingAuthStr);
-      const secretProof = prepareProofOfSecret_Auth(params, h, coin_sks, sk_elgamal, k);
+      // const secretProof = prepareProofOfSecret_Auth(params, h, cred_sks, sk_elgamal, k, signingAuthStr);
+      const secretProof = prepareProofOfSecret_Auth(params, h, cred_sks, sk_elgamal, k);
       const proof_bytes = getBytesProof_Auth(secretProof);
 
       const proof = fromBytesProof_Auth(proof_bytes);
-      // assert.isTrue(verifyProofOfSecret_Auth(params, h, coin_pk, pk_elgamal, enc_sk, proof, signingAuthStr));
-      assert.isTrue(verifyProofOfSecret_Auth(params, h, coin_pk, pk_elgamal, enc_sk, proof));
+      // assert.isTrue(verifyProofOfSecret_Auth(params, h, cred_pk, pk_elgamal, enc_sk, proof, signingAuthStr));
+      assert.isTrue(verifyProofOfSecret_Auth(params, h, cred_pk, pk_elgamal, enc_sk, proof));
     });
   });
 
@@ -139,15 +139,15 @@ describe('Coconut Scheme:', () => {
       const [sk, pk] = CredSig.keygen(params);
       const [x, y] = sk;
 
-      const coin_params = CredSig.setup();
+      const cred_params = CredSig.setup();
       // create commitment
-      const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-      const coin_sk = coin_sks.m;
+      const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+      const cred_sk = cred_sks.m;
 
-      const signature = CredSig.sign(params, sk, coin_sk, coin_pk);
+      const signature = CredSig.sign(params, sk, cred_sk, cred_pk);
       const [h, sig] = signature;
 
-      const m = new G.ctx.BIG(coin_sk);
+      const m = new G.ctx.BIG(cred_sk);
 
       // calculate t1 = (y * m) mod p
       const t1 = G.ctx.BIG.mul(y, m);
@@ -168,21 +168,21 @@ describe('Coconut Scheme:', () => {
     const params = CredSig.setup();
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = CredSig.keygen(params);
-    const coin_params = CredSig.setup();
-    const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-    const coin_sk = coin_sks.m;
+    const cred_params = CredSig.setup();
+    const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+    const cred_sk = cred_sks.m;
 
-    const sigma = CredSig.sign(params, sk, coin_sk, coin_pk);
+    const sigma = CredSig.sign(params, sk, cred_sk, cred_pk);
 
 
     it('Successful verification of original credential', () => {
-      assert.isTrue(CredSig.verify(params, pk, coin_sk, sigma));
+      assert.isTrue(CredSig.verify(params, pk, cred_sk, sigma));
     });
 
     it('Failed verification for credential with different secret', () => {
-      const [new_coin_sks, new_coin_pk] = generateCredSecret(coin_params);
-      const new_coin_sk = new_coin_sks.m;
-      const testCred = new_coin_sk;
+      const [new_cred_sks, new_cred_pk] = generateCredSecret(cred_params);
+      const new_cred_sk = new_cred_sks.m;
+      const testCred = new_cred_sk;
       assert.isNotTrue(CredSig.verify(params, pk, testCred, sigma));
     });
   });
@@ -191,15 +191,15 @@ describe('Coconut Scheme:', () => {
     const params = CredSig.setup();
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = CredSig.keygen(params);
-    const coin_params = CredSig.setup();
-    const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-    const coin_sk = coin_sks.m;
+    const cred_params = CredSig.setup();
+    const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+    const cred_sk = cred_sks.m;
 
-    let sigma = CredSig.sign(params, sk, coin_sk, coin_pk);
+    let sigma = CredSig.sign(params, sk, cred_sk, cred_pk);
     sigma = CredSig.randomize(params, sigma);
 
     it('Successful verification for original credential with randomized signature', () => {
-      assert.isTrue(CredSig.verify(params, pk, coin_sk, sigma));
+      assert.isTrue(CredSig.verify(params, pk, cred_sk, sigma));
     });
   });
 
@@ -208,11 +208,11 @@ describe('Coconut Scheme:', () => {
       const params = CredSig.setup();
       const [G, o, g1, g2, e] = params;
       const [sk, pk] = CredSig.keygen(params);
-      const coin_params = CredSig.setup();
-      const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-      const coin_sk = coin_sks.m;
+      const cred_params = CredSig.setup();
+      const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+      const cred_sk = cred_sks.m;
 
-      const sigma = CredSig.sign(params, sk, coin_sk, coin_pk);
+      const sigma = CredSig.sign(params, sk, cred_sk, cred_pk);
       const aggregateSig = CredSig.aggregateSignatures(params, [sigma]);
 
       assert.isTrue(sigma[0].equals(aggregateSig[0]));
@@ -224,14 +224,14 @@ describe('Coconut Scheme:', () => {
       const [G, o, g1, g2, e] = params;
       const [sk, pk] = CredSig.keygen(params);
 
-      const coin_params = CredSig.setup();
-      const [coin_sks1, coin_pk1] = generateCredSecret(coin_params);
-      const coin_sk1 = coin_sks1.m;
-      const [coin_sks2, coin_pk2] = generateCredSecret(coin_params);
-      const coin_sk2 = coin_sks2.m;
+      const cred_params = CredSig.setup();
+      const [cred_sks1, cred_pk1] = generateCredSecret(cred_params);
+      const cred_sk1 = cred_sks1.m;
+      const [cred_sks2, cred_pk2] = generateCredSecret(cred_params);
+      const cred_sk2 = cred_sks2.m;
 
-      const sigma1 = CredSig.sign(params, sk, coin_sk1, coin_pk1);
-      const sigma2 = CredSig.sign(params, sk, coin_sk2, coin_pk2);
+      const sigma1 = CredSig.sign(params, sk, cred_sk1, cred_pk1);
+      const sigma2 = CredSig.sign(params, sk, cred_sk2, cred_pk2);
 
       const aggregateSig = CredSig.aggregateSignatures(params, [sigma1, sigma2]);
 
@@ -256,69 +256,69 @@ describe('Coconut Scheme:', () => {
         const params = CredSig.setup();
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CredSig.keygen(params);
-        const coin_params = CredSig.setup();
-        const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-        const coin_sk = coin_sks.m;
+        const cred_params = CredSig.setup();
+        const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+        const cred_sk = cred_sks.m;
 
-        const sigma = CredSig.sign(params, sk, coin_sk, coin_pk);
+        const sigma = CredSig.sign(params, sk, cred_sk, cred_pk);
         const aggregateSig = CredSig.aggregateSignatures(params, [sigma]);
 
-        assert.isTrue(CredSig.verifyAggregation(params, [pk], coin_sk, aggregateSig));
+        assert.isTrue(CredSig.verifyAggregation(params, [pk], cred_sk, aggregateSig));
       });
 
       it('Works for three distinct signatures', () => {
         const params = CredSig.setup();
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CredSig.keygen(params);
-        const coin_params = CredSig.setup(); // EDIT:
-        const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-        const coin_sk = coin_sks.m;
+        const cred_params = CredSig.setup(); // EDIT:
+        const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+        const cred_sk = cred_sks.m;
 
-        const coinsToSign = 3;
+        const credsToSign = 3;
         const pks = [];
         const signatures = [];
 
-        for (let i = 0; i < coinsToSign; i++) {
+        for (let i = 0; i < credsToSign; i++) {
           const [sk, pk] = CredSig.keygen(params);
           pks.push(pk);
-          const signature = CredSig.sign(params, sk, coin_sk, coin_pk);
+          const signature = CredSig.sign(params, sk, cred_sk, cred_pk);
           signatures.push(signature);
         }
 
         const aggregateSignature = CredSig.aggregateSignatures(params, signatures);
 
-        assert.isTrue(CredSig.verifyAggregation(params, pks, coin_sk, aggregateSignature));
+        assert.isTrue(CredSig.verifyAggregation(params, pks, cred_sk, aggregateSignature));
       });
 
       it('Doesn\'t work when one of three signatures is on different credential', () => {
         const params = CredSig.setup();
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CredSig.keygen(params);
-        const coin_params = CredSig.setup();
-        const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-        const coin_sk = coin_sks.m;
+        const cred_params = CredSig.setup();
+        const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+        const cred_sk = cred_sks.m;
 
-        const coinsToSign = 2;
+        const credsToSign = 2;
         const pks = [];
         const signatures = [];
 
-        for (let i = 0; i < coinsToSign; i++) {
+        for (let i = 0; i < credsToSign; i++) {
           const [sk, pk] = CredSig.keygen(params);
           pks.push(pk);
-          const signature = CredSig.sign(params, sk, coin_sk, coin_pk);
+          const signature = CredSig.sign(params, sk, cred_sk, cred_pk);
           signatures.push(signature);
         }
 
-        const [another_coin_sks, another_coin_pk] = generateCredSecret(coin_params);
-        const another_coin_sk = another_coin_sks.m;
+        const [another_cred_sks, another_cred_pk] = generateCredSecret(cred_params);
+        const another_cred_sk = another_cred_sks.m;
 
         const [skm, pkm] = CredSig.keygen(params);
         pks.push(pkm);
-        const maliciousSignature = CredSig.sign(params, skm, another_coin_sk, another_coin_pk);
+        const maliciousSignature = CredSig.sign(params, skm, another_cred_sk, another_cred_pk);
         signatures.push(maliciousSignature);
 
         const aggregateSignature = CredSig.aggregateSignatures(params, signatures);
-        assert.isNotTrue(CredSig.verifyAggregation(params, pks, coin_sk, aggregateSignature));
+        assert.isNotTrue(CredSig.verifyAggregation(params, pks, cred_sk, aggregateSignature));
       });
     });
   });
@@ -327,12 +327,12 @@ describe('Coconut Scheme:', () => {
     const params = CredSig.setup();
     const [G, o, g1, g2, e] = params;
 
-    // first we need to create a coin to sign
-    const coin_params = CredSig.setup(); // EDIT:
-    const [coin_sks, coin_pk] = generateCredSecret(coin_params);
-    const coin_sk = coin_sks.m;
-    const coin_pk_bytes = [];
-    coin_pk.toBytes(coin_pk_bytes);
+    // first we need to create a cred to sign
+    const cred_params = CredSig.setup(); // EDIT:
+    const [cred_sks, cred_pk] = generateCredSecret(cred_params);
+    const cred_sk = cred_sks.m;
+    const cred_pk_bytes = [];
+    cred_pk.toBytes(cred_pk_bytes);
 
     // get client key pair
     const pkBytes_client = [];
@@ -351,14 +351,14 @@ describe('Coconut Scheme:', () => {
 
     const [ElGamalSK, ElGamalPK] = ElGamal.keygen(params);
 
-    // PREPARE_BLIND_SIGN: issuer sign credential commitment | return: pk_coin_bytes, pk_client_bytes, issuedCredSig
-    const issuedCred = getIssuedCred(coin_pk_bytes, pkBytes_client, sk_issuer_bytes);
+    // PREPARE_BLIND_SIGN: issuer sign credential commitment | return: pk_cred_bytes, pk_client_bytes, issuedCredSig
+    const issuedCred = getIssuedCred(cred_pk_bytes, pkBytes_client, sk_issuer_bytes);
     it('Credential commitment verified by issuer', () => {
       assert.isTrue(verifyCredSignature(issuedCred, pk_issuer_bytes));
     });
 
     // PREPARE_BLIND_SIGN: client prepare credential to be signed by authorities
-    const signingCred = getSigningCred(issuedCred, ElGamalPK, coin_sk, skBytes_client);
+    const signingCred = getSigningCred(issuedCred, ElGamalPK, cred_sk, skBytes_client);
     it('Credential sign request (signatures by issuer and client) verified by signing authority', () => {
       assert.isTrue(verifySignRequest(signingCred, pk_issuer_bytes));
     });
@@ -383,7 +383,7 @@ describe('Coconut Scheme:', () => {
       const kappa = ctx.PAIR.G2mul(g2, t);      // t*g2
       const aX = pk[1];                         // aX
       const aY = pk[2];                         // aY
-      const pkY = ctx.PAIR.G2mul(aY, coin_sk);  // m*Y
+      const pkY = ctx.PAIR.G2mul(aY, cred_sk);  // m*Y
       kappa.add(aX);
       kappa.add(pkY);
       kappa.affine();
@@ -397,7 +397,7 @@ describe('Coconut Scheme:', () => {
       Aw.affine();
 
       const c = hashToBIG(g2.toString() + Aw.toString());
-      const m_cpy = new ctx.BIG(coin_sk);
+      const m_cpy = new ctx.BIG(cred_sk);
       m_cpy.mod(o);
       const t1 = ctx.BIG.mul(m_cpy, c); // produces DBIG
       const t2 = t1.mod(o); // but this gives BIG back
@@ -458,13 +458,13 @@ describe('Coconut Scheme:', () => {
 
     it('Cw/zeta verified', () => {
       const gs = hashToPointOnCurve(petitionID);
-      const zeta = ctx.PAIR.G1mul(gs, coin_sk);
+      const zeta = ctx.PAIR.G1mul(gs, cred_sk);
       const wm = ctx.BIG.randomnum(G.order, G.rngGen);
       const Cw = ctx.PAIR.G1mul(gs, wm);
       Cw.affine();
 
       const c = hashToBIG(g1.toString() + Cw.toString());
-      const m_cpy = new ctx.BIG(coin_sk);
+      const m_cpy = new ctx.BIG(cred_sk);
       m_cpy.mod(o);
       const t1 = ctx.BIG.mul(m_cpy, c); // produces DBIG
       const t2 = t1.mod(o); // but this gives BIG back
@@ -486,7 +486,7 @@ describe('Coconut Scheme:', () => {
     // BLIND_VERIFY: petitionOwner/issuer verifies credential
     it('Credential shown by client is verified', () => {
       const petitionOwner = 'petitionOwner public key';
-      const MPCP_output = CredSig.make_proof_credentials_petition(params, pk, sigma, coin_sk, petitionOwner, petitionID);
+      const MPCP_output = CredSig.make_proof_credentials_petition(params, pk, sigma, cred_sk, petitionOwner, petitionID);
       assert.isTrue(CredSig.verify_proof_credentials_petition(params, pk, sigma, MPCP_output, petitionOwner, petitionID));
     });
   });

@@ -15,7 +15,7 @@ class MainView extends React.Component {
       ElGamalPK: null,
       sk_client: null,
       pk_client: null,
-      coin_params: null,
+      cred_params: null,
       randomizeDisabled: false,
     };
   }
@@ -80,9 +80,9 @@ class MainView extends React.Component {
   };
 
 
-  handleCredForSpend = (coin, sk) => {
-    const coin_params = { coin: coin, sk: sk };
-    this.setState({ coin_params });
+  handleCredForSpend = (cred, sk) => {
+    const cred_params = { cred: cred, sk: sk };
+    this.setState({ cred_params });
   }
 
   handleRandomizeDisabled = (state) => {
@@ -115,7 +115,7 @@ class MainView extends React.Component {
           <Grid.Row centered={true}>
             <VoteListDisplayer
               randomizedSignatures={this.state.randomizedSignatures}
-              coin_params={this.state.coin_params}
+              cred_params={this.state.cred_params}
               handleRandomizeDisabled={this.handleRandomizeDisabled}
             />
           </Grid.Row>

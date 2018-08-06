@@ -22,12 +22,12 @@ router.post('/', async (req, res) => {
   let responseStatus = -1;
   let signatureBytes = null;
   try {
-    const signingCred = req.body.coin;
+    const signingCred = req.body.cred;
     const ElGamalPKBytes = req.body.ElGamalPKBytes;
 
-    // firstly check if the server has not already signed this coin
+    // firstly check if the server has not already signed this cred
     if (sessionSignatures.has(signingCred.issuedCredSig)) {
-      throw new Error('This coin was already signed before!');
+      throw new Error('This cred was already signed before!');
     } else {
       sessionSignatures.add(signingCred.issuedCredSig);
     }
@@ -44,22 +44,22 @@ router.post('/', async (req, res) => {
 
     const reducer = (acc, cur) => acc + cur;
 
-    const coinStr =
+    const credStr =
       signingCred.pk_client_bytes.reduce(reducer) + // client's key
-      signingCred.pk_coin_bytes.reduce(reducer) + // coin's pk
+      signingCred.pk_cred_bytes.reduce(reducer) + // cred's pk
       signingCred.issuedCredSig[0].reduce(reducer) + // issuer sig
       signingCred.issuedCredSig[1].reduce(reducer); // client sig
 
-    const h_comit = hashToPointOnCurve(coinStr);
+    const h_comit = hashToPointOnCurve(credStr);
 
     const ElGamalPK = ElGamal.getPKFromBytes(params, ElGamalPKBytes);
     const proof = fromBytesProof_Auth(signingCred.proof);
-    const coin_pk = ctx.ECP.fromBytes(signingCred.pk_coin_bytes);
+    const cred_pk = ctx.ECP.fromBytes(signingCred.pk_cred_bytes);
     const [enc_sk_a_bytes, enc_sk_b_bytes] = signingCred.enc_sk_bytes;
     const enc_sk_a = ctx.ECP.fromBytes(enc_sk_a_bytes);
     const enc_sk_b = ctx.ECP.fromBytes(enc_sk_b_bytes);
     const enc_sk = [enc_sk_a, enc_sk_b];
-    const isProofValid = verifyProofOfSecret_Auth(params, h_comit, coin_pk, ElGamalPK, enc_sk, proof);
+    const isProofValid = verifyProofOfSecret_Auth(params, h_comit, cred_pk, ElGamalPK, enc_sk, proof);
 
     if (!isProofValid) {
       console.log('Proof was not correct');
@@ -81,7 +81,7 @@ router.post('/', async (req, res) => {
 
 
     if (DEBUG) {
-      console.log(`Signed the coin. \n h: ${h.toString()}, \n enc_sig_a: ${enc_sig[0].toString()} \n enc_sig_b: ${enc_sig[1].toString()}`);
+      console.log(`Signed the cred. \n h: ${h.toString()}, \n enc_sig_a: ${enc_sig[0].toString()} \n enc_sig_b: ${enc_sig[1].toString()}`);
     }
 
     signatureBytes = [hBytes, [enc_sig_a_Bytes, enc_sig_b_Bytes]];
