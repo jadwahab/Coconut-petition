@@ -1,6 +1,6 @@
 // set of auxiliary functions that don't belong to any existing class/module
 
-import { ctx, power } from '../src/config';
+import { ctx } from '../src/config';
 import CoinSig from './CoinSig';
 
 export const stringToBytes = (s) => {

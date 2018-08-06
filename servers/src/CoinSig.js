@@ -2,7 +2,7 @@
 // to allow for larger number of signed messages from multiple authorities
 
 import BpGroup from './BpGroup';
-import { power, ctx } from './globalConfig';
+import { ctx } from './globalConfig';
 import { hashToBIG, hashG2ElemToBIG, hashToPointOnCurve, hashMessage } from './auxiliary';
 import ElGamal from './ElGamal';
 
@@ -14,7 +14,7 @@ export default class CoinSig {
     const g2 = G.gen2;
     const e = G.pair;
     const o = G.order;
-    // create h to ge g1^power
+    // create h to ge g1^p
     const p = new ctx.BIG(2);
     const h1 = G.ctx.PAIR.G1mul(g1, p);
 

@@ -1,6 +1,6 @@
 import { describe, it } from 'mocha';
 import { expect, assert } from 'chai';
-import { ctx, power } from '../globalConfig';
+import { ctx } from '../globalConfig';
 import CoinSig from '../CoinSig';
 import BpGroup from '../BpGroup';
 import { hashToBIG, hashToPointOnCurve, prepareProofOfSecret, verifyProofOfSecret, fromBytesProof,
@@ -11,12 +11,9 @@ import { getIssuedCoin, verifyCoinSignature } from '../IssuedCoin';
 import { getBytesProof, getBytesProof_Auth, getBytesMPVP } from '../CoinRequest';
 
 const generateCoinSecret = (params) => {
-  const [G, o, g1, g2, e] = params;
+  const [G, o, g1, g2, e, h1] = params;
   const m = ctx.BIG.randomnum(G.order, G.rngGen);
   const pk = ctx.PAIR.G1mul(g1, m);
-
-  // create h to ge g1^power
-  const h1 = ctx.PAIR.G1mul(g1, power); // get power from config
 
   // random blindling factor o_blind
   const o_blind = ctx.BIG.randomnum(G.order, G.rngGen);

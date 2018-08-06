@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SubmitButton from './SubmitButton';
-import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG, power } from '../../config';
+import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG } from '../../config';
 import { signCoin, getCoin } from '../../utils/api';
 import CoinSig from '../../../lib/CoinSig';
 import ElGamal from '../../../lib/ElGamal';
