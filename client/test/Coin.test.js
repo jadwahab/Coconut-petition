@@ -111,7 +111,7 @@
 //       const enc_id_old = properCoin.enc_id;
 //
 //       const signingCoin = properCoin.prepareCoinForSigning();
-//       const recreatedCoin = Coin.fromSigningCredential(signingCoin);
+//       const recreatedCoin = Coin.fromSigningCoin(signingCoin);
 //
 //       const v_new = recreatedCoin.v;
 //       const value_new = recreatedCoin.value;

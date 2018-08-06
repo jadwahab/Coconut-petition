@@ -3,7 +3,7 @@ import { ctx, params } from '../src/config';
 import ElGamal from './ElGamal';
 import { getBytesProof_Auth } from './CoinRequest';
 
-export const getSigningCredential = (issuedCoin, ElGamalSK, ElGamalPK, coin_sks, sk_client_bytes) => {
+export const getSigningCoin = (issuedCoin, ElGamalSK, ElGamalPK, coin_sks, sk_client_bytes) => {
   const [G, o, g1, g2, e] = params;
 
   const reducer = (acc, cur) => acc + cur;
