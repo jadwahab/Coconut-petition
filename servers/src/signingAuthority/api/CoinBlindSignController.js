@@ -4,7 +4,7 @@ import CoinSig from '../../CoinSig';
 import { params, sk } from '../config/CoinSigSetup';
 import { DEBUG } from '../config/appConfig';
 import ElGamal from '../../ElGamal';
-import { verifySignRequest } from '../../SigningCoin';
+import { verifySignRequest } from '../../SigningCredential';
 import { sessionSignatures, publicKeys } from '../cache';
 import { issuer, ctx } from '../../globalConfig';
 import { getPublicKey, hashToPointOnCurve, fromBytesProof_Auth, verifyProofOfSecret_Auth } from '../../auxiliary';

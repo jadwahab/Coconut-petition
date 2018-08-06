@@ -5,7 +5,7 @@ import { params, ctx, COIN_STATUS, signingServers, issuer, DEBUG, power } from '
 import { signCoin, getCoin } from '../../utils/api';
 import CoinSig from '../../../lib/CoinSig';
 import ElGamal from '../../../lib/ElGamal';
-import { getSigningCoin } from '../../../lib/SigningCoin';
+import { getSigningCredential } from '../../../lib/SigningCredential';
 import { publicKeys } from '../../cache';
 
 class CredentialRequester extends React.Component {
@@ -62,7 +62,7 @@ class CredentialRequester extends React.Component {
   };
 
   getSignatures = async (serversArg) => {
-    const signingCoin = getSigningCoin(this.state.coin, this.props.ElGamalSK, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
+    const signingCredential = getSigningCredential(this.state.coin, this.props.ElGamalSK, this.props.ElGamalPK, this.state.sk, this.props.sk_client);
 
     const signatures = await Promise.all(serversArg.map(async (server) => {
       try {
@@ -70,7 +70,7 @@ class CredentialRequester extends React.Component {
           console.log(`Sending request to ${server}...`);
         }
 
-        const [h, enc_sig] = await signCoin(server, signingCoin, this.props.ElGamalPK);
+        const [h, enc_sig] = await signCoin(server, signingCredential, this.props.ElGamalPK);
         const sig = ElGamal.decrypt(params, this.props.ElGamalSK, enc_sig);
 
         if (DEBUG) {
