@@ -3,7 +3,7 @@
 
 import BpGroup from './BpGroup';
 import { ctx } from '../src/config';
-import { hashToBIG, hashG2ElemToBIG, hashToPointOnCurve, hashMessage } from './auxiliary';
+import { hashToBIG, hashG2ElemToBIG, hashToPointOnCurve, hashMessage } from './Proofs';
 import ElGamal from './ElGamal';
 
 export default class CredSig {
@@ -146,130 +146,5 @@ export default class CredSig {
 
     // return [h, c']
     return [h, [enc_sig_a, enc_sig_b]];
-  }
-
-  static make_proof_credentials_petition(params, agg_vk, sigma, m, petitionOwner, petitionID) {
-    const [G, o, g1, g2, e] = params;
-    // const agg_vk = CredSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
-
-    // MATERIALS: rand t, kappa, nu, zeta
-    const t = ctx.BIG.randomnum(G.order, G.rngGen);
-
-    // kappa = t*g2 + aX + m*aY :
-    const kappa = ctx.PAIR.G2mul(g2, t); // t*g2
-    const aX = agg_vk[1]; // aX
-    const aY = agg_vk[2]; // aY
-    const pkY = ctx.PAIR.G2mul(aY, m); // m*Y
-    kappa.add(aX);
-    kappa.add(pkY);
-    kappa.affine();
-
-    const [h, sig] = sigma;
-
-    // nu = t*h
-    const nu = ctx.PAIR.G1mul(h, t);
-
-    const gs = hashToPointOnCurve(petitionID);
-
-    // zeta = m*gs
-    const zeta = ctx.PAIR.G1mul(gs, m);
-
-    // PROOF: pi_v
-    // create witnesses
-    const wm = ctx.BIG.randomnum(G.order, G.rngGen);
-    const wt = ctx.BIG.randomnum(G.order, G.rngGen);
-
-    // compute the witnesses commitments
-    const Aw = ctx.PAIR.G2mul(g2, wt);
-    Aw.add(aX);
-    const pkYw = ctx.PAIR.G2mul(aY, wm);
-    Aw.add(pkYw);
-    Aw.affine();
-    const Bw = ctx.PAIR.G1mul(h, wt);
-    Bw.affine();
-    const Cw = ctx.PAIR.G1mul(gs, wm);
-    Cw.affine();
-
-    // create the challenge
-    const c = hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString()
-      + Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString());
-
-    // create responses
-    const rm = new ctx.BIG(wm);
-    const rt = new ctx.BIG(wt);
-
-    // to prevent object mutation
-    const m_cpy = new ctx.BIG(m);
-    const t_cpy = new ctx.BIG(t);
-    const c_cpy = new ctx.BIG(c);
-    m_cpy.mod(o);
-    t_cpy.mod(o);
-    c_cpy.mod(o);
-
-    const t1 = ctx.BIG.mul(m_cpy, c_cpy); // produces DBIG
-    const t2 = t1.mod(o); // but this gives BIG back
-
-    const t3 = ctx.BIG.mul(t_cpy, c_cpy); // produces DBIG
-    const t4 = t3.mod(o); // but this gives BIG back
-
-    wm.mod(o);
-    wt.mod(o);
-
-    rm.sub(t2);
-    rm.add(o); // to ensure positive result
-    rm.mod(o);
-
-    rt.sub(t4);
-    rt.add(o); // to ensure positive result
-    rt.mod(o);
-
-    const pi_v = {
-      c: c,
-      rm: rm,
-      rt: rt
-    };
-
-    return [kappa, nu, zeta, pi_v];
-  }
-
-  static verify_proof_credentials_petition(params, agg_vk, sigma, MPCP_output, petitionOwner, petitionID) {
-    if (!sigma) {
-      return false;
-    }
-    const [G, o, g1, g2, e] = params;
-    const [ag, aX, aY] = agg_vk;
-    const [h, sig] = sigma;
-    const [kappa, nu, zeta, pi_v] = MPCP_output;
-    const c = pi_v.c;
-    const rm = pi_v.rm;
-    const rt = pi_v.rt;
-    const gs = hashToPointOnCurve(petitionID);
-
-    // re-compute the witness commitments
-    const Aw = ctx.PAIR.G2mul(kappa, c);
-    const temp1 = ctx.PAIR.G2mul(g2, rt);
-    Aw.add(temp1);
-    Aw.add(aX);
-    const temp2 = ctx.PAIR.G2mul(aX, c);
-    Aw.sub(temp2);
-    const temp3 = ctx.PAIR.G2mul(aY, rm);
-    Aw.add(temp3);
-    Aw.affine();
-
-    const Bw = ctx.PAIR.G1mul(nu, c);
-    const temp4 = ctx.PAIR.G1mul(h, rt);
-    Bw.add(temp4);
-    Bw.affine();
-
-    const Cw = ctx.PAIR.G1mul(gs, rm);
-    const temp5 = ctx.PAIR.G1mul(zeta, c);
-    Cw.add(temp5);
-    Cw.affine();
-
-    // BIG.comp(a,b): Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b
-    const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString()
-      + Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString())) === 0;
-
-    return (!h.INF && expr1);
   }
 }

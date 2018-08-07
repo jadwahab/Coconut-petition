@@ -1,6 +1,6 @@
 import { ctx, params } from '../src/config';
-import { getBytesProof } from './BytesConversion';
-import { prepareProofOfSecret, verifyProofOfSecret, fromBytesProof } from './auxiliary';
+import { getBytesProof, fromBytesProof } from './BytesConversion';
+import { prepareProofOfSecret, verifyProofOfSecret } from './Proofs';
 
 export const getCredRequestObject = (
   sk_cred, // to generate proof of secret

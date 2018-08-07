@@ -1,4 +1,4 @@
-import { hashToPointOnCurve, prepareProofOfSecret_Auth } from './auxiliary';
+import { hashToPointOnCurve, prepareProofOfSecret_Auth } from './Proofs';
 import { ctx, params } from '../src/config';
 import ElGamal from './ElGamal';
 import { getBytesProof_Auth } from './BytesConversion';

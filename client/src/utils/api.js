@@ -1,6 +1,5 @@
 import fetch from 'isomorphic-fetch';
 import { ctx, DEBUG, ISSUE_STATUS, params } from '../config';
-import { getRandomNumber } from './helpers';
 import ElGamal from '../../lib/ElGamal';
 import { getSimplifiedProof, getSimplifiedSignature, getSimplifiedMPCP } from '../../lib/BytesConversion';
 import { getCredRequestObject } from '../../lib/CredRequest';
@@ -173,6 +172,7 @@ export async function signCred(server, signingCred, ElGamalPK) {
   return signature;
 }
 
+// EDIT:
 // ... we can't send v because it would link us to issuance, we just send ttl, id, proof of x (on aX3) and sig
 // pkX = aX3^x
 export async function spendCred(MPCP_output, signature, server, petitionID) {

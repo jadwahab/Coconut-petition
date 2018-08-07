@@ -7,7 +7,7 @@ import styles from './VoteDisplayer.style';
 import { params, CRED_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
 import { spendCred } from '../../utils/api';
 import CredSig from '../../../lib/CredSig';
-import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/auxiliary';
+import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/Proofs';
 import { publicKeys } from '../../cache';
 
 class VoteDisplayer extends React.Component {
@@ -73,7 +73,7 @@ class VoteDisplayer extends React.Component {
 
     const petitionOwnerStr = publicKeys[petitionOwner].join('');
 
-    const MPCP_output = CredSig.make_proof_credentials_petition(params, aggregatePublicKey,
+    const MPCP_output = make_proof_credentials_petition(params, aggregatePublicKey,
       this.props.randomizedSignature, this.props.cred_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
     const success = await spendCred(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);

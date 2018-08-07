@@ -1,7 +1,4 @@
-// set of auxiliary functions that don't belong to any existing class/module
-
 import { ctx } from '../src/config';
-import CredSig from './CredSig';
 
 export const stringToBytes = (s) => {
   const b = [];
@@ -46,7 +43,6 @@ export const hashG2ElemToBIG = (G2elem) => {
   return this.hashToBIG(G2elem.toString());
 };
 
-// EDIT: move to file called proofs.js
 export const prepareProofOfSecret = (params, sk, verifierStr) => {
   const [G, o, g1, g2, e, h1] = params;
   const x = sk.m;
@@ -225,7 +221,7 @@ export const verifyProofOfSecret_Auth = (params, h, cred_pk, elgamal_pk, enc_sk,
   return expr;
 };
 
-export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petitionID) => {
+export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petitionOwner, petitionID) => {
   const [G, o, g1, g2, e] = params;
   // const agg_vk = CredSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
 
@@ -233,10 +229,10 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   const t = ctx.BIG.randomnum(G.order, G.rngGen);
 
   // kappa = t*g2 + aX + m*aY :
-  const kappa = ctx.PAIR.G2mul(g2, t);   // t*g2
-  const aX = agg_vk[1];                  // aX
-  const aY = agg_vk[2];                  // aY
-  const pkY = ctx.PAIR.G2mul(aY, m);     // m*Y
+  const kappa = ctx.PAIR.G2mul(g2, t); // t*g2
+  const aX = agg_vk[1]; // aX
+  const aY = agg_vk[2]; // aY
+  const pkY = ctx.PAIR.G2mul(aY, m); // m*Y
   kappa.add(aX);
   kappa.add(pkY);
   kappa.affine();
@@ -257,16 +253,19 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   const wt = ctx.BIG.randomnum(G.order, G.rngGen);
 
   // compute the witnesses commitments
-  const Aw = ctx.PAIR.G2mul(g2,wt);
+  const Aw = ctx.PAIR.G2mul(g2, wt);
   Aw.add(aX);
   const pkYw = ctx.PAIR.G2mul(aY, wm);
   Aw.add(pkYw);
   Aw.affine();
   const Bw = ctx.PAIR.G1mul(h, wt);
+  Bw.affine();
   const Cw = ctx.PAIR.G1mul(gs, wm);
+  Cw.affine();
 
   // create the challenge
-  const c = hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() + Aw.toString() + Bw.toString() + Cw.toString());
+  const c = hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() +
+      Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString());
 
   // create responses
   const rm = new ctx.BIG(wm);
@@ -281,10 +280,10 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   c_cpy.mod(o);
 
   const t1 = ctx.BIG.mul(m_cpy, c_cpy); // produces DBIG
-  const t2 = t1.mod(o); // but this gives BIG back          EDIT: check if can remove t2 and t4 useless
+  const t2 = t1.mod(o); // but this gives BIG back
 
   const t3 = ctx.BIG.mul(t_cpy, c_cpy); // produces DBIG
-  const t4 = t1.mod(o); // but this gives BIG back
+  const t4 = t3.mod(o); // but this gives BIG back
 
   wm.mod(o);
   wt.mod(o);
@@ -306,9 +305,7 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   return [kappa, nu, zeta, pi_v];
 };
 
-
-// EDIT: move to proofs.js
-export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_output, petitionID) => {
+export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_output, petitionOwner, petitionID) => {
   if (!sigma) {
     return false;
   }
@@ -321,33 +318,13 @@ export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_ou
   const rt = pi_v.rt;
   const gs = hashToPointOnCurve(petitionID);
 
-
-  // // for some reason h.x, h.y, sig.x and sig.y return false to being instances of FP when signed by SAs,
-  // // hence temporary, ugly hack:
-  // // I blame javascript pseudo-broken typesystem
-  // const tempX1 = new G.ctx.FP(0);
-  // const tempY1 = new G.ctx.FP(0);
-  // tempX1.copy(h.getx());
-  // tempY1.copy(h.gety());
-  // h.x = tempX1;
-  // h.y = tempY1;
-  //
-  // const tempX2 = new G.ctx.FP(0);
-  // const tempY2 = new G.ctx.FP(0);
-  // tempX2.copy(sig.getx());
-  // tempY2.copy(sig.gety());
-  // sig.x = tempX2;
-  // sig.y = tempY2;
-
   // re-compute the witness commitments
   const Aw = ctx.PAIR.G2mul(kappa, c);
-  const temp1 = ctx.PAIR.G2mul(g2, rt)
+  const temp1 = ctx.PAIR.G2mul(g2, rt);
   Aw.add(temp1);
-  const oneMinusC = new ctx.BIG(1);
-  oneMinusC.sub(c);
-  oneMinusC.mod(o);
-  const temp2 = ctx.PAIR.G2mul(aX, oneMinusC);
-  Aw.add(temp2);
+  Aw.add(aX);
+  const temp2 = ctx.PAIR.G2mul(aX, c);
+  Aw.sub(temp2);
   const temp3 = ctx.PAIR.G2mul(aY, rm);
   Aw.add(temp3);
   Aw.affine();
@@ -363,8 +340,8 @@ export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_ou
   Cw.affine();
 
   // BIG.comp(a,b): Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b
-  const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() + Aw.toString() + Bw.toString() + Cw.toString())) === 0;
+  const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() +
+    Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString())) === 0;
 
-  // return (!h.INF && expr1);
-  return (expr1);
-}
+  return (!h.INF && expr1);
+};
