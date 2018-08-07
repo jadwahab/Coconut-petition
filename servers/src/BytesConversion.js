@@ -101,18 +101,13 @@ export const fromBytesMPCP = (bytesMPCP) => {
 };
 
 export const getBytesMPVP = (proof) => {
-  const [enc_v, C, Cv, rk, rv, rr1, rr2] = proof;
-  const [a, b] = enc_v;
-  const bytesA = [];
-  const bytesB = [];
+  const [C, Cv, rk, rv, rr1, rr2] = proof;
   const bytesC = [];
   const bytesCv = [];
   const bytesRk = [];
   const bytesRv = [];
   const bytesRr1 = [];
   const bytesRr2 = [];
-  a.toBytes(bytesA);
-  b.toBytes(bytesB);
   C.toBytes(bytesC);
   Cv.toBytes(bytesCv);
   rk.toBytes(bytesRk);
@@ -120,21 +115,47 @@ export const getBytesMPVP = (proof) => {
   rr1.toBytes(bytesRr1);
   rr2.toBytes(bytesRr2);
 
-  return [bytesA, bytesB, bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2];
+  return [bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2];
 };
 
 export const fromBytesMPVP = (bytesProof) => {
-  const [bytesA, bytesB, bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2] = bytesProof;
-  const a = ctx.ECP.fromBytes(bytesA);
-  const b = ctx.ECP.fromBytes(bytesB);
-  const enc_v = [a, b];
+  const [bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2] = bytesProof;
   const C = ctx.BIG.fromBytes(bytesC);
   const Cv = ctx.ECP.fromBytes(bytesCv);
   const rk = ctx.BIG.fromBytes(bytesRk);
   const rv = ctx.BIG.fromBytes(bytesRv);
   const rr1 = ctx.BIG.fromBytes(bytesRr1);
   const rr2 = ctx.BIG.fromBytes(bytesRr2);
-  return [enc_v, C, Cv, rk, rv, rr1, rr2];
+
+  return [C, Cv, rk, rv, rr1, rr2];
+};
+
+export const getBytesVotes = (votes) => {
+  const [enc_v, enc_v_not] = votes;
+  const [a, b] = enc_v;
+  const bytesA = [];
+  const bytesB = [];
+  const [a_not, b_not] = enc_v_not;
+  const bytesANot = [];
+  const bytesBNot = [];
+  a.toBytes(bytesA);
+  b.toBytes(bytesB);
+  a_not.toBytes(bytesANot);
+  b_not.toBytes(bytesBNot);
+
+  return [bytesA, bytesB, bytesANot, bytesBNot];
+};
+
+export const fromBytesVotes = (bytesVotes) => {
+  const [bytesA, bytesB, bytesANot, bytesBNot] = bytesVotes;
+  const a = ctx.ECP.fromBytes(bytesA);
+  const b = ctx.ECP.fromBytes(bytesB);
+  const enc_v = [a, b];
+  const a_not = ctx.ECP.fromBytes(bytesANot);
+  const b_not = ctx.ECP.fromBytes(bytesBNot);
+  const enc_v_not = [a_not, b_not];
+
+  return [enc_v, enc_v_not];
 };
 
 export const getSimplifiedSignature = (signature) => {
