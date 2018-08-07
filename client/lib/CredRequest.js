@@ -1,33 +1,6 @@
 import { ctx, params } from '../src/config';
-import { prepareProofOfSecret, verifyProofOfSecret } from './auxiliary';
-
-export const getBytesProof = (proof) => {
-  const [C, rm, ro] = proof;
-  const bytesC = [];
-  const bytesRm = [];
-  const bytesRo = [];
-  C.toBytes(bytesC);
-  rm.toBytes(bytesRm);
-  ro.toBytes(bytesRo);
-
-  return [bytesC, bytesRm, bytesRo];
-};
-
-export const getBytesProof_Auth = (proof) => {
-  const [C, rd, rm, ro, rk] = proof;
-  const bytesC = [];
-  const bytesRd = [];
-  const bytesRm = [];
-  const bytesRo = [];
-  const bytesRk = [];
-  C.toBytes(bytesC);
-  rd.toBytes(bytesRd);
-  rm.toBytes(bytesRm);
-  ro.toBytes(bytesRo);
-  rk.toBytes(bytesRk);
-
-  return [bytesC, bytesRd, bytesRm, bytesRo, bytesRk];
-};
+import { getBytesProof } from './BytesConversion';
+import { prepareProofOfSecret, verifyProofOfSecret, fromBytesProof } from './auxiliary';
 
 export const getCredRequestObject = (
   sk_cred, // to generate proof of secret
@@ -75,7 +48,7 @@ export const getCredRequestObject = (
 export const verifyRequestSignature = (cred_request) => {
   const {
     pk_cred_bytes, proof_bytes, // pk_client_bytes, requestSig,
-      pk_client_bytes, requestSig,
+    pk_client_bytes, requestSig,
   } = cred_request; // object destructuring
   const [bytesW, bytesCm, bytesR] = proof_bytes;
   const reducer = (acc, cur) => acc + cur;
@@ -91,14 +64,6 @@ export const verifyRequestSignature = (cred_request) => {
   const [C, D] = requestSig;
 
   return ctx.ECDH.ECPVP_DSA(sha, pk_client_bytes, requestStr, C, D) === 0;
-};
-
-export const fromBytesProof = (bytesProof) => {
-  const [bytesW, bytesCm, bytesR] = bytesProof;
-  const W = ctx.ECP.fromBytes(bytesW);
-  const cm = ctx.BIG.fromBytes(bytesCm);
-  const r = ctx.BIG.fromBytes(bytesR);
-  return [W, cm, r];
 };
 
 export const verifyRequestProofOfCredSecret = (proof_bytes, pk_cred_bytes, issuer) => {

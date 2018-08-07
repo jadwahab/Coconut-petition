@@ -2,15 +2,15 @@ import { ctx, params } from './globalConfig';
 import { prepareProofOfSecret, verifyProofOfSecret, fromBytesProof } from './auxiliary';
 
 export const getBytesProof = (proof) => {
-  const [W, cm, r] = proof;
-  const bytesW = [];
-  const bytesCm = [];
-  const bytesR = [];
-  W.toBytes(bytesW);
-  cm.toBytes(bytesCm);
-  r.toBytes(bytesR);
+  const [C, rm, ro] = proof;
+  const bytesC = [];
+  const bytesRm = [];
+  const bytesRo = [];
+  C.toBytes(bytesC);
+  rm.toBytes(bytesRm);
+  ro.toBytes(bytesRo);
 
-  return [bytesW, bytesCm, bytesR];
+  return [bytesC, bytesRm, bytesRo];
 };
 
 export const getBytesProof_Auth = (proof) => {

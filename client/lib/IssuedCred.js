@@ -54,6 +54,7 @@ export const getIssuedCred = (pk_cred_bytes, pk_client_bytes, issuer_sk_Bytes) =
   };
 };
 
+// not used except in tests
 export const verifyCredSignature = (issuedCred, pk_issuer_bytes) => {
   const {
     pk_cred_bytes, pk_client_bytes, issuedCredSig,

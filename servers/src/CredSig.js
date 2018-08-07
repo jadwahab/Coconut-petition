@@ -258,7 +258,6 @@ export default class CredSig {
     const [h, sig] = sigma;
 
     // nu = t*h
-    // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCredSecret of CredentialRequester.js
     const nu = ctx.PAIR.G1mul(h, t);
 
     const gs = hashToPointOnCurve(petitionID);

@@ -1,7 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import { ctx, DEBUG, ISSUE_STATUS, params } from '../config';
-import { getSimplifiedProof, getSimplifiedSignature, getRandomNumber, getSimplifiedMPCP } from './helpers';
+import { getRandomNumber } from './helpers';
 import ElGamal from '../../lib/ElGamal';
+import { getSimplifiedProof, getSimplifiedSignature, getSimplifiedMPCP } from '../../lib/BytesConversion';
 import { getCredRequestObject } from '../../lib/CredRequest';
 import { publicKeys } from '../cache';
 
@@ -201,7 +202,7 @@ export async function spendCred(MPCP_output, signature, server, petitionID) {
     success = response.success;
   } catch (err) {
     console.warn(err);
-    console.warn(`Call to petitionOwner ${server} was unsuccessful`); // EDIT:
+    console.warn(`Call to petitionOwner ${server} was unsuccessful`);
   }
   return success;
 }

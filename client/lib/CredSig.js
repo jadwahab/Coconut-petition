@@ -14,7 +14,8 @@ export default class CredSig {
     const g2 = G.gen2;
     const e = G.pair;
     const o = G.order;
-    // create h to ge g1^power
+    // create h to ge g1^p
+    // h('h1') -> like gs
     const p = new ctx.BIG(2);
     const h1 = G.ctx.PAIR.G1mul(g1, p);
 
@@ -166,7 +167,6 @@ export default class CredSig {
     const [h, sig] = sigma;
 
     // nu = t*h
-    // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCredSecret of CredentialRequester.js
     const nu = ctx.PAIR.G1mul(h, t);
 
     const gs = hashToPointOnCurve(petitionID);

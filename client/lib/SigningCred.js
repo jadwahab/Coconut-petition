@@ -1,7 +1,7 @@
 import { hashToPointOnCurve, prepareProofOfSecret_Auth } from './auxiliary';
 import { ctx, params } from '../src/config';
 import ElGamal from './ElGamal';
-import { getBytesProof_Auth } from './CredRequest';
+import { getBytesProof_Auth } from './BytesConversion';
 
 export const getSigningCred = (issuedCred, ElGamalSK, ElGamalPK, cred_sks, sk_client_bytes) => {
   const [G, o, g1, g2, e] = params;

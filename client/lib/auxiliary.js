@@ -244,13 +244,12 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   const [h, sig] = sigma;
 
   // nu = t*h
-  // EDIT: DEPENDS ON IF Cm USED G1 OR G2 in generateCredSecret of CredentialRequester.js
-  const nu = ctx.PAIR.G1mul(h, t); 
+  const nu = ctx.PAIR.G1mul(h, t);
 
   const gs = hashToPointOnCurve(petitionID);
 
   // zeta = m*gs
-  zeta = ctx.PAIR.G1mul(gs, m);    
+  const zeta = ctx.PAIR.G1mul(gs, m);
 
   // PROOF: pi_v
   // create witnesses
@@ -265,16 +264,6 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   Aw.affine();
   const Bw = ctx.PAIR.G1mul(h, wt);
   const Cw = ctx.PAIR.G1mul(gs, wm);
-
-  console.log('sigma');
-  console.log(sigma);
-  console.log('MPCP:');
-  console.log('Aw');
-  console.log(Aw);
-  console.log('Bw');
-  console.log(Bw);
-  console.log('Cw');
-  console.log(Cw);
 
   // create the challenge
   const c = hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() + Aw.toString() + Bw.toString() + Cw.toString());
@@ -311,7 +300,7 @@ export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petiti
   const pi_v = {
     c: c,
     rm: rm,
-    rt: rt
+    rt: rt,
   };
 
   return [kappa, nu, zeta, pi_v];
@@ -372,14 +361,6 @@ export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_ou
   const temp5 = ctx.PAIR.G1mul(zeta, c);
   Cw.add(temp5);
   Cw.affine();
-
-  console.log('VPCP:');
-  console.log('Aw');
-  console.log(Aw);
-  console.log('Bw');
-  console.log(Bw);
-  console.log('Cw');
-  console.log(Cw);
 
   // BIG.comp(a,b): Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b
   const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() + Aw.toString() + Bw.toString() + Cw.toString())) === 0;

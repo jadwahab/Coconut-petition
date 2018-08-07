@@ -98,7 +98,7 @@ describe('Coconut Scheme:', () => {
 
       const issuingServerStr = 'issuer';
       const secretProof = prepareProofOfSecret(params, cred_sks, issuingServerStr);
-      const proof_bytes = getBytesProof(secretProof); // EDIT: FIX to c rm ro
+      const proof_bytes = getBytesProof(secretProof);
 
       const proof = fromBytesProof(proof_bytes);
       assert.isTrue(verifyProofOfSecret(params, cred_pk, proof, issuingServerStr));
@@ -270,7 +270,7 @@ describe('Coconut Scheme:', () => {
         const params = CredSig.setup();
         const [G, o, g1, g2, e] = params;
         const [sk, pk] = CredSig.keygen(params);
-        const cred_params = CredSig.setup(); // EDIT:
+        const cred_params = CredSig.setup();
         const [cred_sks, cred_pk] = generateCredSecret(cred_params);
         const cred_sk = cred_sks.m;
 
@@ -328,7 +328,7 @@ describe('Coconut Scheme:', () => {
     const [G, o, g1, g2, e] = params;
 
     // first we need to create a cred to sign
-    const cred_params = CredSig.setup(); // EDIT:
+    const cred_params = CredSig.setup();
     const [cred_sks, cred_pk] = generateCredSecret(cred_params);
     const cred_sk = cred_sks.m;
     const cred_pk_bytes = [];
@@ -403,7 +403,7 @@ describe('Coconut Scheme:', () => {
       const t2 = t1.mod(o); // but this gives BIG back
       const rm = new ctx.BIG(wm);
       rm.sub(t2);
-      rm.add(o); // to ensure positive result EDIT: REMOVE?
+      rm.add(o); // to ensure positive result
       rm.mod(o);
       const t_cpy = new ctx.BIG(t);
       t_cpy.mod(o);
@@ -470,7 +470,7 @@ describe('Coconut Scheme:', () => {
       const t2 = t1.mod(o); // but this gives BIG back
       const rm = new ctx.BIG(wm);
       rm.sub(t2);
-      rm.add(o); // to ensure positive result EDIT: REMOVE?
+      rm.add(o); // to ensure positive result
       rm.mod(o);
 
       const Cw2 = ctx.PAIR.G1mul(gs, rm);
@@ -492,13 +492,20 @@ describe('Coconut Scheme:', () => {
   });
 
   describe('Threshold decryption', () => {
-    describe('Make proof vote petition', () => {
+    describe('Make proof vote petition m(m-1)=0', () => {
       const params = CredSig.setup();
       const [G, o, g1, g2, e] = params;
       const [sk_elgamal, pk_elgamal] = ElGamal.keygen(params);
   
-      it('Verified proofOfSecret for vote = 1 or = 0', () => {
+      it('Verified proofOfSecret for vote = 1', () => {
         const MPVP_output = CredSig.make_proof_vote_petition(params, pk_elgamal, 1);
+        const proof_bytes = getBytesMPVP(MPVP_output);
+  
+        const MPVP_output_sent = fromBytesMPVP(proof_bytes);
+        assert.isTrue(CredSig.verify_proof_vote_petition(params, pk_elgamal, MPVP_output_sent));
+      });
+      it('Verified proofOfSecret for vote = 0', () => {
+        const MPVP_output = CredSig.make_proof_vote_petition(params, pk_elgamal, 0);
         const proof_bytes = getBytesMPVP(MPVP_output);
   
         const MPVP_output_sent = fromBytesMPVP(proof_bytes);
@@ -526,7 +533,7 @@ describe('Coconut Scheme:', () => {
       aSk.add(sk3);
       aSk.mod(o);
 
-      it('Works for m < max', () => {
+      it('Logh function works for m < max', () => {
         const vote = new ctx.BIG(2);
         const h = hashToPointOnCurve('Threshold decryption');
         const [a, b, k] = ElGamal.encrypt(params, aPk, vote, h);
@@ -543,7 +550,7 @@ describe('Coconut Scheme:', () => {
         assert.isTrue(expr1 && expr2);
       });
 
-      it('Returns false for m > max or m not found', () => {
+      it('Logh function returns false for m > max or m not found', () => {
         const vote = new ctx.BIG(200);
         const h = hashToPointOnCurve('Threshold decryption');
         const [a, b, k] = ElGamal.encrypt(params, aPk, vote, h);
@@ -627,8 +634,9 @@ describe('Coconut Scheme:', () => {
         const expr = ctx.BIG.comp(vote, dec) === 0;
         assert.isTrue(expr);
       });
+    });
 
-
+    describe('Poll Simulation', () => {
       const params = CredSig.setup();
       const [G, o, g1, g2, e] = params;
       const [sk1, pk1] = ElGamal.keygen(params);
@@ -720,6 +728,5 @@ describe('Coconut Scheme:', () => {
         console.log(`Number of "yes" votes: ${parseInt(yes_string, 16)}`);
       });
     });
-
   });
 });

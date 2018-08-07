@@ -85,7 +85,7 @@ router.post('/', async (req, res) => {
   // }
 
 
-  // EDIT: send to issuer to isert used zeta
+  // EDIT: send to issuer to insert used zeta
 
   const t1 = new Date().getTime();
   console.log('Deposit took: ', t1 - t0);
