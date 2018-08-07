@@ -1,61 +1,10 @@
 import { ctx, params } from './globalConfig';
-import { prepareProofOfSecret, verifyProofOfSecret, fromBytesProof } from './auxiliary';
-
-export const getBytesProof = (proof) => {
-  const [C, rm, ro] = proof;
-  const bytesC = [];
-  const bytesRm = [];
-  const bytesRo = [];
-  C.toBytes(bytesC);
-  rm.toBytes(bytesRm);
-  ro.toBytes(bytesRo);
-
-  return [bytesC, bytesRm, bytesRo];
-};
-
-export const getBytesProof_Auth = (proof) => {
-  const [C, rd, rm, ro, rk] = proof;
-  const bytesC = [];
-  const bytesRd = [];
-  const bytesRm = [];
-  const bytesRo = [];
-  const bytesRk = [];
-  C.toBytes(bytesC);
-  rd.toBytes(bytesRd);
-  rm.toBytes(bytesRm);
-  ro.toBytes(bytesRo);
-  rk.toBytes(bytesRk);
-
-  return [bytesC, bytesRd, bytesRm, bytesRo, bytesRk];
-};
-
-export const getBytesMPVP = (proof) => {
-  const [enc_v, C, Cv, rk, rv, rr1, rr2] = proof;
-  const [a, b] = enc_v;
-  const bytesA = [];
-  const bytesB = [];
-  const bytesC = [];
-  const bytesCv = [];
-  const bytesRk = [];
-  const bytesRv = [];
-  const bytesRr1 = [];
-  const bytesRr2 = [];
-  a.toBytes(bytesA);
-  b.toBytes(bytesB);
-  C.toBytes(bytesC);
-  Cv.toBytes(bytesCv);
-  rk.toBytes(bytesRk);
-  rv.toBytes(bytesRv);
-  rr1.toBytes(bytesRr1);
-  rr2.toBytes(bytesRr2);
-
-  return [bytesA, bytesB, bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2];
-};
+import { getBytesProof, getBytesProof_Auth, getBytesMPVP, fromBytesProof } from './BytesConversion';
+import { prepareProofOfSecret, verifyProofOfSecret } from './Proofs';
 
 export const getCredRequestObject = (
   sk_cred, // to generate proof of secret
   pk_cred, // part of the cred
-  // value, // part of the cred
   pk_client_bytes, // part of the cred
   sk_client, // to sign the request
   issuingServer, // to include in the proof of secret, it just has to be some string
@@ -75,7 +24,6 @@ export const getCredRequestObject = (
 
   const requestStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    // value.toString() + // cred's value
     pk_cred_bytes.reduce(reducer) + // cred's pk
     bytesW.reduce(reducer) + // part of proof of cred's secret
     bytesCm.reduce(reducer) + // part of proof of cred's secret
@@ -92,7 +40,6 @@ export const getCredRequestObject = (
   return {
     pk_cred_bytes: pk_cred_bytes,
     proof_bytes: proof_bytes,
-    // value: value,
     pk_client_bytes: pk_client_bytes,
     requestSig: requestSig,
   };
@@ -107,7 +54,6 @@ export const verifyRequestSignature = (cred_request) => {
 
   const requestStr =
     pk_client_bytes.reduce(reducer) + // client's key
-    // value.toString() + // cred's value
     pk_cred_bytes.reduce(reducer) + // cred's pk
     bytesW.reduce(reducer) + // part of proof of cred's secret
     bytesCm.reduce(reducer) + // part of proof of cred's secret

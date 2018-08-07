@@ -3,8 +3,9 @@ import bodyParser from 'body-parser';
 import { checkUsedId, insertUsedId, changeBalance } from '../utils/DatabaseManager';
 import { ctx, petitionOwner, params, signingServers } from '../../globalConfig';
 import { DEBUG } from '../config/appConfig';
-import { fromBytesMPCP, verifyProofOfSecret, getSigningAuthorityPublicKey,
-  getPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
+import { getSigningAuthorityPublicKey, getPublicKey } from '../../auxiliary';
+import { fromBytesMPCP } from '../../BytesConversion';
+import { verifyProofOfSecret, verify_proof_credentials_petition } from '../../Proofs';
 import CredSig from '../../CredSig';
 import { publicKeys } from '../cache';
 

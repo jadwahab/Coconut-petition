@@ -3,12 +3,13 @@ import { expect, assert } from 'chai';
 import { ctx } from '../globalConfig';
 import CredSig from '../CredSig';
 import BpGroup from '../BpGroup';
-import { hashToBIG, hashToPointOnCurve, prepareProofOfSecret, verifyProofOfSecret, fromBytesProof,
-  prepareProofOfSecret_Auth, verifyProofOfSecret_Auth, fromBytesProof_Auth, fromBytesMPVP } from '../auxiliary';
+import { hashToBIG, hashToPointOnCurve, prepareProofOfSecret, verifyProofOfSecret,
+  prepareProofOfSecret_Auth, verifyProofOfSecret_Auth } from '../Proofs';
+import { getBytesProof, getBytesProof_Auth, getBytesMPVP, 
+  fromBytesProof, fromBytesProof_Auth, fromBytesMPVP } from '../BytesConversion';
 import ElGamal from '../ElGamal';
 import { getSigningCred, verifySignRequest } from '../SigningCred';
 import { getIssuedCred, verifyCredSignature } from '../IssuedCred';
-import { getBytesProof, getBytesProof_Auth, getBytesMPVP } from '../CredRequest';
 
 const generateCredSecret = (params) => {
   const [G, o, g1, g2, e, h1] = params;

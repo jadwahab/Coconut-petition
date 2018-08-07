@@ -1,6 +1,3 @@
-// set of auxiliary functions that don't belong to any existing class/module
-import fetch from 'isomorphic-fetch';
-import * as crypto from 'crypto';
 import { ctx } from './globalConfig';
 
 export const stringToBytes = (s) => {
@@ -42,24 +39,13 @@ export const hashToPointOnCurve = (m) => {
   return ctx.ECP.mapit(W);
 };
 
-export const hashG2ElemToBIG = G2elem => hashToBIG(G2elem.toString());
-
-// the below are in credGenerator of client
-export const getRandomCredId = () => {
-  const RAW = crypto.randomBytes(128);
-
-  const rng = new ctx.RAND();
-  rng.clean();
-  rng.seed(RAW.length, RAW);
-  const groupOrder = new ctx.BIG(0);
-  groupOrder.rcopy(ctx.ROM_CURVE.CURVE_Order);
-
-  return ctx.BIG.randomnum(groupOrder, rng);
+export const hashG2ElemToBIG = (G2elem) => {
+  return this.hashToBIG(G2elem.toString());
 };
 
 export const prepareProofOfSecret = (params, sk, verifierStr) => {
   const [G, o, g1, g2, e, h1] = params;
-  const m = sk.m;
+  const x = sk.m;
   const o_blind = sk.o;
   // create random witnesses
   const wm = ctx.BIG.randomnum(G.order, G.rngGen);
@@ -73,23 +59,29 @@ export const prepareProofOfSecret = (params, sk, verifierStr) => {
   const C = hashToBIG(W.toString() + verifierStr);
 
   // to prevent object mutation
-  const m_cpy = new ctx.BIG(m);
+  const x_cpy = new ctx.BIG(x);
   const C_cpy = new ctx.BIG(C);
   const o_cpy = new ctx.BIG(o_blind);
-  m_cpy.mod(o);
+  x_cpy.mod(o);
   C_cpy.mod(o);
   o_cpy.mod(o);
 
-  const t1 = ctx.BIG.mul(m_cpy, C_cpy); // produces DBIG
+  const t1 = ctx.BIG.mul(x_cpy, C_cpy); // produces DBIG
   const t2 = t1.mod(o); // but this gives BIG back
+  wm.mod(o);
   const rm = new ctx.BIG(wm);
+
+  rm.copy(wm);
   rm.sub(t2);
   rm.add(o); // to ensure positive result
   rm.mod(o);
 
   const t3 = ctx.BIG.mul(o_cpy, C_cpy); // produces DBIG
   const t4 = t3.mod(o); // but this gives BIG back
+  wo.mod(o);
   const ro = new ctx.BIG(wo);
+
+  ro.copy(wo);
   ro.sub(t4);
   ro.add(o); // to ensure positive result
   ro.mod(o);
@@ -229,81 +221,127 @@ export const verifyProofOfSecret_Auth = (params, h, cred_pk, elgamal_pk, enc_sk,
   return expr;
 };
 
-export const fromBytesProof = (bytesProof) => {
-  const [bytesC, bytesRm, bytesRo] = bytesProof;
-  const C = ctx.BIG.fromBytes(bytesC);
-  const rm = ctx.BIG.fromBytes(bytesRm);
-  const ro = ctx.BIG.fromBytes(bytesRo);
-  return [C, rm, ro];
-};
+export const make_proof_credentials_petition = (params, agg_vk, sigma, m, petitionOwner, petitionID) => {
+  const [G, o, g1, g2, e] = params;
+  // const agg_vk = CredSig.aggregatePublicKeys_obj(params, signingAuthPubKeys); // agg_vk = [ag, aX, aY]
 
-export const fromBytesProof_Auth = (bytesProof) => {
-  const [bytesC, bytesRd, bytesRm, bytesRo, bytesRk] = bytesProof;
-  const C = ctx.BIG.fromBytes(bytesC);
-  const rd = ctx.BIG.fromBytes(bytesRd);
-  const rm = ctx.BIG.fromBytes(bytesRm);
-  const ro = ctx.BIG.fromBytes(bytesRo);
-  const rk = ctx.BIG.fromBytes(bytesRk);
-  return [C, rd, rm, ro, rk];
-};
+  // MATERIALS: rand t, kappa, nu, zeta
+  const t = ctx.BIG.randomnum(G.order, G.rngGen);
 
+  // kappa = t*g2 + aX + m*aY :
+  const kappa = ctx.PAIR.G2mul(g2, t); // t*g2
+  const aX = agg_vk[1]; // aX
+  const aY = agg_vk[2]; // aY
+  const pkY = ctx.PAIR.G2mul(aY, m); // m*Y
+  kappa.add(aX);
+  kappa.add(pkY);
+  kappa.affine();
 
-export const fromBytesMPCP = (bytesMPCP) => {
-  const [bytesKappa, bytesNu, bytesZeta, bytesPi_v_c, bytesPi_v_rm, bytesPi_v_rt] = bytesMPCP;
-  const kappa = ctx.ECP2.fromBytes(bytesKappa);
-  const nu = ctx.ECP.fromBytes(bytesNu);
-  const zeta = ctx.ECP.fromBytes(bytesZeta);
-  const c = ctx.BIG.fromBytes(bytesPi_v_c);
-  const rm = ctx.BIG.fromBytes(bytesPi_v_rm);
-  const rt = ctx.BIG.fromBytes(bytesPi_v_rt);
+  const [h, sig] = sigma;
+
+  // nu = t*h
+  const nu = ctx.PAIR.G1mul(h, t);
+
+  const gs = hashToPointOnCurve(petitionID);
+
+  // zeta = m*gs
+  const zeta = ctx.PAIR.G1mul(gs, m);
+
+  // PROOF: pi_v
+  // create witnesses
+  const wm = ctx.BIG.randomnum(G.order, G.rngGen);
+  const wt = ctx.BIG.randomnum(G.order, G.rngGen);
+
+  // compute the witnesses commitments
+  const Aw = ctx.PAIR.G2mul(g2, wt);
+  Aw.add(aX);
+  const pkYw = ctx.PAIR.G2mul(aY, wm);
+  Aw.add(pkYw);
+  Aw.affine();
+  const Bw = ctx.PAIR.G1mul(h, wt);
+  Bw.affine();
+  const Cw = ctx.PAIR.G1mul(gs, wm);
+  Cw.affine();
+
+  // create the challenge
+  const c = hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() +
+      Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString());
+
+  // create responses
+  const rm = new ctx.BIG(wm);
+  const rt = new ctx.BIG(wt);
+
+  // to prevent object mutation
+  const m_cpy = new ctx.BIG(m);
+  const t_cpy = new ctx.BIG(t);
+  const c_cpy = new ctx.BIG(c);
+  m_cpy.mod(o);
+  t_cpy.mod(o);
+  c_cpy.mod(o);
+
+  const t1 = ctx.BIG.mul(m_cpy, c_cpy); // produces DBIG
+  const t2 = t1.mod(o); // but this gives BIG back
+
+  const t3 = ctx.BIG.mul(t_cpy, c_cpy); // produces DBIG
+  const t4 = t3.mod(o); // but this gives BIG back
+
+  wm.mod(o);
+  wt.mod(o);
+
+  rm.sub(t2);
+  rm.add(o); // to ensure positive result
+  rm.mod(o);
+
+  rt.sub(t4);
+  rt.add(o); // to ensure positive result
+  rt.mod(o);
+
   const pi_v = {
     c: c,
     rm: rm,
-    rt: rt
+    rt: rt,
   };
+
   return [kappa, nu, zeta, pi_v];
 };
 
-export const fromBytesMPVP = (bytesProof) => {
-  const [bytesA, bytesB, bytesC, bytesCv, bytesRk, bytesRv, bytesRr1, bytesRr2] = bytesProof;
-  const a = ctx.ECP.fromBytes(bytesA);
-  const b = ctx.ECP.fromBytes(bytesB);
-  const enc_v = [a, b];
-  const C = ctx.BIG.fromBytes(bytesC);
-  const Cv = ctx.ECP.fromBytes(bytesCv);
-  const rk = ctx.BIG.fromBytes(bytesRk);
-  const rv = ctx.BIG.fromBytes(bytesRv);
-  const rr1 = ctx.BIG.fromBytes(bytesRr1);
-  const rr2 = ctx.BIG.fromBytes(bytesRr2);
-  return [enc_v, C, Cv, rk, rv, rr1, rr2];
-};
-
-///////////
-export const getPublicKey = async (server) => {
-  try {
-    let response = await fetch(`http://${server}/pk`);
-    response = await response.json();
-    return response.pk;
-  } catch (err) {
-    console.log(err);
-    console.warn(`Call to ${server} was unsuccessful`);
-    return null;
+export const verify_proof_credentials_petition = (params, agg_vk, sigma, MPCP_output, petitionOwner, petitionID) => {
+  if (!sigma) {
+    return false;
   }
-};
+  const [G, o, g1, g2, e] = params;
+  const [ag, aX, aY] = agg_vk;
+  const [h, sig] = sigma;
+  const [kappa, nu, zeta, pi_v] = MPCP_output;
+  const c = pi_v.c;
+  const rm = pi_v.rm;
+  const rt = pi_v.rt;
+  const gs = hashToPointOnCurve(petitionID);
 
-export async function getSigningAuthorityPublicKey(server) {
-  const publicKey = [];
-  try {
-    let response = await fetch(`http://${server}/pk`);
-    response = await response.json();
-    const pkBytes = response.pk;
-    const [gBytes, XBytes, YBytes] = pkBytes;
-    publicKey.push(ctx.ECP2.fromBytes(gBytes));
-    publicKey.push(ctx.ECP2.fromBytes(XBytes));
-    publicKey.push(ctx.ECP2.fromBytes(YBytes));
-  } catch (err) {
-    console.log(err);
-    console.warn(`Call to ${server} was unsuccessful`);
-  }
-  return publicKey;
-}
+  // re-compute the witness commitments
+  const Aw = ctx.PAIR.G2mul(kappa, c);
+  const temp1 = ctx.PAIR.G2mul(g2, rt);
+  Aw.add(temp1);
+  Aw.add(aX);
+  const temp2 = ctx.PAIR.G2mul(aX, c);
+  Aw.sub(temp2);
+  const temp3 = ctx.PAIR.G2mul(aY, rm);
+  Aw.add(temp3);
+  Aw.affine();
+
+  const Bw = ctx.PAIR.G1mul(nu, c);
+  const temp4 = ctx.PAIR.G1mul(h, rt);
+  Bw.add(temp4);
+  Bw.affine();
+
+  const Cw = ctx.PAIR.G1mul(gs, rm);
+  const temp5 = ctx.PAIR.G1mul(zeta, c);
+  Cw.add(temp5);
+  Cw.affine();
+
+  // BIG.comp(a,b): Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b
+  const expr1 = ctx.BIG.comp(c, hashToBIG(g1.toString() + g2.toString() + aX.toString() + aY.toString() +
+    Aw.toString() + Bw.toString() + Cw.toString() + petitionOwner.toString())) === 0;
+
+  return (!h.INF && expr1);
+};

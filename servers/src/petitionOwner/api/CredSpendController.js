@@ -4,7 +4,9 @@ import fetch from 'isomorphic-fetch';
 import { ctx, params, signingServers, issuer } from '../../globalConfig';
 import CredSig from '../../CredSig';
 import { DEBUG } from '../config/appConfig';
-import { fromBytesMPCP, getSigningAuthorityPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
+import { getSigningAuthorityPublicKey } from '../../auxiliary';
+import { fromBytesMPCP } from '../../BytesConversion';
+import { verify_proof_credentials_petition } from '../../Proofs';
 import { sig_pkBytes } from '../config/KeySetup';
 import { publicKeys } from '../cache';
 
@@ -113,7 +115,7 @@ router.post('/', async (req, res) => {
     
     // just check validity of the proof and double spending, we let issuer verify the signature
     // successful verification of the proof assures the cred was supposed to be used in that transaction
-    const isProofValid = CredSig.verify_proof_credentials_petition(params, aggregatePublicKey, 
+    const isProofValid = verify_proof_credentials_petition(params, aggregatePublicKey, 
       sigma, MPCP_output, petitionOwner, petitionID);
     
     if (DEBUG) {

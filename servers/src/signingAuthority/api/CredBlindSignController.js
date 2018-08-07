@@ -7,7 +7,9 @@ import ElGamal from '../../ElGamal';
 import { verifySignRequest } from '../../SigningCred';
 import { sessionSignatures, publicKeys } from '../cache';
 import { issuer, ctx } from '../../globalConfig';
-import { getPublicKey, hashToPointOnCurve, fromBytesProof_Auth, verifyProofOfSecret_Auth } from '../../auxiliary';
+import { getPublicKey } from '../../auxiliary';
+import { fromBytesProof_Auth } from '../../BytesConversion';
+import { hashToPointOnCurve, verifyProofOfSecret_Auth } from '../../Proofs';
 
 const router = express.Router();
 
