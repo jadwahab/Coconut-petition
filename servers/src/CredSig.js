@@ -13,9 +13,7 @@ export default class CredSig {
     const g2 = G.gen2;
     const e = G.pair;
     const o = G.order;
-    // create h to ge g1^p
-    const p = new ctx.BIG(2);
-    const h1 = G.ctx.PAIR.G1mul(g1, p);
+    const h1 = hashToPointOnCurve('h1');
 
     return [G, o, g1, g2, e, h1];
   }
