@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Segment } from 'semantic-ui-react';
+import { Segment, Button } from 'semantic-ui-react';
 import VoteActionButton from './VoteActionButton';
 import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
@@ -16,6 +16,8 @@ class VoteDisplayer extends React.Component {
     this.state = {
       credState: CRED_STATUS.signed,
       petitionID: null,
+      hasVoted: false,
+      voteResult: null,
       // remainingValidityString: '',
     };
   }
@@ -59,7 +61,7 @@ class VoteDisplayer extends React.Component {
   //   this.setState({ remainingValidityString: remainingValidityString });
   // };
 
-  handleCredSpend = async () => {
+  handleCredSpend = async (vote) => {
     this.setState({ credState: CRED_STATUS.spending });
 
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
@@ -76,37 +78,81 @@ class VoteDisplayer extends React.Component {
     const MPCP_output = make_proof_credentials_petition(params, aggregatePublicKey,
       this.props.randomizedSignature, this.props.cred_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
-    const success = await spendCred(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
+    const [success, error_msg] = await spendCred(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
     if (success) {
       if (DEBUG) {
         console.log('Signature verified');
       }
-      this.setState({ credState: CRED_STATUS.spent }); // EDIT:
+      this.setState({ credState: CRED_STATUS.spent }); // EDIT: delete but check
+
       this.props.handleRandomizeDisabled(false);
+      this.setState({ voteResult: `Voted for petition: ${this.state.petitionID}!` });
     } else {
       if (DEBUG) {
-        console.log('There was an error in verifying signature');
+        switch (error_msg) {
+          case 'sig':
+            console.log('There was an error in verifying signature');
+            this.setState({ voteResult: 'Error in voting!' });
+            break;   
+          case 'used':
+            console.log('Already voted for this petition');
+            this.setState({ voteResult: `Already voted for petition ${this.state.petitionID}!` });
+            break;
+          default:
+            console.log('Unknown error');
+            this.setState({ voteResult: 'Error in voting!' });
+            break;
+        }
       }
-      this.setState({ credState: CRED_STATUS.error });// EDIT:
-    }
+      this.setState({ credState: CRED_STATUS.error });// EDIT: delete but check
 
+      this.props.handleRandomizeDisabled(false);
+    }
+    this.setState({ hasVoted: true });
   };
 
   handleInputChange = (petitionID) => {
     this.setState({ petitionID: petitionID.toString() });
   };
 
+  handleVoteYes = () => {
+    this.handleCredSpend(1);
+  };
+
+  handleVoteNo = () => {
+    this.handleCredSpend(0);
+  };
+
   render() {
     return (
       <Segment.Group horizontal>
         <Segment style={styles.segmentStyle}>
-          <InputPetitionID onInputChange={this.handleInputChange}>
-            <VoteActionButton
-              onSpend={this.handleCredSpend}
-              credState={this.state.credState}
-              voteDisabled={this.state.petitionID == null}
-            />
-          </InputPetitionID>
+          {
+            this.state.hasVoted ? <h1>{this.state.voteResult}</h1> :
+            // this.state.hasVoted ?
+            //   <Button
+            //     disabled={true}
+            //     // primary={true}
+            //     content={this.state.voteResult}
+            //   />
+            // :
+            <InputPetitionID onInputChange={this.handleInputChange}>
+              <Button.Group>
+                <Button
+                  icon="thumbs up"
+                  color="green"
+                  onClick={this.handleVoteYes}
+                  disabled={this.state.petitionID === null}
+                />
+                <Button
+                  icon="thumbs down"
+                  color="red"
+                  onClick={this.handleVoteNo}
+                  disabled={this.state.petitionID === null}
+                />
+              </Button.Group>
+            </InputPetitionID>
+          }
         </Segment>
 
         {/*<Segment style={styles.segmentStyle}><b>Valid for:</b> {this.state.remainingValidityString}</Segment>*/}

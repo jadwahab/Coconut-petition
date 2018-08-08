@@ -184,6 +184,7 @@ export async function spendCred(MPCP_output, signature, server, petitionID) {
   }
 
   let success = false;
+  let error_msg;
   try {
     let response = await
       fetch(`http://${server}/spend`, {
@@ -200,9 +201,10 @@ export async function spendCred(MPCP_output, signature, server, petitionID) {
       });
     response = await response.json();
     success = response.success;
+    error_msg = response.error_msg;
   } catch (err) {
     console.warn(err);
     console.warn(`Call to petitionOwner ${server} was unsuccessful`);
   }
-  return success;
+  return [success, error_msg];
 }

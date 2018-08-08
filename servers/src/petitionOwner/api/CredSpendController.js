@@ -10,6 +10,8 @@ import { verify_proof_credentials_petition } from '../../Proofs';
 import { sig_pkBytes } from '../config/KeySetup';
 import { publicKeys } from '../cache';
 
+const zetaIds = [];
+
 const router = express.Router();
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -126,7 +128,7 @@ router.post('/', async (req, res) => {
         console.log('Proof was invalid, no further checks will be made.');
       }
       res.status(200)
-        .json({ success: false });
+        .json({ success: false, error_msg: 'sig' });
       return;
     }
     
@@ -139,6 +141,31 @@ router.post('/', async (req, res) => {
     // // we don't need to create byte representations of all objects because we already have them
     // const wasCredDeposited = await depositCred(credAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
     
+    // const [kappa, nu, zeta, pi_v] = MPCP_output;
+
+    const zetaIdstemp = zetaIds.filter(zid => zid.id === petitionID);
+
+    if (zetaIdstemp.length > 0) {
+      for (let i = 0; i < zetaIdstemp.length; i++) {
+        const isUsed = MPCP_output[2].equals(zetaIdstemp[i].zeta);
+        if (isUsed) {
+          if (DEBUG) {
+            console.log('Already voted for this petition');
+          }
+          res.status(200)
+          .json({ success: false, error_msg: 'used' });
+          return;
+        }
+      }
+    }
+      
+    const zetaId = { 
+      id: petitionID,
+      zeta: MPCP_output[2],
+    };
+
+    zetaIds.push(zetaId);
+
     responseStatus = 200;
     // success = isProofValid && !wasCredAlreadySpent && wasCredDeposited;
     success = isProofValid;
@@ -157,7 +184,7 @@ router.post('/', async (req, res) => {
   console.log('Request took: ', t1 - t0);
 
   res.status(responseStatus)
-    .json({ success: success });
+    .json({ success: success, error_msg: 'none' });
 });
 
 export default router;
