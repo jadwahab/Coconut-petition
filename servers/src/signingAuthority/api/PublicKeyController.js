@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { pkBytes } from '../config/CredSigSetup';
+import { pkBytes, pkElGamalBytes } from '../config/CredSigSetup';
 import { DEBUG } from '../config/appConfig';
 
 const router = express.Router();
@@ -15,6 +15,7 @@ router.get('/', (req, res) => {
   }
   res.status(200).json({
     pk: pkBytes,
+    pkElGamal: pkElGamalBytes,
   });
 });
 

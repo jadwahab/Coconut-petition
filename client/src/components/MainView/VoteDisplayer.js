@@ -1,20 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Segment, Button } from 'semantic-ui-react';
-import VoteActionButton from './VoteActionButton';
 import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
-import { params, CRED_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
+import { ctx, params, CRED_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
 import { spendCred } from '../../utils/api';
 import CredSig from '../../../lib/CredSig';
-import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/Proofs';
+import { make_proof_credentials_petition, make_proof_vote_petition } from '../../../lib/Proofs';
 import { publicKeys } from '../../cache';
 
 class VoteDisplayer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      credState: CRED_STATUS.signed,
+      credState: CRED_STATUS.signed, // EDIT: remove unused
       petitionID: null,
       hasVoted: false,
       voteResult: null,
@@ -61,9 +60,36 @@ class VoteDisplayer extends React.Component {
   //   this.setState({ remainingValidityString: remainingValidityString });
   // };
 
+  getSigningAuthorityElGamal = async (server) => {
+    let pkElGamal;
+    try {
+      let response = await fetch(`http://${server}/pk`);
+      response = await response.json();
+      const pkElGamalBytes = response.pkElGamal;
+      pkElGamal = ctx.ECP.fromBytes(pkElGamalBytes);
+    } catch (err) {
+      console.log(err);
+      console.warn(`Call to ${server} was unsuccessful`);
+    }
+    return pkElGamal;
+  }
+
+  handleInputChange = (petitionID) => {
+    this.setState({ petitionID: petitionID.toString() });
+  };
+
+  handleVoteYes = () => {
+    this.handleCredSpend(1);
+  };
+
+  handleVoteNo = () => {
+    this.handleCredSpend(0);
+  };
+
   handleCredSpend = async (vote) => {
     this.setState({ credState: CRED_STATUS.spending });
 
+    // MPCP:
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
       .filter(server => signingServers.includes(server))
       .reduce((obj, server) => {
@@ -78,7 +104,29 @@ class VoteDisplayer extends React.Component {
     const MPCP_output = make_proof_credentials_petition(params, aggregatePublicKey,
       this.props.randomizedSignature, this.props.cred_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
-    const [success, error_msg] = await spendCred(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
+    // MPVP:
+    const signingAuthoritiesElGamal = [];
+    await Promise.all(signingServers.map(async (server) => {
+      try {
+        const publicKey = await this.getSigningAuthorityElGamal(server);
+        signingAuthoritiesElGamal.push(publicKey);
+      } catch (err) {
+        console.warn(err);
+      }
+    }));
+    const aggregateElGamal = CredSig.aggregateElGamalPublicKeys(params, signingAuthoritiesElGamal);
+
+    let enc_votes;
+    let MPVP_output;
+    if (vote === 1) {
+      [enc_votes, MPVP_output] = make_proof_vote_petition(params, aggregateElGamal, 1);
+    } else {
+      [enc_votes, MPVP_output] = make_proof_vote_petition(params, aggregateElGamal, 0);
+    }
+
+    const [success, error_msg] = await spendCred(MPCP_output, this.props.randomizedSignature, 
+      petitionOwner, this.state.petitionID, enc_votes, MPVP_output);
+
     if (success) {
       if (DEBUG) {
         console.log('Signature verified');
@@ -109,18 +157,6 @@ class VoteDisplayer extends React.Component {
       this.props.handleRandomizeDisabled(false);
     }
     this.setState({ hasVoted: true });
-  };
-
-  handleInputChange = (petitionID) => {
-    this.setState({ petitionID: petitionID.toString() });
-  };
-
-  handleVoteYes = () => {
-    this.handleCredSpend(1);
-  };
-
-  handleVoteNo = () => {
-    this.handleCredSpend(0);
   };
 
   render() {
