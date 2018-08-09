@@ -6,9 +6,8 @@ export const params = [];
 export const pk = [];
 export const pkBytes = [];
 export const sk = [];
-export const pkElGamal = [];
+export const ElGamalkeys = [];
 export const pkElGamalBytes = [];
-export const skElGamal = [];
 
 export const setupCredSigKeys = () => {
   const params_gen = CredSig.setup();
@@ -33,8 +32,9 @@ export const setupCredSigKeys = () => {
 
   // El Gamal key:
   const [skElGamal_gen, pkElGamal_gen] = ElGamal.keygen(params);
-  for (let i = 0; i < skElGamal_gen.length; i++) { skElGamal[i] = skElGamal_gen[i]; }
-  for (let i = 0; i < pkElGamal_gen.length; i++) { pkElGamal_gen[i] = pkElGamal_gen[i]; }
+  
+  ElGamalkeys.push(skElGamal_gen);
+  ElGamalkeys.push(pkElGamal_gen);
 
   pkElGamal_gen.toBytes(pkElGamalBytes);
 

@@ -98,6 +98,7 @@ router.post('/', async (req, res) => {
   res.status(responseStatus).json({ signature: signatureBytes });
 });
 
+// EDIT : wtf is this
 router.get('/', (req, res) => {
   console.log('blindsign get');
   res.status(200).json({ hi: 'hi' });

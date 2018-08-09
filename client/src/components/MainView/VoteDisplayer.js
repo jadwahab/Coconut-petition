@@ -146,6 +146,10 @@ class VoteDisplayer extends React.Component {
             console.log('Already voted for this petition');
             this.setState({ voteResult: `Already voted for petition ${this.state.petitionID}!` });
             break;
+          case 'ended':
+            console.log('This petition has ended');
+            this.setState({ voteResult: `Petition ${this.state.petitionID} has ended!` });
+            break;
           default:
             console.log('Unknown error');
             this.setState({ voteResult: 'Error in voting!' });

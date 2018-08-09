@@ -1,6 +1,7 @@
 import express from 'express';
 import PublicKeyController from './api/PublicKeyController';
 import CredBlindSignController from './api/CredBlindSignController';
+import ThresholdDecryption from './api/ThresholdDecryption';
 
 const app = express();
 
@@ -13,5 +14,6 @@ app.use((req, res, next) => {
 
 app.use('/blindsign', CredBlindSignController);
 app.use('/pk', PublicKeyController);
+app.use('/thresholddecrypt', ThresholdDecryption);
 
 export default app;
