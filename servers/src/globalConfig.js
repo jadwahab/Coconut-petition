@@ -16,3 +16,4 @@ export const issuer = (process.env.NODE_ENV === 'production') ? '35.178.15.103:3
 
 export const ctx = new CTX('BN254');
 export const params = CredSig.setup();
+export const maxVoters = 5;

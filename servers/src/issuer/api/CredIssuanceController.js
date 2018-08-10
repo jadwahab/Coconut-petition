@@ -17,7 +17,7 @@ router.use(bodyParser.json());
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('POST Call to getcred');
+    console.log('>POST Call to getcred');
   }
   const sourceIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // just for purpose of debugging
   if (DEBUG) {

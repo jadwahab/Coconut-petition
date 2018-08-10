@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import fetch from 'isomorphic-fetch';
-import { ctx, params, signingServers, issuer } from '../../globalConfig';
+import { ctx, params, signingServers, maxVoters } from '../../globalConfig';
 import CredSig from '../../CredSig';
 import { DEBUG } from '../config/appConfig';
 import { getSigningAuthorityPublicKey } from '../../auxiliary';
@@ -10,62 +10,12 @@ import { verify_proof_credentials_petition, verify_proof_vote_petition } from '.
 import { sig_pkBytes } from '../config/KeySetup';
 import { publicKeys } from '../cache';
 
-const storage = [];
+export const storage = [];
 
 const router = express.Router();
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-
-// const checkDoubleSpend = async (id, server) => {
-//   const id_bytes = [];
-//   id.toBytes(id_bytes);
-//   try {
-//     let response = await
-//       fetch(`http://${server}/checkid`, {
-//         method: 'POST',
-//         mode: 'cors',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//           id: id_bytes,
-//         }),
-//       });
-//     response = await response.json();
-//     return response.wasIdUsed;
-//   } catch (err) {
-//     console.log(err);
-//     console.warn(`Call to ${server} was unsuccessful`);
-//     return true; // if call was unsuccessful assume cred was already spent
-//   }
-// };
-
-// const depositCred = async (credAttributes, simplifiedProof, sigBytes, pkXBytes, server) => {
-//   try {
-//     let response = await
-//       fetch(`http://${server}/depositcred`, {
-//         method: 'POST',
-//         mode: 'cors',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//           credAttributes: credAttributes,
-//           proof: simplifiedProof,
-//           signature: sigBytes,
-//           pkXBytes: pkXBytes,
-//         }),
-//       });
-//     response = await response.json();
-//     const success = response.success;
-//     return success;
-//   } catch (err) {
-//     console.log(err);
-//     console.warn(`Call to ${server} was unsuccessful`);
-//     return false; // if call was unsuccessful assume deposit failed
-//   }
-// };
 
 const getSigningAuthorityElGamal = async (server) => {
   let pkElGamal;
@@ -81,7 +31,7 @@ const getSigningAuthorityElGamal = async (server) => {
   return pkElGamal;
 };
 
-const sendThresholdDecryption = async (server, enc_votes, decIndex) => {
+const sendThresholdDecryption = async (server, petitionID, enc_votes, decIndex) => {
   try {
     const response = await
     fetch(`http://${server}/thresholddecrypt`, {
@@ -93,6 +43,7 @@ const sendThresholdDecryption = async (server, enc_votes, decIndex) => {
       body: JSON.stringify({
         votes_bytes: getBytesVotes(enc_votes),
         decIndex: decIndex,
+        petitionID: petitionID,
       }),
     });
     if (response.status === 200) {
@@ -107,12 +58,48 @@ const sendThresholdDecryption = async (server, enc_votes, decIndex) => {
   }
 };
 
+const checkVoteUsed = (zetaIdVote, storagetemp) => {
+  for (let i = 0; i < storagetemp.length; i++) {
+    if (zetaIdVote.zeta.equals(storagetemp[i].zeta)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const addVotes = (storagetemp) => {
+  const [enc_v, enc_v_not] = storagetemp[0].enc_votes;
+  // return [a, b, k]
+  const [a_enc_v, b_enc_v] = enc_v;
+  const [a_enc_v_not, b_enc_v_not] = enc_v_not;
+
+  for (let i = 1; i < storagetemp.length; i++) {
+    const [temp_enc_v, temp_enc_v_not] = storagetemp[i].enc_votes;
+    a_enc_v.add(temp_enc_v[0]);
+    b_enc_v.add(temp_enc_v[1]);
+
+    a_enc_v_not.add(temp_enc_v_not[0]);
+    b_enc_v_not.add(temp_enc_v_not[1]);
+  }
+
+  a_enc_v.affine();
+  b_enc_v.affine();
+  a_enc_v_not.affine();
+  b_enc_v_not.affine();
+
+  const total_enc_v = [a_enc_v, b_enc_v];
+  const total_enc_v_not = [a_enc_v_not, b_enc_v_not];
+
+  return [total_enc_v, total_enc_v_not];
+};
+
+
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   const client_address = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
   if (DEBUG) {
-    console.log('spend post from ', client_address);
+    console.log('>vote post from ', client_address);
   }
 
   let responseStatus = -1;
@@ -169,7 +156,7 @@ router.post('/', async (req, res) => {
     }
     if (!isProofValid) {
       if (DEBUG) {
-        console.log('Proof was invalid, no further checks will be made.');
+        console.log('Credential proof was invalid, no further checks will be made.');
       }
       res.status(200)
         .json({ success: false, error_msg: 'sig' });
@@ -195,25 +182,15 @@ router.post('/', async (req, res) => {
     }
     if (!isVoteValid) {
       if (DEBUG) {
-        console.log('Proof was invalid, no further checks will be made.');
+        console.log('Vote proof was invalid, no further checks will be made.');
       }
       res.status(200)
         .json({ success: false, error_msg: 'sig' });
       return;
     }
     
-    // // now finally check if the cred wasn't already spent
-    // const wasCredAlreadySpent = await checkDoubleSpend(id, issuer);
-    // if (DEBUG) {
-    //   console.log(`Was cred already spent: ${wasCredAlreadySpent}`);
-    // }
-    //
-    // // we don't need to create byte representations of all objects because we already have them
-    // const wasCredDeposited = await depositCred(credAttributes, simplifiedProof, req.body.signature, pkXBytes, issuer);
-    
     // get a new list of only zetas with that specific petitionID
     const storagetemp = storage.filter(zid => zid.id === petitionID);
-
     if (DEBUG) {
       console.log(`Petition ${petitionID} already has ${storagetemp.length} votes`);
     }
@@ -225,51 +202,28 @@ router.post('/', async (req, res) => {
       enc_votes: enc_votes,
     };
 
-    // check if this user ALREADY voted for this petition
+    // check if this user already voted for this petition
     if (storagetemp.length > 0) {
-      for (let i = 0; i < storagetemp.length; i++) {
-        const isUsed = zetaIdVote.zeta.equals(storagetemp[i].zeta);
-        if (isUsed) {
-          if (DEBUG) {
-            console.log('Already voted for this petition');
-          }
-          res.status(200)
-            .json({ success: false, error_msg: 'used' });
-          return;
+      if (checkVoteUsed(zetaIdVote, storagetemp)) {
+        if (DEBUG) {
+          console.log('Already voted for this petition');
         }
+        res.status(200)
+          .json({ success: false, error_msg: 'used' });
+        return;
       }
     }
 
     storage.push(zetaIdVote);
     storagetemp.push(zetaIdVote);
 
-    // check if 2 people voted
-    if (storagetemp.length === 4) {
-      const [enc_v, enc_v_not] = storagetemp[0].enc_votes;
-      // return [a, b, k]
-      const [a_enc_v, b_enc_v, kv0] = enc_v;
-      const [a_enc_v_not, b_enc_v_not, kv1] = enc_v_not;
-
-      for (let i = 1; i < storagetemp.length; i++) {
-        const [temp_enc_v, temp_enc_v_not] = storagetemp[i].enc_votes;
-        a_enc_v.add(temp_enc_v[0]);
-        b_enc_v.add(temp_enc_v[1]);
-
-        a_enc_v_not.add(temp_enc_v_not[0]);
-        b_enc_v_not.add(temp_enc_v_not[1]);
-      } // end for
-
-      a_enc_v.affine();
-      b_enc_v.affine();
-      a_enc_v_not.affine();
-      b_enc_v_not.affine();
-
-      const enc_votes_total = [[a_enc_v, b_enc_v], [a_enc_v_not, b_enc_v_not]]
-
+    // check if maxVoters people voted
+    if (storagetemp.length === maxVoters) {
+      const enc_votes_total = addVotes(storagetemp);
       const decIndex = signingServers.length - 1;
       
-      const sentthreshdec = await
-      sendThresholdDecryption(signingServers[decIndex], enc_votes_total, decIndex);
+      const sentthreshdec = await sendThresholdDecryption(signingServers[decIndex], 
+        petitionID, enc_votes_total, decIndex);
 
       if (DEBUG) {
         if (!sentthreshdec) {
@@ -277,7 +231,9 @@ router.post('/', async (req, res) => {
         }
       }
     }
-    if (storagetemp.length > 4) {
+
+    // check if petition has ended
+    if (storagetemp.length > maxVoters) {
       if (DEBUG) {
         console.log('Petition ended');
       }
@@ -287,13 +243,11 @@ router.post('/', async (req, res) => {
     }
 
     responseStatus = 200;
-    // EDIT: add sentthreshdec here to success
     success = isProofValid && isVoteValid;
     if (DEBUG) {
       console.log(`Was credential successfully used to vote: ${success}`);
       if (success) {
         console.log(`Zeta shown for petitionID: ${petitionID}`);
-        
       }
     }
   } catch (err) {

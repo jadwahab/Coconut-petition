@@ -19,7 +19,7 @@ router.use(bodyParser.json());
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('blindsign post');
+    console.log('>blindsign post');
   }
   let responseStatus = -1;
   let signatureBytes = null;
@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
     const signingCred = req.body.cred;
     const ElGamalPKBytes = req.body.ElGamalPKBytes;
 
-    // firstly check if the server has not already signed this cred
+    // first check if the server has not already signed this cred
     if (sessionSignatures.has(signingCred.issuedCredSig)) {
       throw new Error('This cred was already signed before!');
     } else {

@@ -6,8 +6,8 @@ import { CRED_STATUS, BUTTON_CRED_STATUS } from '../../config';
 const SubmitButton = (props) => {
   let buttonContent;
   let handleButtonClick;
-  let isDisabled = false;
-  let buttonIcon = "key"
+  let isDisabled = false; // EDIT:
+  let buttonIcon = 'key';
 
   switch (props.credState) {
     case CRED_STATUS.uncreated: // 'Ungenerated'
@@ -23,7 +23,7 @@ const SubmitButton = (props) => {
     case CRED_STATUS.signed: // 'Signed'
       buttonContent = BUTTON_CRED_STATUS.ready; // 'Credential Ready'
       handleButtonClick = props.onRandomize;
-      buttonIcon = 'check';
+      buttonIcon = 'retweet';
       break;
     
     case CRED_STATUS.error:

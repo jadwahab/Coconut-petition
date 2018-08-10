@@ -173,7 +173,7 @@ export async function signCred(server, signingCred, ElGamalPK) {
   return signature;
 }
 
-export async function spendCred(MPCP_output, signature, server, petitionID, enc_votes, MPVP_output) {
+export async function voteCred(MPCP_output, signature, server, petitionID, enc_votes, MPVP_output) {
   const simplifiedMPCP = getSimplifiedMPCP(MPCP_output);
   const simplifiedSignature = getSimplifiedSignature(signature);
   const MPVP_bytes = getBytesMPVP(MPVP_output);
@@ -187,7 +187,7 @@ export async function spendCred(MPCP_output, signature, server, petitionID, enc_
   let error_msg;
   try {
     let response = await
-      fetch(`http://${server}/spend`, {
+      fetch(`http://${server}/vote`, {
         method: 'POST',
         mode: 'cors',
         headers: {

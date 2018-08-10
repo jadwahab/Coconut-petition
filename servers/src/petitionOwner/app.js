@@ -1,7 +1,8 @@
 import express from 'express';
-import CredSpendController from './api/CredSpendController';
+import CredVoteController from './api/CredVoteController';
 import ServerStatusController from './api/ServerStatusController';
 import PublicKeyController from './api/PublicKeyController';
+import VoteResultController from './api/VoteResultController';
 
 const app = express();
 
@@ -13,7 +14,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/pk', PublicKeyController);
-app.use('/spend', CredSpendController);
+app.use('/vote', CredVoteController);
+app.use('/result', VoteResultController);
 app.use('/status', ServerStatusController);
 
 

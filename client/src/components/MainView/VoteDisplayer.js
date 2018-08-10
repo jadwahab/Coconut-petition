@@ -4,7 +4,7 @@ import { Segment, Button } from 'semantic-ui-react';
 import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
 import { ctx, params, CRED_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
-import { spendCred } from '../../utils/api';
+import { voteCred } from '../../utils/api';
 import CredSig from '../../../lib/CredSig';
 import { make_proof_credentials_petition, make_proof_vote_petition } from '../../../lib/Proofs';
 import { publicKeys } from '../../cache';
@@ -17,6 +17,8 @@ class VoteDisplayer extends React.Component {
       petitionID: null,
       hasVoted: false,
       voteResult: null,
+      currentVoteIcon: null,
+      resultButtonColor: 'grey',
       // remainingValidityString: '',
     };
   }
@@ -79,14 +81,46 @@ class VoteDisplayer extends React.Component {
   };
 
   handleVoteYes = () => {
-    this.handleCredSpend(1);
+    this.setState({ currentVoteIcon: 'thumbs up' });
+    this.handleCredVote(1);
   };
 
   handleVoteNo = () => {
-    this.handleCredSpend(0);
+    this.setState({ currentVoteIcon: 'thumbs down' });
+    this.handleCredVote(0);
   };
 
-  handleCredSpend = async (vote) => {
+  handleVoteResult = async () => {
+    try {
+      const response = await fetch(`http://${petitionOwner}/result/${this.state.petitionID}`);
+      if (response.status === 200) {
+        const responseJSON = await response.json();
+        const petitionResult = responseJSON.petitionResult;
+        const yesVotes = parseInt(petitionResult.result.yes, 16);
+        const noVotes = parseInt(petitionResult.result.no, 16);
+
+        // if petition passed thumbs up, else thumbs down
+        if (yesVotes > noVotes) {
+          this.setState({ currentVoteIcon: 'check' });
+          this.setState({ resultButtonColor: 'green' });
+        } else if (yesVotes === noVotes) {
+          this.setState({ currentVoteIcon: 'minus' });
+        } else {
+          this.setState({ currentVoteIcon: 'x' });
+          this.setState({ resultButtonColor: 'red' });
+        }
+        this.setState({ voteResult: `Petition ${petitionResult.petitionID}:    ${yesVotes}-${noVotes}` });
+      } else {
+        this.setState({ currentVoteIcon: 'exclamation circle' });
+        this.setState({ voteResult: `Petition ${this.state.petitionID} has not ended` });
+      }
+    } catch (err) {
+      console.log(err);
+      console.warn(`Call to ${petitionOwner} was unsuccessful`);
+    }
+  };
+
+  handleCredVote = async (vote) => {
     this.setState({ credState: CRED_STATUS.spending });
 
     // MPCP:
@@ -124,7 +158,7 @@ class VoteDisplayer extends React.Component {
       [enc_votes, MPVP_output] = make_proof_vote_petition(params, aggregateElGamal, 0);
     }
 
-    const [success, error_msg] = await spendCred(MPCP_output, this.props.randomizedSignature, 
+    const [success, error_msg] = await voteCred(MPCP_output, this.props.randomizedSignature, 
       petitionOwner, this.state.petitionID, enc_votes, MPVP_output);
 
     if (success) {
@@ -136,25 +170,35 @@ class VoteDisplayer extends React.Component {
       this.props.handleRandomizeDisabled(false);
       this.setState({ voteResult: `Voted for petition: ${this.state.petitionID}!` });
     } else {
-      if (DEBUG) {
-        switch (error_msg) {
-          case 'sig':
+      switch (error_msg) {
+        case 'sig':
+          if (DEBUG) {
             console.log('There was an error in verifying signature');
-            this.setState({ voteResult: 'Error in voting!' });
-            break;   
-          case 'used':
+          }
+          this.setState({ currentVoteIcon: 'exclamation circle' });
+          this.setState({ voteResult: 'Error in voting!' });
+          break;   
+        case 'used':
+          if (DEBUG) {
             console.log('Already voted for this petition');
-            this.setState({ voteResult: `Already voted for petition ${this.state.petitionID}!` });
-            break;
-          case 'ended':
+          }
+          this.setState({ currentVoteIcon: 'exclamation circle' });
+          this.setState({ voteResult: `Already voted for petition ${this.state.petitionID}!` });
+          break;
+        case 'ended':
+          if (DEBUG) {
             console.log('This petition has ended');
-            this.setState({ voteResult: `Petition ${this.state.petitionID} has ended!` });
-            break;
-          default:
+          }
+          this.setState({ currentVoteIcon: 'exclamation circle' });
+          this.setState({ voteResult: `Petition ${this.state.petitionID} ended!` });
+          break;
+        default:
+          if (DEBUG) {
             console.log('Unknown error');
-            this.setState({ voteResult: 'Error in voting!' });
-            break;
-        }
+          }
+          this.setState({ currentVoteIcon: 'exclamation circle' });
+          this.setState({ voteResult: 'Error in voting!' });
+          break;
       }
       this.setState({ credState: CRED_STATUS.error });// EDIT: delete but check
 
@@ -168,30 +212,39 @@ class VoteDisplayer extends React.Component {
       <Segment.Group horizontal>
         <Segment style={styles.segmentStyle}>
           {
-            this.state.hasVoted ? <h1>{this.state.voteResult}</h1> :
-            // this.state.hasVoted ?
-            //   <Button
-            //     disabled={true}
-            //     // primary={true}
-            //     content={this.state.voteResult}
-            //   />
-            // :
-            <InputPetitionID onInputChange={this.handleInputChange}>
+            // this.state.hasVoted ? <h1>{this.state.voteResult}</h1> :
+            this.state.hasVoted ?
               <Button.Group>
                 <Button
-                  icon="thumbs up"
-                  color="green"
-                  onClick={this.handleVoteYes}
-                  disabled={this.state.petitionID === null}
+                  disabled={true}
+                  // primary={true}
+                  color={this.state.resultButtonColor}
+                  content={this.state.voteResult}
+                  icon={this.state.currentVoteIcon}
                 />
                 <Button
-                  icon="thumbs down"
-                  color="red"
-                  onClick={this.handleVoteNo}
-                  disabled={this.state.petitionID === null}
+                  primary={true}
+                  content="Check Result"
+                  onClick={this.handleVoteResult}
                 />
               </Button.Group>
-            </InputPetitionID>
+            :
+              <InputPetitionID onInputChange={this.handleInputChange}>
+                <Button.Group>
+                  <Button
+                    icon="thumbs up"
+                    color="green"
+                    onClick={this.handleVoteYes}
+                    disabled={this.state.petitionID === null}
+                  />
+                  <Button
+                    icon="thumbs down"
+                    color="red"
+                    onClick={this.handleVoteNo}
+                    disabled={this.state.petitionID === null}
+                  />
+                </Button.Group>
+              </InputPetitionID>
           }
         </Segment>
 

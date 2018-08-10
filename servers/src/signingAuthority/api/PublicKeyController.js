@@ -11,7 +11,7 @@ router.use(bodyParser.json());
 
 router.get('/', (req, res) => {
   if (DEBUG) {
-    console.log('pk get');
+    console.log('>pk get');
   }
   res.status(200).json({
     pk: pkBytes,

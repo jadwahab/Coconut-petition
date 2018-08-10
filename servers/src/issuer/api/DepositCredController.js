@@ -19,7 +19,7 @@ router.use(bodyParser.json());
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('Deposit cred post');
+    console.log('>Deposit cred post');
   }
 
   const [hBytes, sigBytes] = req.body.signature;

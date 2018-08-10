@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import fetch from 'isomorphic-fetch';
-import { ctx, params, signingServers } from '../../globalConfig';
+import { ctx, params, signingServers, petitionOwner } from '../../globalConfig';
 import { ElGamalkeys } from '../config/CredSigSetup';
 import { DEBUG } from '../config/appConfig';
 import { fromBytesVotes, getBytesVotes } from '../../BytesConversion';
@@ -12,7 +12,7 @@ const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-const sendThresholdDecryption = async (server, enc_votes, decIndex) => {
+const sendThresholdDecryption = async (server, petitionID, enc_votes, decIndex) => {
   try {
     const response = await
     fetch(`http://${server}/thresholddecrypt`, {
@@ -24,13 +24,41 @@ const sendThresholdDecryption = async (server, enc_votes, decIndex) => {
       body: JSON.stringify({
         votes_bytes: getBytesVotes(enc_votes),
         decIndex: decIndex,
+        petitionID: petitionID,
       }),
     });
     if (response.status === 200) {
       console.log(`Successfully sent threshold decryption to ${server}`);
       return true;
     }
-    console.log(`Threshold decryption to ${server} failed`);
+    console.log(`Threshold decryption send to ${server} failed`);
+    return false;
+
+  } catch (err) {
+    console.warn(err);
+    console.warn(`Call to ${server} was unsuccessful`);
+  }
+};
+
+const sendResult = async (server, petitionID, result) => {
+  try {
+    const response = await
+    fetch(`http://${server}/result`, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        petitionID: petitionID,
+        result: result,
+      }),
+    });
+    if (response.status === 200) {
+      console.log(`Successfully sent result to ${server}`);
+      return true;
+    }
+    console.log(`Result send to ${server} failed`);
     return false;
 
   } catch (err) {
@@ -40,9 +68,10 @@ const sendThresholdDecryption = async (server, enc_votes, decIndex) => {
 };
 
 router.post('/', async (req, res) => {
+  const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('threshold decryption');
-  } 
+    console.log('>threshold decryption');
+  }
 
   let responseStatus = -1;
 
@@ -61,6 +90,7 @@ router.post('/', async (req, res) => {
     const hdec_not = ElGamal.decrypt(params, ElGamalkeys[0], [a_enc_v_not, b_enc_v_not]);
     
     const decIndex = req.body.decIndex;
+    const petitionID = req.body.petitionID;
 
     if (decIndex === 0) {
       const dec = ElGamal.logh(params, hdec, h1, 100);
@@ -68,16 +98,27 @@ router.post('/', async (req, res) => {
 
       const yes_string = dec.toString();
       const no_string = dec_not.toString();
+      console.log(`Petition ${petitionID}:`);
       console.log(`Number of "yes" votes: ${parseInt(yes_string, 16)}`);
       console.log(`Number of "no" votes: ${parseInt(no_string, 16)}`);
+      
+      // send result to petitionOwner
+      const result = {
+        yes: yes_string,
+        no: no_string,
+      };
+      const sentResult = sendResult(petitionOwner, petitionID, result);
+      if (!sentResult) {
+        console.log('Error in sending the threshold decryption');
+      }
     } else {
       const encV = [a_enc_v, hdec];
       const encVNot = [a_enc_v_not, hdec_not];
       const enc_votes_new = [encV, encVNot];
 
-      const sentthreshdec = await sendThresholdDecryption(signingServers[decIndex - 1], 
-        enc_votes_new, (decIndex - 1) );
-      if (!sentthreshdec) {
+      const sentThreshdec = await sendThresholdDecryption(signingServers[decIndex - 1], 
+        petitionID, enc_votes_new, (decIndex - 1) );
+      if (!sentThreshdec) {
         console.log('Error in sending the threshold decryption');
       }
     }
@@ -88,6 +129,8 @@ router.post('/', async (req, res) => {
     responseStatus = 400;
   }
 
+  const t1 = new Date().getTime();
+  console.log('Request took: ', t1 - t0);
   res.sendStatus(responseStatus);
 });
 
