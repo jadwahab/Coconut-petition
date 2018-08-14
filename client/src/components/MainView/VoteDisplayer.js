@@ -4,17 +4,17 @@ import { Segment } from 'semantic-ui-react';
 import VoteActionButton from './VoteActionButton';
 import InputPetitionID from './InputPetitionID';
 import styles from './VoteDisplayer.style';
-import { params, COIN_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
-import { spendCoin } from '../../utils/api';
-import CoinSig from '../../../lib/CoinSig';
-import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/auxiliary';
+import { params, CRED_STATUS, signingServers, petitionOwner, DEBUG } from '../../config';
+import { spendCred } from '../../utils/api';
+import CredSig from '../../../lib/CredSig';
+import { make_proof_credentials_petition, verify_proof_credentials_petition } from '../../../lib/Proofs';
 import { publicKeys } from '../../cache';
 
 class VoteDisplayer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      coinState: COIN_STATUS.signed,
+      credState: CRED_STATUS.signed,
       petitionID: null,
       // remainingValidityString: '',
     };
@@ -30,20 +30,20 @@ class VoteDisplayer extends React.Component {
 
   // updateRemainingValidityString = () => {
   //   let remainingValidityString;
-  //   switch (this.state.coinState) {
-  //     case COIN_STATUS.spent: {
-  //       remainingValidityString = 'Coin was spent';
+  //   switch (this.state.credState) {
+  //     case CRED_STATUS.spent: {
+  //       remainingValidityString = 'Cred was spent';
   //       clearInterval(this.timer);
   //       break;
   //     }
-  //     case COIN_STATUS.error: {
+  //     case CRED_STATUS.error: {
   //       remainingValidityString = 'Error occurred';
   //       clearInterval(this.timer);
   //       break;
   //     }
   //     default: {
   //       const currentTime = new Date().getTime();
-  //       const td = this.props.coin.ttl - currentTime;
+  //       const td = this.props.cred.ttl - currentTime;
   //       const seconds = Math.floor((td / 1000) % 60);
   //       const minutes = Math.floor((td / 1000 / 60) % 60);
   //       const hours = Math.floor((td / (1000 * 60 * 60)));
@@ -59,8 +59,8 @@ class VoteDisplayer extends React.Component {
   //   this.setState({ remainingValidityString: remainingValidityString });
   // };
 
-  handleCoinSpend = async () => {
-    this.setState({ coinState: COIN_STATUS.spending });
+  handleCredSpend = async () => {
+    this.setState({ credState: CRED_STATUS.spending });
 
     const signingAuthoritiesPublicKeys = Object.keys(publicKeys)
       .filter(server => signingServers.includes(server))
@@ -69,25 +69,25 @@ class VoteDisplayer extends React.Component {
         return obj;
       }, {});
 
-    const aggregatePublicKey = CoinSig.aggregatePublicKeys_obj(params, signingAuthoritiesPublicKeys);
+    const aggregatePublicKey = CredSig.aggregatePublicKeys_obj(params, signingAuthoritiesPublicKeys);
 
     const petitionOwnerStr = publicKeys[petitionOwner].join('');
 
-    const MPCP_output = CoinSig.make_proof_credentials_petition(params, aggregatePublicKey,
-      this.props.randomizedSignature, this.props.coin_params.sk.m, petitionOwnerStr, this.state.petitionID);
+    const MPCP_output = make_proof_credentials_petition(params, aggregatePublicKey,
+      this.props.randomizedSignature, this.props.cred_params.sk.m, petitionOwnerStr, this.state.petitionID);
 
-    const success = await spendCoin(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
+    const success = await spendCred(MPCP_output, this.props.randomizedSignature, petitionOwner, this.state.petitionID);
     if (success) {
       if (DEBUG) {
         console.log('Signature verified');
       }
-      this.setState({ coinState: COIN_STATUS.spent }); // EDIT:
+      this.setState({ credState: CRED_STATUS.spent }); // EDIT:
       this.props.handleRandomizeDisabled(false);
     } else {
       if (DEBUG) {
         console.log('There was an error in verifying signature');
       }
-      this.setState({ coinState: COIN_STATUS.error });// EDIT:
+      this.setState({ credState: CRED_STATUS.error });// EDIT:
     }
 
   };
@@ -102,8 +102,8 @@ class VoteDisplayer extends React.Component {
         <Segment style={styles.segmentStyle}>
           <InputPetitionID onInputChange={this.handleInputChange}>
             <VoteActionButton
-              onSpend={this.handleCoinSpend}
-              coinState={this.state.coinState}
+              onSpend={this.handleCredSpend}
+              credState={this.state.credState}
               voteDisabled={this.state.petitionID == null}
             />
           </InputPetitionID>
@@ -118,7 +118,7 @@ class VoteDisplayer extends React.Component {
 
 VoteDisplayer.propTypes = {
   randomizedSignature: PropTypes.array.isRequired,
-  coin_params: PropTypes.object,
+  cred_params: PropTypes.object,
   handleRandomizeDisabled: PropTypes.func.isRequired,
 };
 

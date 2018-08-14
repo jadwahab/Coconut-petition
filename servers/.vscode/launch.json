@@ -17,7 +17,7 @@
                 "--require",
                 "babel-polyfill", 
                 "--no-timeouts",
-                "${workspaceFolder}/dist/test/CredentialSig.test.js"
+                "${workspaceFolder}/dist/test/CoconutScheme.test.js"
             ]
         },
         {

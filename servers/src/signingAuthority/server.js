@@ -1,6 +1,6 @@
 import 'babel-polyfill';
 import app from './app';
-import { setupCoinSigKeys } from './config/CoinSigSetup';
+import { setupCredSigKeys } from './config/CredSigSetup';
 
 if (process.argv.length < 3) {
   throw new Error('No port number provided');
@@ -9,6 +9,6 @@ if (process.argv.length < 3) {
 const port = parseInt(process.argv[2], 10);
 
 const server = app.listen(port, () => {
-  setupCoinSigKeys();
+  setupCredSigKeys();
   console.log(`Server Started on port ${port}`);
 });

@@ -1,9 +1,9 @@
 import express from 'express';
 import PublicKeyController from './api/PublicKeyController';
 import ServerStatusController from './api/ServerStatusController';
-import CoinIssuanceController from './api/CoinIssuanceController';
+import CredIssuanceController from './api/CredIssuanceController';
 import UsedIdController from './api/UsedIdController';
-import DepositCoinController from './api/DepositCoinController';
+import DepositCredController from './api/DepositCredController';
 
 const app = express();
 
@@ -16,8 +16,8 @@ app.use((req, res, next) => {
 
 app.use('/pk', PublicKeyController);
 app.use('/status', ServerStatusController);
-app.use('/getcoin', CoinIssuanceController);
+app.use('/getcred', CredIssuanceController);
 app.use('/checkid', UsedIdController);
-app.use('/depositcoin', DepositCoinController);
+app.use('/depositcred', DepositCredController);
 
 export default app;

@@ -1,12 +1,12 @@
 import { before, beforeEach, describe, it, xit } from 'mocha';
 import { expect, assert } from 'chai';
 import ElGamal from '../ElGamal';
-import CoinSig from '../CoinSig';
+import CredSig from '../CredSig';
 import { hashToPointOnCurve } from '../auxiliary';
 
 describe('ElGamal Encryption', () => {
   describe('Keygen', () => {
-    const params = CoinSig.setup();
+    const params = CredSig.setup();
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = ElGamal.keygen(params);
     it('Returns valid secret key of type BIG', () => {
@@ -20,7 +20,7 @@ describe('ElGamal Encryption', () => {
   });
 
   describe('Encryption', () => {
-    const params = CoinSig.setup();
+    const params = CredSig.setup();
     const [G, o, g1, g2, e] = params;
     const [sk, pk] = ElGamal.keygen(params);
 
@@ -56,7 +56,7 @@ describe('ElGamal Encryption', () => {
 
   describe('Decryption', () => {
     it('Can recover encrypted h^m', () => {
-      const params = CoinSig.setup();
+      const params = CredSig.setup();
       const [G, o, g1, g2, e] = params;
       const [sk, pk] = ElGamal.keygen(params);
 
@@ -74,7 +74,7 @@ describe('ElGamal Encryption', () => {
 
   describe('To and from Bytes', () => {
     it('Can be converted to and from bytes representation', () => {
-      const params = CoinSig.setup();
+      const params = CredSig.setup();
       const [G, o, g1, g2, e] = params;
       const [sk, pk] = ElGamal.keygen(params);
       const PKBytes = ElGamal.getPKBytes(pk);

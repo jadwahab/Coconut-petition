@@ -23,17 +23,17 @@ describe('MainView Component', () => {
     expect(wrapper.find(VoteListDisplayer)).to.have.length(1);
   });
 
-  it('Has initially empty array for coins state', () => {
+  it('Has initially empty array for creds state', () => {
     const wrapper = mount(<MainView />);
-    expect(wrapper.state().coins).to.be.an('Array').that.is.empty;
+    expect(wrapper.state().creds).to.be.an('Array').that.is.empty;
   });
 
   describe('Coin generation', async () => {
-    const coinValue = 42;
+    const credValue = 42;
     const wrapper = mount(<MainView />);
     const input = wrapper.find(CredentialRequester).find('input');
     // input value
-    input.simulate('change', { target: { value: coinValue } });
+    input.simulate('change', { target: { value: credValue } });
 
     // submit value
     const button = wrapper.find(CredentialRequester).find('button');
@@ -41,14 +41,14 @@ describe('MainView Component', () => {
 
     await wait(200);
 
-    it('Upon submitting coin of given value, the Coin object has that value', () => {
-      expect(wrapper.state('coins')[0].coin.value).to.equal(coinValue);
+    it('Upon submitting cred of given value, the Coin object has that value', () => {
+      expect(wrapper.state('creds')[0].cred.value).to.equal(credValue);
     });
 
     it("Coin's PK = g2^SK", () => {
       const [G, o, g1, g2, e] = params;
-      const { sk } = wrapper.state('coins')[0];
-      const pk = wrapper.state('coins')[0].coin.v;
+      const { sk } = wrapper.state('creds')[0];
+      const pk = wrapper.state('creds')[0].cred.v;
 
       assert.isTrue(pk.equals(G.ctx.PAIR.G2mul(g2, sk)));
     });

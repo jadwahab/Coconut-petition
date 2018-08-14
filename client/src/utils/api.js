@@ -1,8 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import { ctx, DEBUG, ISSUE_STATUS, params } from '../config';
-import { getSimplifiedProof, getSimplifiedSignature, getRandomNumber, getSimplifiedMPCP } from './helpers';
 import ElGamal from '../../lib/ElGamal';
-import { getCoinRequestObject } from '../../lib/CoinRequest';
+import { getSimplifiedProof, getSimplifiedSignature, getSimplifiedMPCP } from '../../lib/BytesConversion';
+import { getCredRequestObject } from '../../lib/CredRequest';
 import { publicKeys } from '../cache';
 
 // auxiliary, mostly for testing purposes to simulate delays
@@ -48,7 +48,7 @@ export async function getSigningAuthorityPublicKey(server) {
   return publicKey;
 }
 
-export async function getCoin(sk_coin, pk_coin, pk_client, sk_client, issuingServer) {
+export async function getCred(sk_cred, pk_cred, pk_client, sk_client, issuingServer) {
   const [G, o, g1, g2, e] = params;
 
   // for some reason we have no cached pk, lets try to get it
@@ -65,29 +65,29 @@ export async function getCoin(sk_coin, pk_coin, pk_client, sk_client, issuingSer
 
   const issuingServerStr = publicKeys[issuingServer].join('');
 
-  const coinRequestObject =
-    getCoinRequestObject(sk_coin, pk_coin, pk_client, sk_client, issuingServerStr);
+  const credRequestObject =
+    getCredRequestObject(sk_cred, pk_cred, pk_client, sk_client, issuingServerStr);
 
-  let issuedCoin;
+  let issuedCred;
   let issuance_status;
 
   if (DEBUG) {
-    console.log(`Calling ${issuingServer} to get a coin`);
+    console.log(`Calling ${issuingServer} to get a cred`);
   }
   try {
     let response = await
-      fetch(`http://${issuingServer}/getcoin`, {
+      fetch(`http://${issuingServer}/getcred`, {
         method: 'POST',
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          coin_request: coinRequestObject,
+          cred_request: credRequestObject,
         }),
       });
     response = await response.json();
-    issuedCoin = response.coin;
+    issuedCred = response.cred;
     issuance_status = response.status;
   } catch (err) {
     console.log(err);
@@ -95,8 +95,8 @@ export async function getCoin(sk_coin, pk_coin, pk_client, sk_client, issuingSer
   }
 
   if (issuance_status === ISSUE_STATUS.success) {
-    // return [issuedCoin, coin_id];
-    return issuedCoin;
+    // return [issuedCred, cred_id];
+    return issuedCred;
   } else if (issuance_status != null) {
     console.warn(issuance_status);
   } else {
@@ -121,10 +121,10 @@ export async function checkIfAlive(server) {
   return isAlive;
 }
 
-export async function signCoin(server, signingCoin, ElGamalPK) {
+export async function signCred(server, signingCred, ElGamalPK) {
   let signature = null;
   if (DEBUG) {
-    console.log('Compressed coin to sign: ', signingCoin);
+    console.log('Compressed cred to sign: ', signingCred);
   }
 
   if (publicKeys[server] == null || publicKeys[server].length <= 0) {
@@ -150,7 +150,7 @@ export async function signCoin(server, signingCoin, ElGamalPK) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          coin: signingCoin,
+          cred: signingCred,
           ElGamalPKBytes: ElGamal.getPKBytes(ElGamalPK),
         }),
       });
@@ -172,9 +172,10 @@ export async function signCoin(server, signingCoin, ElGamalPK) {
   return signature;
 }
 
+// EDIT:
 // ... we can't send v because it would link us to issuance, we just send ttl, id, proof of x (on aX3) and sig
 // pkX = aX3^x
-export async function spendCoin(MPCP_output, signature, server, petitionID) {
+export async function spendCred(MPCP_output, signature, server, petitionID) {
   const simplifiedMPCP = getSimplifiedMPCP(MPCP_output);
   const simplifiedSignature = getSimplifiedSignature(signature);
 
@@ -201,7 +202,7 @@ export async function spendCoin(MPCP_output, signature, server, petitionID) {
     success = response.success;
   } catch (err) {
     console.warn(err);
-    console.warn(`Call to petitionOwner ${server} was unsuccessful`); // EDIT:
+    console.warn(`Call to petitionOwner ${server} was unsuccessful`);
   }
   return success;
 }

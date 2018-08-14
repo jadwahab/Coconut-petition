@@ -3,9 +3,10 @@ import bodyParser from 'body-parser';
 import { checkUsedId, insertUsedId, changeBalance } from '../utils/DatabaseManager';
 import { ctx, petitionOwner, params, signingServers } from '../../globalConfig';
 import { DEBUG } from '../config/appConfig';
-import { fromBytesMPCP, verifyProofOfSecret, getSigningAuthorityPublicKey,
-  getPublicKey, verify_proof_credentials_petition } from '../../auxiliary';
-import CoinSig from '../../CoinSig';
+import { getSigningAuthorityPublicKey, getPublicKey } from '../../auxiliary';
+import { fromBytesMPCP } from '../../BytesConversion';
+import { verifyProofOfSecret, verify_proof_credentials_petition } from '../../Proofs';
+import CredSig from '../../CredSig';
 import { publicKeys } from '../cache';
 
 const router = express.Router();
@@ -18,7 +19,7 @@ router.use(bodyParser.json());
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('Deposit coin post');
+    console.log('Deposit cred post');
   }
 
   const [hBytes, sigBytes] = req.body.signature;
@@ -52,7 +53,7 @@ router.post('/', async (req, res) => {
         console.warn(err);
       }
     }));
-    aggregatePublicKey = CoinSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys);
+    aggregatePublicKey = CredSig.aggregatePublicKeys(params, signingAuthoritiesPublicKeys);
 
     publicKeys['Aggregate'] = aggregatePublicKey;
   } else {
@@ -73,19 +74,19 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  // // now finally check if the coin wasn't already spent
-  // const wasCoinAlreadySpent = await checkUsedId(id);
+  // // now finally check if the cred wasn't already spent
+  // const wasCredAlreadySpent = await checkUsedId(id);
   // if (DEBUG) {
-  //   console.log(`Was coin already spent: ${wasCoinAlreadySpent}`);
+  //   console.log(`Was cred already spent: ${wasCredAlreadySpent}`);
   // }
   //
-  // if (isProofValid && !wasCoinAlreadySpent && isSignatureValid) {
+  // if (isProofValid && !wasCredAlreadySpent && isSignatureValid) {
   //   await insertUsedId(id);
-  //   // await changeBalance(publicKeys[petitionOwner], coinAttributes.value);
+  //   // await changeBalance(publicKeys[petitionOwner], credAttributes.value);
   // }
 
 
-  // EDIT: send to issuer to isert used zeta
+  // EDIT: send to issuer to insert used zeta
 
   const t1 = new Date().getTime();
   console.log('Deposit took: ', t1 - t0);

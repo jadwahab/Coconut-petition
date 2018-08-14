@@ -61,7 +61,7 @@ export const checkUsedId = async (id) => {
 
   const wasUsed = res.rows.length;
   if (DEBUG) {
-    console.log(`Checked if coin id ${id} was already used and result was: ${wasUsed}`);
+    console.log(`Checked if cred id ${id} was already used and result was: ${wasUsed}`);
   }
 
   return (wasUsed !== 0);

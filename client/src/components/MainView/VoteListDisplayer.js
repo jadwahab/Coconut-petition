@@ -8,7 +8,7 @@ const VoteListDisplayer = props => (
       <VoteDisplayer
         key={index} // if it is not unique, that is client's fault ///////chose something other than x
         randomizedSignature={randomizedSignature}
-        coin_params={props.coin_params}
+        cred_params={props.cred_params}
         handleRandomizeDisabled={props.handleRandomizeDisabled}
       />
     ))}
@@ -17,7 +17,7 @@ const VoteListDisplayer = props => (
 
 VoteListDisplayer.propTypes = {
   randomizedSignatures: PropTypes.array.isRequired,
-  coin_params: PropTypes.object,
+  cred_params: PropTypes.object,
   handleRandomizeDisabled: PropTypes.func.isRequired,
 };
 

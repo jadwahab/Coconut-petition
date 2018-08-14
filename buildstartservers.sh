@@ -19,8 +19,8 @@ tmux new-session -s "$sn" -n "git" -d
 cd "$base_path/client"
 tmux new-window -t "$sn:$1" -n "client" $start_client
 
-cd "$base_path/servers/docker"
-tmux new-window -t "$sn:$1" -n "docker" $start_docker
+# cd "$base_path/servers/docker"
+# tmux new-window -t "$sn:$1" -n "docker" $start_docker
 
 
 cd "$base_path/servers"

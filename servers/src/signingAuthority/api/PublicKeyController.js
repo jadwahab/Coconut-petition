@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { pkBytes } from '../config/CoinSigSetup';
+import { pkBytes } from '../config/CredSigSetup';
 import { DEBUG } from '../config/appConfig';
 
 const router = express.Router();

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
-import CredentialRequester from './MainView/CredentialRequester';
+import CredRequester from './MainView/CredRequester';
 import VoteListDisplayer from './MainView/VoteListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG } from '../config';
 import ElGamal from '../../lib/ElGamal';
-import CoinSig from '../../lib/CoinSig';
+import CredSig from '../../lib/CredSig';
 
 class MainView extends React.Component {
   constructor(props) {
@@ -15,7 +15,7 @@ class MainView extends React.Component {
       ElGamalPK: null,
       sk_client: null,
       pk_client: null,
-      coin_params: null,
+      cred_params: null,
       randomizeDisabled: false,
     };
   }
@@ -56,7 +56,7 @@ class MainView extends React.Component {
 
 
   handleRandomize = (sig) => {
-    const randomizedSignature = CoinSig.randomize(params, sig);
+    const randomizedSignature = CredSig.randomize(params, sig);
 
     // // Not working right for some reason: (consider fixing in future)
     // this.setState(prevState => ({
@@ -80,9 +80,9 @@ class MainView extends React.Component {
   };
 
 
-  handleCoinForSpend = (coin, sk) => {
-    const coin_params = { coin: coin, sk: sk };
-    this.setState({ coin_params });
+  handleCredForSpend = (cred, sk) => {
+    const cred_params = { cred: cred, sk: sk };
+    this.setState({ cred_params });
   }
 
   handleRandomizeDisabled = (state) => {
@@ -100,14 +100,14 @@ class MainView extends React.Component {
         />
         <Grid>
           <Grid.Row centered={true}>
-            <CredentialRequester
+            <CredRequester
               ElGamalSK={this.state.ElGamalSK}
               ElGamalPK={this.state.ElGamalPK}
               // sk_client will be required to sign requests to SAs, but is NOT sent:
               sk_client={this.state.sk_client}
               pk_client={this.state.pk_client}
               handleRandomize={this.handleRandomize}
-              handleCoinForSpend={this.handleCoinForSpend}
+              handleCredForSpend={this.handleCredForSpend}
               randomizeDisabled={this.state.randomizeDisabled}
             />
           </Grid.Row>
@@ -115,7 +115,7 @@ class MainView extends React.Component {
           <Grid.Row centered={true}>
             <VoteListDisplayer
               randomizedSignatures={this.state.randomizedSignatures}
-              coin_params={this.state.coin_params}
+              cred_params={this.state.cred_params}
               handleRandomizeDisabled={this.handleRandomizeDisabled}
             />
           </Grid.Row>

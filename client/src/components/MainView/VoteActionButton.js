@@ -1,32 +1,32 @@
 import React from 'react';
 import { Button } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
-import { COIN_STATUS, BUTTON_COIN_STATUS } from '../../config';
+import { CRED_STATUS, BUTTON_CRED_STATUS } from '../../config';
 
 const VoteActionButton = (props) => {
   let buttonContent;
   let handleButtonClick;
   let isDisabled = props.voteDisabled;
 
-  switch (props.coinState) {
-    case COIN_STATUS.signed: // 'Signed'
-      buttonContent = BUTTON_COIN_STATUS.spend; // 'Spend Coin'
+  switch (props.credState) {
+    case CRED_STATUS.signed: // 'Signed'
+      buttonContent = BUTTON_CRED_STATUS.spend; // 'Spend Cred'
       handleButtonClick = props.onSpend;
       break;
 
-    case COIN_STATUS.spent: // 'Spent'
+    case CRED_STATUS.spent: // 'Spent'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.spent; // 'Coin was Spent'
+      buttonContent = BUTTON_CRED_STATUS.spent; // 'Cred was Spent'
       break;
 
-    case COIN_STATUS.spending: // 'Spending'
+    case CRED_STATUS.spending: // 'Spending'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.spending; // 'Spending...'
+      buttonContent = BUTTON_CRED_STATUS.spending; // 'Spending...'
       break;
 
-    case COIN_STATUS.error: // 'Error'
+    case CRED_STATUS.error: // 'Error'
       isDisabled = true;
-      buttonContent = BUTTON_COIN_STATUS.error; // 'Error'
+      buttonContent = BUTTON_CRED_STATUS.error; // 'Error'
       break;
 
     default:
@@ -45,7 +45,7 @@ const VoteActionButton = (props) => {
 
 VoteActionButton.propTypes = {
   onSpend: PropTypes.func.isRequired,
-  coinState: PropTypes.string.isRequired,
+  credState: PropTypes.string.isRequired,
   voteDisabled: PropTypes.bool.isRequired,
 };
 
