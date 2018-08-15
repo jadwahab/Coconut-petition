@@ -223,7 +223,7 @@ class VoteDisplayer extends React.Component {
                   icon={this.state.currentVoteIcon}
                 />
                 <Button
-                  primary={true}
+                  color="instagram"
                   content="Check Result"
                   onClick={this.handleVoteResult}
                 />
