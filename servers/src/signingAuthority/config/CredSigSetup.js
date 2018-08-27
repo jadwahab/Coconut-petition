@@ -1,10 +1,13 @@
 import { ctx } from '../../globalConfig'; // required to resolve circular dependency issue
 import CredSig from '../../CredSig';
+import ElGamal from '../../ElGamal';
 
 export const params = [];
 export const pk = [];
 export const pkBytes = [];
 export const sk = [];
+export const ElGamalkeys = [];
+export const pkElGamalBytes = [];
 
 export const setupCredSigKeys = () => {
   const params_gen = CredSig.setup();
@@ -27,5 +30,13 @@ export const setupCredSigKeys = () => {
   pkBytes.push(X_bytes);
   pkBytes.push(Y_bytes);
 
-  console.log('Generated CredSig secret and public sigKeys');
+  // El Gamal key:
+  const [skElGamal_gen, pkElGamal_gen] = ElGamal.keygen(params);
+  
+  ElGamalkeys.push(skElGamal_gen);
+  ElGamalkeys.push(pkElGamal_gen);
+
+  pkElGamal_gen.toBytes(pkElGamalBytes);
+
+  console.log('Generated CredSig secret and public sigKeys + ElGamal keypair');
 };

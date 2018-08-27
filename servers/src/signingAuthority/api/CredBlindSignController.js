@@ -19,7 +19,7 @@ router.use(bodyParser.json());
 router.post('/', async (req, res) => {
   const t0 = new Date().getTime();
   if (DEBUG) {
-    console.log('blindsign post');
+    console.log('>blindsign post');
   }
   let responseStatus = -1;
   let signatureBytes = null;
@@ -27,32 +27,70 @@ router.post('/', async (req, res) => {
     const signingCred = req.body.cred;
     const ElGamalPKBytes = req.body.ElGamalPKBytes;
 
-    // firstly check if the server has not already signed this cred
-    if (sessionSignatures.has(signingCred.issuedCredSig)) {
+    // first check if the server has not already signed this cred
+    if (sessionSignatures.has(signingCred.requestSig)) {
       throw new Error('This cred was already signed before!');
     } else {
-      sessionSignatures.add(signingCred.issuedCredSig);
+      sessionSignatures.add(signingCred.requestSig);
     }
 
-    if (publicKeys[issuer] == null || publicKeys[issuer].length <= 0) {
-      const publicKey = await getPublicKey(issuer);
-      publicKeys[issuer] = publicKey;
-    }
+    // if (publicKeys[issuer] == null || publicKeys[issuer].length <= 0) {
+    //   const publicKey = await getPublicKey(issuer);
+    //   publicKeys[issuer] = publicKey;
+    // }
 
-    const isRequestLegit = verifySignRequest(signingCred, publicKeys[issuer]);
-    if (!isRequestLegit) {
-      throw new Error('Cred was tampered with.');
-    }
+    // check if issuer signature valid
+    // const isRequestLegit = verifySignRequest(signingCred, publicKeys[issuer]);
+    // if (!isRequestLegit) {
+    //   throw new Error('Cred was tampered with.');
+    // }
+
+    //
+    // const requestSig = req.body.requestSig;
+
+    // const reducer = (acc, cur) => acc + cur;
+    // const requestStr =
+    //   signingCred.pk_client_bytes.reduce(reducer) + // client's key
+    //   signingCred.pk_cred_bytes.reduce(reducer); // cred's pk
+
+    // const sha = ctx.ECDH.HASH_TYPE;
+    // const [C, D] = requestSig;
+
+    // const isSignValid = ctx.ECDH.ECPVP_DSA(sha, signingCred.pk_client_bytes, requestStr, C, D) === 0;
+    // if (!isSignValid) {
+    //   console.log('Signature was not valid');
+    //   throw new Error('Signature was not valid');
+    // }
+    //
+
 
     const reducer = (acc, cur) => acc + cur;
 
     const credStr =
       signingCred.pk_client_bytes.reduce(reducer) + // client's key
-      signingCred.pk_cred_bytes.reduce(reducer) + // cred's pk
-      signingCred.issuedCredSig[0].reduce(reducer) + // issuer sig
-      signingCred.issuedCredSig[1].reduce(reducer); // client sig
+      signingCred.pk_cred_bytes.reduce(reducer); // cred's pk
 
-    const h_comit = hashToPointOnCurve(credStr);
+
+    //
+    const requestStr = credStr +
+    signingCred.enc_sk_bytes[0].reduce(reducer) +
+    signingCred.enc_sk_bytes[1].reduce(reducer);
+
+    const sha = ctx.ECDH.HASH_TYPE;
+    const [C, D] = signingCred.requestSig;
+    const isSignValid = ctx.ECDH.ECPVP_DSA(sha, signingCred.pk_client_bytes, requestStr, C, D) === 0;
+    if (!isSignValid) {
+      console.log('Signature was not valid');
+      throw new Error('Signature was not valid');
+    }
+
+    if (DEBUG) {
+      console.log(`Was signature valid: ${isSignValid}`);
+    }
+    //
+
+
+    const h_commit = hashToPointOnCurve(credStr);
 
     const ElGamalPK = ElGamal.getPKFromBytes(params, ElGamalPKBytes);
     const proof = fromBytesProof_Auth(signingCred.proof);
@@ -61,7 +99,7 @@ router.post('/', async (req, res) => {
     const enc_sk_a = ctx.ECP.fromBytes(enc_sk_a_bytes);
     const enc_sk_b = ctx.ECP.fromBytes(enc_sk_b_bytes);
     const enc_sk = [enc_sk_a, enc_sk_b];
-    const isProofValid = verifyProofOfSecret_Auth(params, h_comit, cred_pk, ElGamalPK, enc_sk, proof);
+    const isProofValid = verifyProofOfSecret_Auth(params, h_commit, cred_pk, ElGamalPK, enc_sk, proof);
 
     if (!isProofValid) {
       console.log('Proof was not correct');
@@ -98,6 +136,7 @@ router.post('/', async (req, res) => {
   res.status(responseStatus).json({ signature: signatureBytes });
 });
 
+// EDIT : wtf is this
 router.get('/', (req, res) => {
   console.log('blindsign get');
   res.status(200).json({ hi: 'hi' });

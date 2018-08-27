@@ -29,7 +29,7 @@ tmux new-window -t "$sn:$2" -n "sign3000" $start_sign1
 tmux new-window -t "$sn:$3" -n "sign3001" $start_sign2
 tmux new-window -t "$sn:$4" -n "sign3002" $start_sign3
 tmux new-window -t "$sn:$5" -n "petitionOwner" $start_petitionOwner
-tmux new-window -t "$sn:$6" -n "issuer" $start_issuer
+# tmux new-window -t "$sn:$6" -n "issuer" $start_issuer
 
 # not required for the system, but useful for debug
 cd "$base_path/.."

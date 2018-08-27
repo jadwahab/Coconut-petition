@@ -37,7 +37,7 @@ export const CRED_STATUS = {
 };
 
 const BUTTON_CRED_STATUS_GET = 'Get Credential';
-const BUTTON_CRED_STATUS_SIGN = 'Sign Credential';
+const BUTTON_CRED_STATUS_SIGN = 'Get Signed Credential';
 const BUTTON_CRED_STATUS_SPEND = 'Show Credential';
 const BUTTON_CRED_STATUS_SPENT = 'Credential was Verified';
 const BUTTON_CRED_STATUS_SPENDING_IN_PROGRESS = 'Showing...';
@@ -54,7 +54,7 @@ export const BUTTON_CRED_STATUS = {
   ready: BUTTON_CRED_STATUS_READY,
 };
 
-const SERVER_TYPE_SA = 'Signing Authority';
+const SERVER_TYPE_SA = 'Signing/Decrypting Authority';
 const SERVER_TYPE_PO = 'Petition Owner';
 const SERVER_TYPE_ISSUER = 'Issuer';
 

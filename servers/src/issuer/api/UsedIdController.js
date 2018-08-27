@@ -12,7 +12,7 @@ router.use(bodyParser.json());
 
 router.post('/', async (req, res) => {
   if (DEBUG) {
-    console.log('Used id post');
+    console.log('>Used id post');
   }
   const id_bytes = req.body.id;
   const id = ctx.BIG.fromBytes(id_bytes);

@@ -94,6 +94,23 @@ export default class CredSig {
     return [g2, aX, aY];
   }
 
+  // for threshold decryption
+  static aggregateElGamalPublicKeys(params, pks) {
+    const [G, o, g1, g2, e] = params;
+    const aPk = new G.ctx.ECP();
+
+    for (let i = 0; i < pks.length; i++) {
+      if (i === 0) {
+        aPk.copy(pks[i]);
+      } else {
+        aPk.add(pks[i]);
+      }
+    }
+    aPk.affine();
+
+    return aPk;
+  }
+
   static verifyAggregation(params, pks, cred, aggregateSignature) {
     const aPk = CredSig.aggregatePublicKeys(params, pks);
     return CredSig.verify(params, aPk, cred, aggregateSignature);

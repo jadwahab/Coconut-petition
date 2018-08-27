@@ -1,7 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import { ctx, DEBUG, ISSUE_STATUS, params } from '../config';
 import ElGamal from '../../lib/ElGamal';
-import { getSimplifiedProof, getSimplifiedSignature, getSimplifiedMPCP } from '../../lib/BytesConversion';
+import { getSimplifiedProof, getSimplifiedSignature, getSimplifiedMPCP, 
+  getBytesMPVP, getBytesVotes } from '../../lib/BytesConversion';
 import { getCredRequestObject } from '../../lib/CredRequest';
 import { publicKeys } from '../cache';
 
@@ -172,37 +173,49 @@ export async function signCred(server, signingCred, ElGamalPK) {
   return signature;
 }
 
-// EDIT:
-// ... we can't send v because it would link us to issuance, we just send ttl, id, proof of x (on aX3) and sig
-// pkX = aX3^x
-export async function spendCred(MPCP_output, signature, server, petitionID) {
+export async function voteCred(MPCP_output, signature, server, petitionID, enc_votes, MPVP_output) {
   const simplifiedMPCP = getSimplifiedMPCP(MPCP_output);
   const simplifiedSignature = getSimplifiedSignature(signature);
+  const MPVP_bytes = getBytesMPVP(MPVP_output);
+  const votes_bytes = getBytesVotes(enc_votes);
+
+  const sent_obj = {
+    MPCP: simplifiedMPCP,
+    signature: simplifiedSignature,
+    petitionID: petitionID,
+    MPVP: MPVP_bytes,
+    votes: votes_bytes,
+  };
 
   if (DEBUG) {
     console.log('Sending ShowBlingSign output');
+    console.log(sent_obj);
   }
 
   let success = false;
+  let error_msg;
   try {
     let response = await
-      fetch(`http://${server}/spend`, {
+      fetch(`http://${server}/vote`, {
         method: 'POST',
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          proof: simplifiedMPCP,
+          MPCP: simplifiedMPCP,
           signature: simplifiedSignature,
           petitionID: petitionID,
+          MPVP: MPVP_bytes,
+          votes: votes_bytes,
         }),
       });
     response = await response.json();
     success = response.success;
+    error_msg = response.error_msg;
   } catch (err) {
     console.warn(err);
     console.warn(`Call to petitionOwner ${server} was unsuccessful`);
   }
-  return success;
+  return [success, error_msg];
 }

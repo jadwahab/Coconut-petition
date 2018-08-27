@@ -207,9 +207,9 @@ export default class CredSig {
 
     const credStr =
       signingCred.pk_client_bytes.reduce(reducer) + // 1- client's key
-      signingCred.pk_cred_bytes.reduce(reducer) + // 2- cred's pk
-      signingCred.issuedCredSig[0].reduce(reducer) + // 3- (1 & 2) signed by issuer
-      signingCred.issuedCredSig[1].reduce(reducer); // (1 & 2 & 3 & enc_sk) signed by client
+      signingCred.pk_cred_bytes.reduce(reducer); // 2- cred's pk
+      // signingCred.issuedCredSig[0].reduce(reducer) + // 3- (1 & 2) signed by issuer
+      // signingCred.issuedCredSig[1].reduce(reducer); // (1 & 2 & 3 & enc_sk) signed by client
 
     const h = hashToPointOnCurve(credStr);
 

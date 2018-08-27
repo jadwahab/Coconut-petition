@@ -51,11 +51,11 @@ class ServerStatuses extends React.Component {
                   type={SERVER_TYPES.petitionOwner}
                 />
 
-                <ServerStatus
+                {/* <ServerStatus
                   key={this.state.keyPrefix + issuer}
                   address={issuer}
                   type={SERVER_TYPES.issuer}
-                />
+                /> */}
               </Table.Body>
 
             </Table>

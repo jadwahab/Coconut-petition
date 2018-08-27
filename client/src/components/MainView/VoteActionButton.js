@@ -34,12 +34,20 @@ const VoteActionButton = (props) => {
   }
 
   return (
-    <Button
-      disabled={isDisabled}
-      primary={true}
-      content={buttonContent}
-      onClick={handleButtonClick}
-    />
+    <div>
+      <Button
+        disabled={isDisabled}
+        primary={true}
+        content={buttonContent}
+        onClick={handleButtonClick}
+      />
+      <Button
+        disabled={isDisabled}
+        primary={true}
+        content={buttonContent}
+        onClick={handleButtonClick}
+      />
+    </div>
   );
 };
 

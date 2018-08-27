@@ -49,6 +49,21 @@
             "outFiles": [
                 "${workspaceRoot}/dist/**"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug SA Command",
+            "cwd": "${workspaceRoot}",
+            "sourceMaps": true,
+            "preLaunchTask": "npm: build",
+            "program": "${workspaceRoot}/dist/signingAuthority/server.js",
+            "args": "3002",
+            "stopOnEntry": false,
+            "localRoot": "${workspaceRoot}",
+            "outFiles": [
+                "${workspaceRoot}/dist/**"
+            ]
         }
     ]
 }

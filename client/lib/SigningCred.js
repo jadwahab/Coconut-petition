@@ -10,9 +10,9 @@ export const getSigningCred = (issuedCred, ElGamalSK, ElGamalPK, cred_sks, sk_cl
 
   const credStr =
     issuedCred.pk_client_bytes.reduce(reducer) + // client's key
-    issuedCred.pk_cred_bytes.reduce(reducer) + // cred's pk
-    issuedCred.issuedCredSig[0].reduce(reducer) + // issuer sig
-    issuedCred.issuedCredSig[1].reduce(reducer); // client sig
+    issuedCred.pk_cred_bytes.reduce(reducer); // cred's pk
+    // issuedCred.issuedCredSig[0].reduce(reducer) + // issuer sig
+    // issuedCred.requestSig.reduce(reducer); // client sig
 
   const h = hashToPointOnCurve(credStr);
 
@@ -47,7 +47,7 @@ export const getSigningCred = (issuedCred, ElGamalSK, ElGamalPK, cred_sks, sk_cl
   return {
     pk_cred_bytes: issuedCred.pk_cred_bytes,
     pk_client_bytes: issuedCred.pk_client_bytes,
-    issuedCredSig: issuedCred.issuedCredSig,
+    // issuedCredSig: issuedCred.issuedCredSig,
     enc_sk_bytes: enc_sk_bytes,
     requestSig: requestSig,
     proof: proof_bytes,
@@ -64,6 +64,7 @@ export const getSigningCred = (issuedCred, ElGamalSK, ElGamalPK, cred_sks, sk_cl
  */
 };
 
+// check if issuer signature valid
 export const verifySignRequest = (signingCred, issuerPK) => {
   if (issuerPK == null) {
     return false;
