@@ -7,7 +7,7 @@ const analyze = !!process.env.ANALYZE_ENV;
 const env = process.env.NODE_ENV || 'development';
 
 const webpackConfig = {
-  devtool: 'source-map',
+  // devtool: 'source-map',
 
   name: 'client',
   target: 'web',
