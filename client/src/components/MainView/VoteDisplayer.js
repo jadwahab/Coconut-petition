@@ -210,7 +210,7 @@ class VoteDisplayer extends React.Component {
   render() {
     return (
       <Segment.Group horizontal>
-        <Segment style={styles.segmentStyle}>
+        <Segment style={styles.segmentStyle} size='huge'>
           {
             // this.state.hasVoted ? <h1>{this.state.voteResult}</h1> :
             this.state.hasVoted ?
@@ -221,11 +221,13 @@ class VoteDisplayer extends React.Component {
                   color={this.state.resultButtonColor}
                   content={this.state.voteResult}
                   icon={this.state.currentVoteIcon}
+                  size='huge'
                 />
                 <Button
                   color="instagram"
                   content="Check Result"
                   onClick={this.handleVoteResult}
+                  size='huge'
                 />
               </Button.Group>
             :
@@ -236,12 +238,14 @@ class VoteDisplayer extends React.Component {
                     color="green"
                     onClick={this.handleVoteYes}
                     disabled={this.state.petitionID === null}
+                    size='huge'
                   />
                   <Button
                     icon="thumbs down"
                     color="red"
                     onClick={this.handleVoteNo}
                     disabled={this.state.petitionID === null}
+                    size='huge'
                   />
                 </Button.Group>
               </InputPetitionID>
