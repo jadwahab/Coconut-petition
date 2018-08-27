@@ -106,36 +106,28 @@ class MainView extends React.Component {
         randomizeDisabled={this.state.randomizeDisabled}
       >
         <div>
-          {/* <Segment style={{ padding: '8em 0em' }} vertical> */}
-            {/* <Header
-              as="h2"
-              color="#49769c"
-              textAlign="center"
-              content="Get issued your signed credential"
-            /> */}
-            <Grid>
-              {/* <Grid.Row centered={true}>
-                <CredRequester
-                  ElGamalSK={this.state.ElGamalSK}
-                  ElGamalPK={this.state.ElGamalPK}
-                  // sk_client will be required to sign requests to SAs, but is NOT sent:
-                  sk_client={this.state.sk_client}
-                  pk_client={this.state.pk_client}
-                  handleRandomize={this.handleRandomize}
-                  handleCredForSpend={this.handleCredForSpend}
-                  randomizeDisabled={this.state.randomizeDisabled}
-                />
-              </Grid.Row> */}
+          <Grid>
+            {/* <Grid.Row centered={true}>
+              <CredRequester
+                ElGamalSK={this.state.ElGamalSK}
+                ElGamalPK={this.state.ElGamalPK}
+                // sk_client will be required to sign requests to SAs, but is NOT sent:
+                sk_client={this.state.sk_client}
+                pk_client={this.state.pk_client}
+                handleRandomize={this.handleRandomize}
+                handleCredForSpend={this.handleCredForSpend}
+                randomizeDisabled={this.state.randomizeDisabled}
+              />
+            </Grid.Row> */}
 
-              <Grid.Row centered={true}>
-                <VoteListDisplayer
-                  randomizedSignatures={this.state.randomizedSignatures}
-                  cred_params={this.state.cred_params}
-                  handleRandomizeDisabled={this.handleRandomizeDisabled}
-                />
-              </Grid.Row>
-            </Grid>
-          {/* </Segment> */}
+            <Grid.Row centered={true}>
+              <VoteListDisplayer
+                randomizedSignatures={this.state.randomizedSignatures}
+                cred_params={this.state.cred_params}
+                handleRandomizeDisabled={this.handleRandomizeDisabled}
+              />
+            </Grid.Row>
+          </Grid>
 
           <ServerStatuses />
         </div>
