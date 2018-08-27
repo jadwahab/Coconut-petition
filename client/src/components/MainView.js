@@ -1,5 +1,7 @@
 import React from 'react';
 import { Grid, Segment, Header } from 'semantic-ui-react';
+import ServerStatuses from './ServerStatuses';
+import ResponsiveContainer from './ResponsiveContainer';
 import CredRequester from './MainView/CredRequester';
 import VoteListDisplayer from './MainView/VoteListDisplayer';
 import { params, DEBUG, DETAILED_DEBUG } from '../config';
@@ -58,13 +60,15 @@ class MainView extends React.Component {
   handleRandomize = (sig) => {
     const randomizedSignature = CredSig.randomize(params, sig);
 
-    // // Not working right for some reason: (consider fixing in future)
-    // this.setState(prevState => ({
-    //   randomizedSignatures: prevState.randomizedSignatures.concat([randomizedSignature]),
-    // }));
-    // // Messes up with length as seen below with console.logs below:
-    // console.log(this.state.randomizedSignatures.length);
-    // console.log(this.state.randomizedSignatures);
+    /* Not working right for some reason: (consider fixing in future)
+    this.setState(prevState => ({
+      randomizedSignatures: prevState.randomizedSignatures.concat([randomizedSignature]),
+    }));
+    */
+    /* Messes up with length as seen below with console.logs below:
+    console.log(this.state.randomizedSignatures.length);
+    console.log(this.state.randomizedSignatures);
+    */
 
     // works but is less elegant:
     const randSigs = this.state.randomizedSignatures;
@@ -91,36 +95,52 @@ class MainView extends React.Component {
 
   render() {
     return (
-      <Segment style={{ padding: '8em 0em' }} vertical>
-        <Header
-          as="h2"
-          color="teal"
-          textAlign="center"
-          content="Get issued your credential (by separate issuer entity)"
-        />
-        <Grid>
-          <Grid.Row centered={true}>
-            <CredRequester
-              ElGamalSK={this.state.ElGamalSK}
-              ElGamalPK={this.state.ElGamalPK}
-              // sk_client will be required to sign requests to SAs, but is NOT sent:
-              sk_client={this.state.sk_client}
-              pk_client={this.state.pk_client}
-              handleRandomize={this.handleRandomize}
-              handleCredForSpend={this.handleCredForSpend}
-              randomizeDisabled={this.state.randomizeDisabled}
-            />
-          </Grid.Row>
+      <ResponsiveContainer
+        ElGamalSK={this.state.ElGamalSK}
+        ElGamalPK={this.state.ElGamalPK}
+        // sk_client will be required to sign requests to SAs, but is NOT sent:
+        sk_client={this.state.sk_client}
+        pk_client={this.state.pk_client}
+        handleRandomize={this.handleRandomize}
+        handleCredForSpend={this.handleCredForSpend}
+        randomizeDisabled={this.state.randomizeDisabled}
+      >
+        <div>
+          {/* <Segment style={{ padding: '8em 0em' }} vertical> */}
+            {/* <Header
+              as="h2"
+              color="#49769c"
+              textAlign="center"
+              content="Get issued your signed credential"
+            /> */}
+            <Grid>
+              {/* <Grid.Row centered={true}>
+                <CredRequester
+                  ElGamalSK={this.state.ElGamalSK}
+                  ElGamalPK={this.state.ElGamalPK}
+                  // sk_client will be required to sign requests to SAs, but is NOT sent:
+                  sk_client={this.state.sk_client}
+                  pk_client={this.state.pk_client}
+                  handleRandomize={this.handleRandomize}
+                  handleCredForSpend={this.handleCredForSpend}
+                  randomizeDisabled={this.state.randomizeDisabled}
+                />
+              </Grid.Row> */}
 
-          <Grid.Row centered={true}>
-            <VoteListDisplayer
-              randomizedSignatures={this.state.randomizedSignatures}
-              cred_params={this.state.cred_params}
-              handleRandomizeDisabled={this.handleRandomizeDisabled}
-            />
-          </Grid.Row>
-        </Grid>
-      </Segment>
+              <Grid.Row centered={true}>
+                <VoteListDisplayer
+                  randomizedSignatures={this.state.randomizedSignatures}
+                  cred_params={this.state.cred_params}
+                  handleRandomizeDisabled={this.handleRandomizeDisabled}
+                />
+              </Grid.Row>
+            </Grid>
+          {/* </Segment> */}
+
+          <ServerStatuses />
+        </div>
+      </ResponsiveContainer>
+
     );
   }
 }

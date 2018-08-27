@@ -1,22 +1,14 @@
 import React from 'react';
 import MainView from './MainView';
 import styles from './App.style';
-import TopMenu from './TopMenu';
-import Footer from './Footer';
-import ServerStatuses from './ServerStatuses';
+
 
 const App = () => (
-  <div style={styles.siteStyle}>
-    {/*<TopMenu />*/}
+  <div style={styles.siteContentStyle}>
 
-    <div style={styles.siteContentStyle}>
+    <MainView />
+    {/* <ServerStatuses /> */}
 
-      <MainView />
-      <ServerStatuses />
-
-    </div>
-
-    {/*<Footer />*/}
   </div>
 );
 

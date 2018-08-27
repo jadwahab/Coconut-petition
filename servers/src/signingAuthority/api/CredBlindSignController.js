@@ -34,10 +34,10 @@ router.post('/', async (req, res) => {
       sessionSignatures.add(signingCred.requestSig);
     }
 
-    if (publicKeys[issuer] == null || publicKeys[issuer].length <= 0) {
-      const publicKey = await getPublicKey(issuer);
-      publicKeys[issuer] = publicKey;
-    }
+    // if (publicKeys[issuer] == null || publicKeys[issuer].length <= 0) {
+    //   const publicKey = await getPublicKey(issuer);
+    //   publicKeys[issuer] = publicKey;
+    // }
 
     // check if issuer signature valid
     // const isRequestLegit = verifySignRequest(signingCred, publicKeys[issuer]);
@@ -82,6 +82,10 @@ router.post('/', async (req, res) => {
     if (!isSignValid) {
       console.log('Signature was not valid');
       throw new Error('Signature was not valid');
+    }
+
+    if (DEBUG) {
+      console.log(`Was signature valid: ${isSignValid}`);
     }
     //
 

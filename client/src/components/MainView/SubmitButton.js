@@ -40,11 +40,12 @@ const SubmitButton = (props) => {
     <Button
       disabled={props.isDisabled || isDisabled}
       color="instagram"
-      labelPosition="left"
+      labelPosition="right"
       icon={buttonIcon}
       content={buttonContent}
       onClick={handleButtonClick}
       loading={props.isLoading}
+      size='huge'
     />
   );
 };

@@ -179,8 +179,17 @@ export async function voteCred(MPCP_output, signature, server, petitionID, enc_v
   const MPVP_bytes = getBytesMPVP(MPVP_output);
   const votes_bytes = getBytesVotes(enc_votes);
 
+  const sent_obj = {
+    MPCP: simplifiedMPCP,
+    signature: simplifiedSignature,
+    petitionID: petitionID,
+    MPVP: MPVP_bytes,
+    votes: votes_bytes,
+  };
+
   if (DEBUG) {
     console.log('Sending ShowBlingSign output');
+    console.log(sent_obj);
   }
 
   let success = false;
