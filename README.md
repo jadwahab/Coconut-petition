@@ -2,8 +2,10 @@
 
 Forked from [Jędrzej Stuczyński's Multi-Authority-SDC e-cash system](https://github.com/jstuczyn/Multi-Authority-SDC)!
 
-### Running the system:
-
+### System Setup:
 - Run `npm install` within `/client` directory
 - Run `npm install` and `npm run build` within `/servers` directory
-- Run the `startservers.sh` script in the root directory (starts appropriate processes in separate `tmux` windows)
+
+#### Start processes in separate `tmux` windows:
+- Install `tmux` if you don't have it:
+- Run the `start.sh` script in the root directory

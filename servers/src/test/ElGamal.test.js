@@ -2,7 +2,7 @@ import { before, beforeEach, describe, it, xit } from 'mocha';
 import { expect, assert } from 'chai';
 import ElGamal from '../ElGamal';
 import CredSig from '../CredSig';
-import { hashToPointOnCurve } from '../auxiliary';
+import { hashToPointOnCurve } from '../Proofs';
 
 describe('ElGamal Encryption', () => {
   describe('Keygen', () => {
