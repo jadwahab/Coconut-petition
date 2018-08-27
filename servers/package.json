@@ -11,11 +11,7 @@
     "body-parser": "^1.18.3",
     "es6-promise": "^4.2.4",
     "express": "^4.16.3",
-    "isomorphic-fetch": "^2.2.1",
-    "knex": "^0.15.2",
-    "nodemon": "^1.18.3",
-    "pg": "^7.4.3",
-    "pg-native": "^2.2.0"
+    "isomorphic-fetch": "^2.2.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
