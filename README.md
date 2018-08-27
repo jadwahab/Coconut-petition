@@ -4,14 +4,7 @@ Forked from [Jędrzej Stuczyński's Multi-Authority-SDC e-cash system](https://g
 
 ### Running the system:
 
-To run the system locally one can use the provided `startservers.sh` script that starts appropriate services in separate `tmux` windows. However, it requires that that all dependencies were already installed. This includes:
-- running `npm install` and `npm build` within servers directory
-- running `npm install` within client's directory
-- installing docker
-- creating SQL schema:
+- Run `npm install` and `npm build` within servers directory
+- Run `npm install` within client's directory
 
-```
-npm install knex -g
-
-knex migrate:latest
-```
+To run the system locally, run the `startservers.sh` script that starts appropriate services in separate `tmux` windows.
