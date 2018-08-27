@@ -4,7 +4,6 @@ Forked from [Jędrzej Stuczyński's Multi-Authority-SDC e-cash system](https://g
 
 ### Running the system:
 
-- Run `npm install` and `npm build` within servers directory
-- Run `npm install` within client's directory
-
-To run the system locally, run the `startservers.sh` script that starts appropriate services in separate `tmux` windows.
+- Run `npm install` within `/client` directory
+- Run `npm install` and `npm run build` within `/servers` directory
+- Run the `startservers.sh` script in the root directory (starts appropriate processes in separate `tmux` windows)
