@@ -1,7 +1,7 @@
 {
-  "name": "MA-SDC-Client",
+  "name": "Coconut-Petition-Client",
   "version": "1.0.0",
-  "description": "Simple Client for MA-SDC",
+  "description": "Simple Client for Coconut-Petition",
   "main": "index.js",
   "scripts": {
     "analyze": "cross-env ANALYZE_ENV=true yarn build",
@@ -13,7 +13,7 @@
     "test": "./node_modules/.bin/mocha --require ./test/setup.js --compilers js:babel-core/register --recursive --no-timeouts",
     "benchmark": "cross-env NODE_ENV=test ./node_modules/.bin/mocha benchmark/*.js --require ./benchmark/setup.js --compilers js:babel-core/register --recursive --no-timeouts"
   },
-  "author": "Jedrzej Stuczynski",
+  "author": "Jad Wahab",
   "dependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
