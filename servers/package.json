@@ -41,14 +41,9 @@
     "start_issuer_production": "NODE_ENV=production node dist/issuer/server.js"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jstuczyn/Multi-Authority-SDC.git"
+    "type": "git"
   },
-  "author": "Jedrzej Stuczynski",
-  "bugs": {
-    "url": "https://github.com/jstuczyn/Multi-Authority-SDC/issues"
-  },
-  "homepage": "https://github.com/jstuczyn/Multi-Authority-SDC#readme",
+  "author": "Jad Wahab",
   "babel": {
     "presets": [
       "env"
